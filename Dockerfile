@@ -15,7 +15,7 @@ RUN npm run build && rm -rf dist/.vite
 
 # Runtime stage: copy-only (no RUN), so multi-arch publishing needs no QEMU.
 # nginx-unprivileged runs as uid 101 on port 8080 and works with `docker run --read-only --tmpfs /tmp`.
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 
 ARG GIT_SHA
 ARG VERSION=dev
