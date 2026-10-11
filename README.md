@@ -9,9 +9,10 @@ The first supported frame is the KWS Rack v2 from MakerWorld; a generic 10" rack
 frames follow. The app is a static site: run it from one Docker image or on Azure Static Web
 Apps (Free).
 
-> **Status:** early development. The foundations (M0) and the rack and BOM engine (M1) are built;
-> the editor UI comes next. See [Features](#features-by-milestone) and
-> [docs/status/m0-m1.md](docs/status/m0-m1.md).
+> **Status:** early development. The foundations (M0), the rack and BOM engine (M1) and
+> persistence with the app shell (M2: saved plans, the new-plan wizard, import and export,
+> settings) are built; the editor UI comes next. See [Features](#features-by-milestone),
+> [docs/status/m0-m1.md](docs/status/m0-m1.md) and [docs/status/m2.md](docs/status/m2.md).
 
 ## Privacy: everything stays in your browser
 
@@ -32,7 +33,7 @@ Apps (Free).
 | --------------------------- | ---------------------------------------------------------------------------------------- | ------- |
 | M0 Foundations              | App shell, Docker image, Azure SWA hosting, CI/CD, security headers                      | Built   |
 | M1 Domain and BOM           | Rack and BOM engine, KWS Rack v2 catalog entry, `npm run bom -- <plan.json>`             | Built   |
-| M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export                          | Planned |
+| M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export, settings, diagnostics   | Built   |
 | M3a Minimal editor (v0.1)   | 2D rack editor, Have/Need, BOM drawer, shopping list, CSV                                | Planned |
 | M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Planned |
 | M4 Share and compare (v0.2) | Share links, read-only viewer, compare ideas, Markdown/SVG/PNG export                    | Planned |
