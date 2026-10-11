@@ -33,6 +33,9 @@ updates:
         versions: ['>=19.4.0']
       - dependency-name: '@types/react-dom'
         versions: ['>=19.4.0']
+      # TypeScript 6 is pinned on purpose (plan); evaluate TS 7 (native compiler) in its own PR after v0.1.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
