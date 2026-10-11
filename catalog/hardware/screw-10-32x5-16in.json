@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "screw-10-32x5-16in",
+  "name": "#10-32 × 5/16\" rack screw",
+  "category": "screw",
+  "spec": {
+    "thread": "10-32",
+    "lengthMm": 7.94
+  },
+  "packSizes": [20, 50, 100],
+  "aliases": ["10-32 x 5/16 rack screw", "#10-32 5/16 inch screw", "10-32 UNF x 5/16\""],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Unified_Thread_Standard"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: UNF #10-32 rack screw (head style varies)."
+  }
+}

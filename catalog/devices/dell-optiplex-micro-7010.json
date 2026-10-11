@@ -1,0 +1,31 @@
+{
+  "kind": "device",
+  "id": "dell-optiplex-micro-7010",
+  "brand": "Dell",
+  "model": "OptiPlex Micro 7010",
+  "category": "mini-pc",
+  "dims": {
+    "w": 182,
+    "d": 178,
+    "h": 36
+  },
+  "weightG": 1340,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.dell.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page."
+  }
+}

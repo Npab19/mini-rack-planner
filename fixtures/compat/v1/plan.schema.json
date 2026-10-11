@@ -1,0 +1,2751 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "number",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "rackId": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "notes": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "rev": {
+      "default": 0,
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "catalogRev": {
+      "type": "string"
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "frameId": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "options": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ]
+          }
+        },
+        "caps": {
+          "default": {
+            "top": {},
+            "bottom": {}
+          },
+          "type": "object",
+          "properties": {
+            "top": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "options": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "boolean",
+                      "number"
+                    ]
+                  }
+                },
+                "have": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                    },
+                    "typeId": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "heightU": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "itemId": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "options": {
+                      "default": {},
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": [
+                          "string",
+                          "boolean",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "at"
+                  ]
+                }
+              }
+            },
+            "bottom": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "options": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "boolean",
+                      "number"
+                    ]
+                  }
+                },
+                "have": {
+                  "type": "object",
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                    },
+                    "typeId": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "heightU": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "itemId": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "options": {
+                      "default": {},
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": [
+                          "string",
+                          "boolean",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "at"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "sections": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "typeId": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "heightU": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "options": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "boolean",
+                    "number"
+                  ]
+                }
+              },
+              "have": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  "typeId": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "heightU": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "itemId": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "options": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "at"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "typeId"
+            ]
+          }
+        }
+      },
+      "required": [
+        "frameId"
+      ]
+    },
+    "placements": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "itemId": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "heightSixths": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "face": {
+            "default": "front",
+            "type": "string",
+            "enum": [
+              "front",
+              "rear"
+            ]
+          },
+          "bay": {
+            "default": "full",
+            "type": "string",
+            "enum": [
+              "full",
+              "left",
+              "right"
+            ]
+          },
+          "options": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "boolean",
+                "number"
+              ]
+            }
+          },
+          "have": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "typeId": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "heightU": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "itemId": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "options": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "boolean",
+                    "number"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "at"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "devices": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "deviceId": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "slotId": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "xMm": {
+                  "type": "number"
+                },
+                "orientation": {
+                  "type": "string",
+                  "enum": [
+                    "flat",
+                    "flat-rotated",
+                    "on-side",
+                    "upright"
+                  ]
+                },
+                "have": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "deviceId",
+                "slotId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "itemId",
+          "y"
+        ]
+      }
+    },
+    "equipment": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "deviceId": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "have": {
+            "default": false,
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "deviceId"
+        ]
+      }
+    },
+    "extras": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "itemId": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "haveQty": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "itemId",
+          "qty"
+        ]
+      }
+    },
+    "retired": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "section",
+              "placement",
+              "extra",
+              "cap"
+            ]
+          },
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "typeId": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "heightU": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "itemId": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "options": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "boolean",
+                    "number"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "at"
+            ]
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "snapshot"
+        ]
+      }
+    },
+    "custom": {
+      "default": {
+        "frames": [],
+        "items": [],
+        "devices": [],
+        "hardware": []
+      },
+      "type": "object",
+      "properties": {
+        "frames": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "frame"
+              },
+              "id": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "makerworld",
+                      "printables",
+                      "thingiverse",
+                      "github",
+                      "vendor",
+                      "other"
+                    ]
+                  },
+                  "url": {
+                    "type": "string",
+                    "maxLength": 2048,
+                    "format": "uri"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "designer": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "platform",
+                  "url"
+                ]
+              },
+              "verified": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "page",
+                      "user-files",
+                      "calipers",
+                      "vendor-spec",
+                      "unverified"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "by",
+                  "date",
+                  "method"
+                ]
+              },
+              "standard": {
+                "type": "object",
+                "properties": {
+                  "panelWidthMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "innerWidthMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "depthMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "rearOpen": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "panelWidthMm",
+                  "innerWidthMm",
+                  "depthMm",
+                  "rearOpen"
+                ]
+              },
+              "rail": {
+                "type": "object",
+                "properties": {
+                  "earSpacingMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "holeOffsetsPerUMm": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "holeTolMm": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "earSpacingMm",
+                  "holeOffsetsPerUMm",
+                  "holeTolMm"
+                ]
+              },
+              "equipmentFastener": {
+                "type": "object",
+                "properties": {
+                  "thread": {
+                    "type": "string",
+                    "enum": [
+                      "M3",
+                      "M4",
+                      "M5",
+                      "M6",
+                      "10-32",
+                      "12-24"
+                    ]
+                  },
+                  "perHole": {
+                    "type": "string",
+                    "enum": [
+                      "screw",
+                      "screw+nut",
+                      "screw+cage-nut"
+                    ]
+                  },
+                  "screwIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    }
+                  },
+                  "engagementMm": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "nutId": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  }
+                },
+                "required": [
+                  "thread",
+                  "perHole",
+                  "screwIds",
+                  "engagementMm"
+                ]
+              },
+              "sectionTypes": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "heightU": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "min": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "max": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "min",
+                            "max"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "heightU"
+                  ]
+                }
+              },
+              "stack": {
+                "type": "object",
+                "properties": {
+                  "minU": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "maxU": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "joint": {
+                    "type": "object",
+                    "properties": {
+                      "gapMm": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "deadSixths": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "gapMm",
+                      "deadSixths"
+                    ]
+                  }
+                },
+                "required": [
+                  "minU",
+                  "maxU"
+                ]
+              },
+              "options": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "scope": {
+                      "type": "string",
+                      "enum": [
+                        "rack",
+                        "top",
+                        "bottom",
+                        "section",
+                        "item"
+                      ]
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "boolean",
+                        "choice"
+                      ]
+                    },
+                    "choices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "effects": {
+                            "type": "object",
+                            "properties": {
+                              "depthMm": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "innerWidthMm": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "label"
+                        ]
+                      }
+                    },
+                    "default": {
+                      "type": [
+                        "boolean",
+                        "string"
+                      ]
+                    },
+                    "effects": {
+                      "type": "object",
+                      "properties": {
+                        "depthMm": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "innerWidthMm": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      }
+                    },
+                    "help": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "scope",
+                    "kind",
+                    "default"
+                  ]
+                }
+              },
+              "prints": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "plate": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "material": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "gramsPerPrint": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "minutesPerPrint": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "pieces": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "partId": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "perPrint": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "partId",
+                          "perPrint"
+                        ]
+                      }
+                    },
+                    "embeds": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "hardwareId": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "perPrint": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "when": {
+                            "$ref": "#/$defs/Condition"
+                          }
+                        },
+                        "required": [
+                          "hardwareId",
+                          "perPrint"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "plate",
+                    "label"
+                  ]
+                }
+              },
+              "recipe": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "rack",
+                        "top",
+                        "bottom",
+                        "section",
+                        "joint",
+                        "item"
+                      ]
+                    },
+                    "ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "print": {
+                              "type": "string",
+                              "maxLength": 100,
+                              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                            }
+                          },
+                          "required": [
+                            "print"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "hardware": {
+                              "type": "string",
+                              "maxLength": 100,
+                              "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                            }
+                          },
+                          "required": [
+                            "hardware"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "count": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "base": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perU": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perSection": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string",
+                                "maxLength": 100,
+                                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                              },
+                              "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0
+                              }
+                            },
+                            "perSectionAny": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perJoint": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "jointFilter": {
+                              "type": "object",
+                              "properties": {
+                                "notAdjacentTo": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "maxLength": 100,
+                                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                  }
+                                }
+                              },
+                              "additionalProperties": false
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "length": {
+                      "type": "object",
+                      "properties": {
+                        "base": {
+                          "default": 0,
+                          "type": "number"
+                        },
+                        "perU": {
+                          "default": 0,
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "when": {
+                      "$ref": "#/$defs/Condition"
+                    },
+                    "role": {
+                      "default": "assembly",
+                      "type": "string",
+                      "enum": [
+                        "assembly",
+                        "rack-mount",
+                        "embedded"
+                      ]
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "unit",
+                    "ref",
+                    "count"
+                  ]
+                }
+              },
+              "parts3d": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "leg",
+                        "connector",
+                        "cap",
+                        "panel",
+                        "tray",
+                        "shelf",
+                        "plate",
+                        "other"
+                      ]
+                    },
+                    "envelopeMm": {
+                      "type": "object",
+                      "properties": {
+                        "w": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "d": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "h": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "w",
+                        "d",
+                        "h"
+                      ]
+                    },
+                    "mirrorAllowed": {
+                      "type": "boolean"
+                    },
+                    "nameHints": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "role",
+                    "envelopeMm"
+                  ]
+                }
+              },
+              "assembly3d": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "partId": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "at": {
+                      "type": "string",
+                      "enum": [
+                        "section",
+                        "joint",
+                        "top",
+                        "bottom",
+                        "item"
+                      ]
+                    },
+                    "sectionTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      }
+                    },
+                    "corners": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "fl",
+                          "fr",
+                          "rl",
+                          "rr"
+                        ]
+                      }
+                    },
+                    "transform": {
+                      "type": "object",
+                      "properties": {
+                        "rotDeg": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "offsetMm": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "mirrorX": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "when": {
+                      "$ref": "#/$defs/Condition"
+                    }
+                  },
+                  "required": [
+                    "partId",
+                    "at"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "verified",
+              "standard",
+              "rail",
+              "equipmentFastener",
+              "sectionTypes",
+              "stack"
+            ]
+          }
+        },
+        "items": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "item",
+                  "extra"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "makerworld",
+                      "printables",
+                      "thingiverse",
+                      "github",
+                      "vendor",
+                      "other"
+                    ]
+                  },
+                  "url": {
+                    "type": "string",
+                    "maxLength": 2048,
+                    "format": "uri"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "designer": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "platform",
+                  "url"
+                ]
+              },
+              "verified": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "page",
+                      "user-files",
+                      "calipers",
+                      "vendor-spec",
+                      "unverified"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "by",
+                  "date",
+                  "method"
+                ]
+              },
+              "heightSixths": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "faces": {
+                "default": [
+                  "front"
+                ],
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "front",
+                    "rear"
+                  ]
+                }
+              },
+              "bay": {
+                "default": "full",
+                "type": "string",
+                "enum": [
+                  "full",
+                  "half"
+                ]
+              },
+              "depthMm": {
+                "type": "number",
+                "minimum": 0
+              },
+              "options": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "scope": {
+                      "type": "string",
+                      "enum": [
+                        "rack",
+                        "top",
+                        "bottom",
+                        "section",
+                        "item"
+                      ]
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "boolean",
+                        "choice"
+                      ]
+                    },
+                    "choices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "effects": {
+                            "type": "object",
+                            "properties": {
+                              "depthMm": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "innerWidthMm": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "label"
+                        ]
+                      }
+                    },
+                    "default": {
+                      "type": [
+                        "boolean",
+                        "string"
+                      ]
+                    },
+                    "effects": {
+                      "type": "object",
+                      "properties": {
+                        "depthMm": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "innerWidthMm": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      }
+                    },
+                    "help": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "scope",
+                    "kind",
+                    "default"
+                  ]
+                }
+              },
+              "prints": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "plate": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "material": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "gramsPerPrint": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "minutesPerPrint": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "pieces": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "partId": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "perPrint": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "partId",
+                          "perPrint"
+                        ]
+                      }
+                    },
+                    "embeds": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "hardwareId": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          },
+                          "perPrint": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "when": {
+                            "$ref": "#/$defs/Condition"
+                          }
+                        },
+                        "required": [
+                          "hardwareId",
+                          "perPrint"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "plate",
+                    "label"
+                  ]
+                }
+              },
+              "recipe": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "rack",
+                        "top",
+                        "bottom",
+                        "section",
+                        "joint",
+                        "item"
+                      ]
+                    },
+                    "ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "print": {
+                              "type": "string",
+                              "maxLength": 100,
+                              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                            }
+                          },
+                          "required": [
+                            "print"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "hardware": {
+                              "type": "string",
+                              "maxLength": 100,
+                              "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                            }
+                          },
+                          "required": [
+                            "hardware"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "count": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "base": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perU": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perSection": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string",
+                                "maxLength": 100,
+                                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                              },
+                              "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0
+                              }
+                            },
+                            "perSectionAny": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "perJoint": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "jointFilter": {
+                              "type": "object",
+                              "properties": {
+                                "notAdjacentTo": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "maxLength": 100,
+                                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                  }
+                                }
+                              },
+                              "additionalProperties": false
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "length": {
+                      "type": "object",
+                      "properties": {
+                        "base": {
+                          "default": 0,
+                          "type": "number"
+                        },
+                        "perU": {
+                          "default": 0,
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "when": {
+                      "$ref": "#/$defs/Condition"
+                    },
+                    "role": {
+                      "default": "assembly",
+                      "type": "string",
+                      "enum": [
+                        "assembly",
+                        "rack-mount",
+                        "embedded"
+                      ]
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "unit",
+                    "ref",
+                    "count"
+                  ]
+                }
+              },
+              "mount": {
+                "default": {
+                  "front": 0,
+                  "rear": 0
+                },
+                "type": "object",
+                "properties": {
+                  "front": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "rear": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "holeOffsetsMm": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "slotLengthMm": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "clearance": {
+                    "type": "string",
+                    "enum": [
+                      "M3",
+                      "M4",
+                      "M5",
+                      "M6",
+                      "10-32",
+                      "12-24"
+                    ]
+                  },
+                  "earThicknessMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "front"
+                ]
+              },
+              "slots": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "fixed",
+                        "area"
+                      ]
+                    },
+                    "maxW": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "maxD": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "maxH": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "orientations": {
+                      "default": [
+                        "flat",
+                        "flat-rotated"
+                      ],
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "flat",
+                          "flat-rotated",
+                          "on-side",
+                          "upright"
+                        ]
+                      }
+                    },
+                    "accepts": {
+                      "type": "object",
+                      "properties": {
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "mini-pc",
+                              "sbc",
+                              "nas",
+                              "drive",
+                              "switch",
+                              "router",
+                              "gateway",
+                              "pdu",
+                              "ups",
+                              "power-brick",
+                              "kvm",
+                              "patch-panel",
+                              "other"
+                            ]
+                          }
+                        },
+                        "deviceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                          }
+                        }
+                      }
+                    },
+                    "layout": {
+                      "type": "object",
+                      "properties": {
+                        "xMm": {
+                          "type": "number"
+                        },
+                        "yMm": {
+                          "type": "number"
+                        },
+                        "zMm": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "xMm",
+                        "yMm",
+                        "zMm"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "maxW",
+                    "maxD",
+                    "layout"
+                  ]
+                }
+              },
+              "requiresRearSupport": {
+                "type": "boolean"
+              },
+              "compat": {
+                "type": "object",
+                "properties": {
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    }
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "render": {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "blank",
+                      "vent",
+                      "keystone",
+                      "shelf",
+                      "tray",
+                      "device",
+                      "fan",
+                      "power",
+                      "other"
+                    ]
+                  },
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{6})$"
+                  }
+                },
+                "required": [
+                  "style"
+                ]
+              },
+              "parts3d": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "leg",
+                        "connector",
+                        "cap",
+                        "panel",
+                        "tray",
+                        "shelf",
+                        "plate",
+                        "other"
+                      ]
+                    },
+                    "envelopeMm": {
+                      "type": "object",
+                      "properties": {
+                        "w": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "d": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "h": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "w",
+                        "d",
+                        "h"
+                      ]
+                    },
+                    "mirrorAllowed": {
+                      "type": "boolean"
+                    },
+                    "nameHints": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "role",
+                    "envelopeMm"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "category",
+              "verified",
+              "heightSixths",
+              "depthMm"
+            ]
+          }
+        },
+        "devices": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "device"
+              },
+              "id": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "brand": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "mini-pc",
+                  "sbc",
+                  "nas",
+                  "drive",
+                  "switch",
+                  "router",
+                  "gateway",
+                  "pdu",
+                  "ups",
+                  "power-brick",
+                  "kvm",
+                  "patch-panel",
+                  "other"
+                ]
+              },
+              "dims": {
+                "type": "object",
+                "properties": {
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "d": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "w",
+                  "d",
+                  "h"
+                ]
+              },
+              "weightG": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "power": {
+                "type": "object",
+                "properties": {
+                  "typW": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "maxW": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "ac",
+                          "usb-c-pd",
+                          "poe",
+                          "dc",
+                          "none"
+                        ]
+                      },
+                      "connector": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "brick": {
+                        "type": "object",
+                        "properties": {
+                          "dims": {
+                            "type": "object",
+                            "properties": {
+                              "w": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "d": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "h": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            },
+                            "required": [
+                              "w",
+                              "d",
+                              "h"
+                            ]
+                          },
+                          "outputW": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "included": {
+                            "type": "boolean"
+                          },
+                          "plug": {
+                            "type": "string",
+                            "enum": [
+                              "c5",
+                              "c7",
+                              "c13",
+                              "wall"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "included"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ]
+                  },
+                  "outputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "ac",
+                            "poe",
+                            "usb-c",
+                            "dc"
+                          ]
+                        },
+                        "count": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "maxWEach": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "budgetW": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "batteryBacked": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "count"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              },
+              "rackmount": {
+                "type": "object",
+                "properties": {
+                  "heightSixths": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "face": {
+                    "type": "string",
+                    "enum": [
+                      "front",
+                      "rear"
+                    ]
+                  },
+                  "depthMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "heightSixths",
+                  "face",
+                  "depthMm"
+                ]
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "makerworld",
+                      "printables",
+                      "thingiverse",
+                      "github",
+                      "vendor",
+                      "other"
+                    ]
+                  },
+                  "url": {
+                    "type": "string",
+                    "maxLength": 2048,
+                    "format": "uri"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "designer": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "platform",
+                  "url"
+                ]
+              },
+              "verified": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "page",
+                      "user-files",
+                      "calipers",
+                      "vendor-spec",
+                      "unverified"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "by",
+                  "date",
+                  "method"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "brand",
+              "model",
+              "category",
+              "dims",
+              "verified"
+            ]
+          }
+        },
+        "hardware": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "hardware"
+              },
+              "id": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "screw",
+                  "nut",
+                  "insert",
+                  "cage-nut",
+                  "t-nut",
+                  "washer",
+                  "magnet",
+                  "foot",
+                  "extrusion",
+                  "standoff",
+                  "cable-tie",
+                  "other"
+                ]
+              },
+              "spec": {
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "thread": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "lengthMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "head": {
+                    "type": "string",
+                    "enum": [
+                      "shcs",
+                      "bhcs",
+                      "fhcs",
+                      "hex",
+                      "nyloc",
+                      "square",
+                      "cage",
+                      "other"
+                    ]
+                  },
+                  "odMm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "dims": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "unit": {
+                "default": "pcs",
+                "type": "string",
+                "enum": [
+                  "pcs",
+                  "mm"
+                ]
+              },
+              "packSizes": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "makerworld",
+                      "printables",
+                      "thingiverse",
+                      "github",
+                      "vendor",
+                      "other"
+                    ]
+                  },
+                  "url": {
+                    "type": "string",
+                    "maxLength": 2048,
+                    "format": "uri"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "profileId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "designer": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "license": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "platform",
+                  "url"
+                ]
+              },
+              "verified": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "page",
+                      "user-files",
+                      "calipers",
+                      "vendor-spec",
+                      "unverified"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "by",
+                  "date",
+                  "method"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "name",
+              "category"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "id",
+    "rackId",
+    "name",
+    "createdAt",
+    "updatedAt",
+    "frame"
+  ],
+  "$defs": {
+    "Condition": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "option": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": [
+                      "string",
+                      "boolean",
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": [
+                        "string",
+                        "boolean",
+                        "number"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "option"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "stack": {
+              "type": "object",
+              "properties": {
+                "minU": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "maxU": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "minSections": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "maxSections": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "topTypeId": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "bottomTypeId": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "stack"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Condition"
+              }
+            }
+          },
+          "required": [
+            "all"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Condition"
+              }
+            }
+          },
+          "required": [
+            "any"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/Condition"
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

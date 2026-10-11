@@ -1,0 +1,32 @@
+{
+  "kind": "device",
+  "id": "synology-ds224-plus",
+  "brand": "Synology",
+  "model": "DiskStation DS224+",
+  "category": "nas",
+  "dims": {
+    "w": 108,
+    "d": 232.2,
+    "h": 165
+  },
+  "weightG": 1300,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 60,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.synology.com/en-global/products/DS224+"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

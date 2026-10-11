@@ -1,0 +1,28 @@
+name: Feature
+description: A new capability or an improvement to an existing one
+title: 'feat: '
+labels: [feature]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What problem does this solve, and for whom?
+      placeholder: When I extend my rack I can't see which printed parts I still need…
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Proposed approach
+      description: Optional. Point at the plan section or the code you would change.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will we know it is done? Include keyboard and accessibility checks for UI work.
+      placeholder: |
+        - [ ] …
+        - [ ] Works on a plain-HTTP LAN origin (no secure-context-only APIs without a fallback)
+    validations:
+      required: true

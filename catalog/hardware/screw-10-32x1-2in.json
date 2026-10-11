@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "screw-10-32x1-2in",
+  "name": "#10-32 × 1/2\" rack screw",
+  "category": "screw",
+  "spec": {
+    "thread": "10-32",
+    "lengthMm": 12.7
+  },
+  "packSizes": [20, 50, 100],
+  "aliases": ["10-32 x 1/2 rack screw", "#10-32 1/2 inch screw", "10-32 UNF x 1/2\""],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Unified_Thread_Standard"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: UNF #10-32 rack screw (head style varies)."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "screw-m4x10-shcs",
+  "name": "M4×10 socket head cap screw",
+  "category": "screw",
+  "spec": {
+    "thread": "M4",
+    "lengthMm": 10,
+    "head": "shcs"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M4x10 SHCS", "M4 x 10 socket head cap screw", "DIN 912 M4x10", "ISO 4762 M4x10"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 4762 / DIN 912 socket head cap screw."
+  }
+}

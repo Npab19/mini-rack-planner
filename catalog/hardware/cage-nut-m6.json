@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "cage-nut-m6",
+  "name": "M6 cage nut",
+  "category": "cage-nut",
+  "spec": {
+    "thread": "M6",
+    "head": "cage"
+  },
+  "packSizes": [10, 20, 50],
+  "aliases": ["M6 caged nut", "M6 rack cage nut", "cage nut M6"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Cage_nut"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic rack part: M6 cage nut for square rail holes."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "insert-m6x8x5",
+  "name": "M6 heat-set insert (M6x8x5)",
+  "category": "insert",
+  "spec": {
+    "thread": "M6",
+    "dims": "M6x8x5"
+  },
+  "packSizes": [25, 50, 100],
+  "aliases": ["M6x8x5 insert", "M6 brass insert"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Threaded_insert"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Size label as designers list it; insert brands differ, so match the hole size your design calls for. Length and outer diameter of \"M6x8x5\" are not confirmed (an M6 insert cannot be 5 mm wide)."
+  }
+}

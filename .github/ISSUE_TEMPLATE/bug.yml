@@ -1,0 +1,59 @@
+name: Bug
+description: Something does not work as expected
+title: 'fix: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Your plans stay in your browser, so please describe the steps
+        rather than attaching private data. If the app offers **Copy diagnostics**, paste that
+        below: it holds versions and browser details, not your plans.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where do you run it?
+      options:
+        - Hosted site
+        - Docker, opened as http://localhost
+        - Docker, opened from another device on my LAN (plain HTTP)
+        - Docker behind an HTTPS reverse proxy
+        - npm run dev / npm run preview
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown on the About page, e.g. 0.1.0 (abc123def456).
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: e.g. Firefox on Windows 11, Safari on iPhone
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics or console output
+      render: text

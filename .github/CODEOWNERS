@@ -1,0 +1,9 @@
+# Code owners are asked to review pull requests that touch these paths.
+# Owner: @Npab19. Swap in a team here before turning on
+# "Require review from Code Owners" in branch protection.
+
+# Shared catalog data: links and facts only, ids are never removed (CONTRIBUTING.md).
+/catalog/ @Npab19
+
+# CI/CD, release and repository settings.
+/.github/ @Npab19

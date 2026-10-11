@@ -1,0 +1,78 @@
+{
+  "kind": "item",
+  "id": "minisforum-ms-2u-enclosure",
+  "name": "Minisforum MS-01 / MS-A2 enclosure 2U",
+  "category": "mount",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/2569296",
+    "modelId": "2569296",
+    "designer": "Blenda",
+    "license": "Standard Digital File License"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, slot size, rear support, designer, licence and hardware (16 M4 heat-set inserts, 20 M4×10 countersunk screws) from the plan research 2026-10-09; the hardware list may be incomplete; plates and depth are estimates."
+  },
+  "heightSixths": 12,
+  "depthMm": 200,
+  "prints": [
+    {
+      "id": "enclosure",
+      "plate": "All plates",
+      "label": "Minisforum MS enclosure 2U",
+      "embeds": [
+        {
+          "hardwareId": "insert-m4x8-1",
+          "perPrint": 16
+        }
+      ]
+    }
+  ],
+  "recipe": [
+    {
+      "id": "enclosure",
+      "unit": "item",
+      "ref": {
+        "print": "enclosure"
+      },
+      "count": 1
+    },
+    {
+      "id": "m4x10",
+      "unit": "item",
+      "ref": {
+        "hardware": "screw-m4x10-fhcs"
+      },
+      "count": 20
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "pc",
+      "label": "Mini PC",
+      "kind": "fixed",
+      "maxW": 197,
+      "maxD": 190,
+      "maxH": 49,
+      "orientations": ["flat"],
+      "accepts": {
+        "deviceIds": ["minisforum-ms-01", "minisforum-ms-a2"]
+      },
+      "layout": {
+        "xMm": 12.5,
+        "yMm": 4,
+        "zMm": 0
+      }
+    }
+  ],
+  "requiresRearSupport": true,
+  "render": {
+    "style": "tray"
+  }
+}

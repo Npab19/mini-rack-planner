@@ -1,0 +1,62 @@
+{
+  "kind": "item",
+  "id": "kws-power-supplies-shelf-2u",
+  "name": "KWS power supplies shelf 2U",
+  "category": "power",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/2383010",
+    "modelId": "2383010",
+    "designer": "Ilan Kushnir",
+    "license": "Standard Digital File License"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, designer and licence from the plan research 2026-10-09; plates, depth, slot size and ear holes are estimates."
+  },
+  "heightSixths": 12,
+  "depthMm": 200,
+  "prints": [
+    {
+      "id": "shelf",
+      "plate": "All plates",
+      "label": "KWS power supplies shelf 2U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "shelf",
+      "unit": "item",
+      "ref": {
+        "print": "shelf"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "bay",
+      "label": "Power bricks and PDUs",
+      "kind": "area",
+      "maxW": 210,
+      "maxD": 190,
+      "maxH": 80,
+      "accepts": {
+        "categories": ["power-brick", "pdu"]
+      },
+      "layout": {
+        "xMm": 6,
+        "yMm": 4,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "power"
+  }
+}

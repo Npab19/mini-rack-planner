@@ -1,0 +1,159 @@
+{
+  "plan": {
+    "id": "plan-kws-new-6-6",
+    "name": "New KWS 12U (6U + 6U)"
+  },
+  "lines": [
+    {
+      "key": "print:kws-rack-v2/leg-6u",
+      "kind": "print",
+      "refId": "leg-6u",
+      "label": "6U frame leg",
+      "unit": "plates",
+      "target": 8,
+      "asBuilt": 0,
+      "need": 8,
+      "buy": 8,
+      "material": "PETG",
+      "gramsEach": 125,
+      "minutesEach": 323
+    },
+    {
+      "key": "print:kws-rack-v2/base-legs",
+      "kind": "print",
+      "refId": "base-legs",
+      "label": "Bottom frame base legs",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 0,
+      "need": 2,
+      "buy": 2,
+      "material": "PETG",
+      "gramsEach": 131,
+      "minutesEach": 248
+    },
+    {
+      "key": "print:kws-rack-v2/bottom-connectors",
+      "kind": "print",
+      "refId": "bottom-connectors",
+      "label": "Bottom frame connectors",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 0,
+      "need": 2,
+      "buy": 2,
+      "material": "PETG",
+      "gramsEach": 45,
+      "minutesEach": 89
+    },
+    {
+      "key": "print:kws-rack-v2/frame-connectors",
+      "kind": "print",
+      "refId": "frame-connectors",
+      "label": "Frame connectors",
+      "unit": "plates",
+      "target": 1,
+      "asBuilt": 0,
+      "need": 1,
+      "buy": 1,
+      "material": "PETG",
+      "gramsEach": 68,
+      "minutesEach": 180
+    },
+    {
+      "key": "print:kws-rack-v2/top-connectors",
+      "kind": "print",
+      "refId": "top-connectors",
+      "label": "Top frame connectors",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 0,
+      "need": 2,
+      "buy": 2,
+      "material": "PETG",
+      "gramsEach": 44,
+      "minutesEach": 85
+    },
+    {
+      "key": "print:kws-rack-v2/top-handle",
+      "kind": "print",
+      "refId": "top-handle",
+      "label": "Top frame handle",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 0,
+      "need": 2,
+      "buy": 2,
+      "material": "PETG",
+      "gramsEach": 217,
+      "minutesEach": 421
+    },
+    {
+      "key": "hw:insert-m5x8x7",
+      "kind": "hardware",
+      "refId": "insert-m5x8x7",
+      "label": "M5 heat-set insert (M5x8x7)",
+      "unit": "pcs",
+      "category": "insert",
+      "target": 144,
+      "asBuilt": 0,
+      "need": 144,
+      "buy": 150
+    },
+    {
+      "key": "hw:nut-m6-nyloc",
+      "kind": "hardware",
+      "refId": "nut-m6-nyloc",
+      "label": "M6 nyloc nut",
+      "unit": "pcs",
+      "category": "nut",
+      "target": 80,
+      "asBuilt": 0,
+      "need": 80,
+      "buy": 100
+    },
+    {
+      "key": "hw:screw-m6x10-shcs",
+      "kind": "hardware",
+      "refId": "screw-m6x10-shcs",
+      "label": "M6×10 socket head cap screw",
+      "unit": "pcs",
+      "category": "screw",
+      "target": 48,
+      "asBuilt": 0,
+      "need": 48,
+      "buy": 50
+    },
+    {
+      "key": "hw:screw-m6x8-shcs",
+      "kind": "hardware",
+      "refId": "screw-m6x8-shcs",
+      "label": "M6×8 socket head cap screw",
+      "unit": "pcs",
+      "category": "screw",
+      "target": 32,
+      "asBuilt": 0,
+      "need": 32,
+      "buy": 50
+    },
+    {
+      "key": "hw:magnet-10x5",
+      "kind": "hardware",
+      "refId": "magnet-10x5",
+      "label": "Round neodymium magnet 10×5 mm",
+      "unit": "pcs",
+      "category": "magnet",
+      "target": 119,
+      "asBuilt": 0,
+      "need": 119,
+      "buy": 120
+    }
+  ],
+  "totals": {
+    "needGramsByMaterial": {
+      "PETG": 1942
+    },
+    "needMinutes": 4450
+  },
+  "warnings": []
+}

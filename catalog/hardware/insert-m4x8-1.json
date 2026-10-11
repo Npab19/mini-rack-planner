@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "insert-m4x8-1",
+  "name": "M4 heat-set insert (M4x8.1)",
+  "category": "insert",
+  "spec": {
+    "thread": "M4",
+    "lengthMm": 8.1,
+    "dims": "M4x8.1"
+  },
+  "packSizes": [25, 50, 100],
+  "aliases": ["Ruthex RX-M4x8.1", "M4x8.1 insert", "M4 brass insert"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Threaded_insert"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Size label as designers list it; insert brands differ, so match the hole size your design calls for."
+  }
+}

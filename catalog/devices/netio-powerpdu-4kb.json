@@ -1,0 +1,38 @@
+{
+  "kind": "device",
+  "id": "netio-powerpdu-4kb",
+  "brand": "NETIO",
+  "model": "PowerPDU 4KB",
+  "category": "pdu",
+  "dims": {
+    "w": 220,
+    "d": 120,
+    "h": 40
+  },
+  "power": {
+    "input": {
+      "kind": "ac"
+    },
+    "outputs": [
+      {
+        "kind": "ac",
+        "count": 4
+      }
+    ]
+  },
+  "rackmount": {
+    "heightSixths": 6,
+    "face": "front",
+    "depthMm": 120
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.netio-products.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page. 1U rack mount with 4 AC outputs."
+  }
+}

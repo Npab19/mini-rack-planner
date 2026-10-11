@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "screw-m4x10-fhcs",
+  "name": "M4×10 countersunk screw",
+  "category": "screw",
+  "spec": {
+    "thread": "M4",
+    "lengthMm": 10,
+    "head": "fhcs"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M4x10 countersunk", "M4x10 FHCS", "M4 x 10 flat head screw", "DIN 7991 M4x10"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 10642 / DIN 7991 countersunk socket screw."
+  }
+}

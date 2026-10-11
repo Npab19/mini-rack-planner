@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mini Rack Planner catalog: alignment record",
+  "description": "How a designer's model file maps onto a catalog 3D part, in catalog/alignments/<id>.json.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "mrp.align/1"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "catalogPartId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "match": {
+      "type": "object",
+      "properties": {
+        "fileSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "geomKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sig": {
+          "type": "object",
+          "properties": {
+            "tri": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "areaMm2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "volMm3": {
+              "type": "number"
+            },
+            "extMm": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "tri",
+            "areaMm2",
+            "volMm3",
+            "extMm"
+          ],
+          "additionalProperties": false
+        },
+        "nameHints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "pose": {
+      "type": "object",
+      "properties": {
+        "basis": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "+x",
+                "-x",
+                "+y",
+                "-y",
+                "+z",
+                "-z"
+              ]
+            },
+            {
+              "type": "string",
+              "enum": [
+                "+x",
+                "-x",
+                "+y",
+                "-y",
+                "+z",
+                "-z"
+              ]
+            },
+            {
+              "type": "string",
+              "enum": [
+                "+x",
+                "-x",
+                "+y",
+                "-y",
+                "+z",
+                "-z"
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "fineQuat": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "mirrorX": {
+          "default": false,
+          "type": "boolean"
+        },
+        "anchor": {
+          "type": "object",
+          "properties": {
+            "mesh": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "slot": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "min",
+                    "mid",
+                    "max"
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "mesh",
+            "slot"
+          ],
+          "additionalProperties": false
+        },
+        "offsetMm": {
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "basis",
+        "anchor"
+      ],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "user",
+            "curated"
+          ]
+        },
+        "conf": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "appVersion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema",
+    "catalogPartId",
+    "match",
+    "pose",
+    "provenance"
+  ],
+  "additionalProperties": false
+}

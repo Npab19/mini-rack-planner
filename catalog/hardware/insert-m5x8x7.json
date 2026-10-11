@@ -1,0 +1,24 @@
+{
+  "kind": "hardware",
+  "id": "insert-m5x8x7",
+  "name": "M5 heat-set insert (M5x8x7)",
+  "category": "insert",
+  "spec": {
+    "thread": "M5",
+    "lengthMm": 8,
+    "odMm": 7,
+    "dims": "M5x8x7"
+  },
+  "packSizes": [25, 50, 100],
+  "aliases": ["M5 brass insert 7mm OD", "M5x8x7 insert", "M5 threaded insert 8 mm"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Threaded_insert"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Size label as designers list it; insert brands differ, so match the hole size your design calls for."
+  }
+}

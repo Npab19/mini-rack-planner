@@ -1,0 +1,95 @@
+name: Nightly
+
+# Slower checks that do not gate pull requests: the E2E suite in Firefox and WebKit against the
+# production image, and an audit of the runtime dependencies.
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-browsers:
+    name: e2e (firefox, webkit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: mini-rack-planner:nightly
+          build-args: GIT_SHA=${{ github.sha }}
+          cache-from: type=gha,scope=ci-e2e
+
+      - name: Start the container (read-only root filesystem)
+        run: docker run -d --name mrp --read-only --tmpfs /tmp -p 8080:8080 mini-rack-planner:nightly
+
+      - name: Wait for /healthz
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/healthz; then exit 0; fi
+            sleep 1
+          done
+          docker logs mrp
+          exit 1
+
+      - name: Read the Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-firefox-webkit
+
+      - name: Install Firefox and WebKit
+        run: npx playwright install --with-deps firefox webkit
+
+      - name: E2E against the container
+        run: npm run e2e -- --project=firefox --project=webkit
+        env:
+          ALL_BROWSERS: '1'
+          BASE_URL: http://localhost:8080
+          GIT_SHA: ${{ github.sha }}
+
+      - name: Container logs
+        if: failure()
+        run: docker logs mrp
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-nightly
+          path: playwright-report/
+          retention-days: 7
+
+  audit:
+    name: npm audit (runtime dependencies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Audit the dependencies that ship in the build
+        run: npm audit --omit=dev --audit-level=high

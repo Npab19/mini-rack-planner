@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "nut-m6-nyloc",
+  "name": "M6 nyloc nut",
+  "category": "nut",
+  "spec": {
+    "thread": "M6",
+    "head": "nyloc"
+  },
+  "packSizes": [25, 50, 100],
+  "aliases": ["M6 nylon lock nut", "M6 lock nut", "DIN 985 M6", "ISO 10511 M6"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Nyloc_nut"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 10511 / DIN 985 nylon-insert lock nut."
+  }
+}

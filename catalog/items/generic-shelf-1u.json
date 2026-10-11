@@ -1,0 +1,59 @@
+{
+  "kind": "item",
+  "id": "generic-shelf-1u",
+  "name": "Shelf 1U",
+  "category": "shelf",
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/19-inch_rack"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Generic template: print any design of this size. Sizes follow the nominal 10-inch rack; depth and slot sizes are typical values."
+  },
+  "heightSixths": 6,
+  "depthMm": 205,
+  "prints": [
+    {
+      "id": "shelf",
+      "plate": "Shelf 1U",
+      "label": "Shelf 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "shelf",
+      "unit": "item",
+      "ref": {
+        "print": "shelf"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4,
+    "holeOffsetsMm": [6.35, 38.1],
+    "clearance": "M6",
+    "earThicknessMm": 4
+  },
+  "slots": [
+    {
+      "id": "shelf",
+      "label": "Shelf",
+      "kind": "area",
+      "maxW": 210,
+      "maxD": 200,
+      "maxH": 38,
+      "layout": {
+        "xMm": 6,
+        "yMm": 3,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "shelf"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "device",
+  "id": "ubiquiti-usw-flex-mini",
+  "brand": "Ubiquiti",
+  "model": "UniFi Switch Flex Mini (USW-Flex-Mini)",
+  "category": "switch",
+  "dims": {
+    "w": 107,
+    "d": 70,
+    "h": 21
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://techspecs.ui.com/unifi/switching/usw-flex-mini"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

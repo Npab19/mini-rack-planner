@@ -1,0 +1,32 @@
+{
+  "kind": "device",
+  "id": "gmktec-nucbox-g3-plus",
+  "brand": "GMKtec",
+  "model": "NucBox G3 Plus",
+  "category": "mini-pc",
+  "dims": {
+    "w": 114,
+    "d": 106,
+    "h": 42.5
+  },
+  "weightG": 361,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 36,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.gmktec.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page."
+  }
+}

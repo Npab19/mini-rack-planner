@@ -1,0 +1,38 @@
+{
+  "kind": "frame",
+  "id": "generic-10in",
+  "name": "Generic 10-inch rack",
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/19-inch_rack"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Template for a commercial or self-built 10-inch rack: set your own depth, inner width, hole tolerance and screws. depthMm 300 is a placeholder; the rest follows the nominal 10-inch rack dimensions."
+  },
+  "standard": {
+    "panelWidthMm": 254,
+    "innerWidthMm": 222.25,
+    "depthMm": 300,
+    "rearOpen": true
+  },
+  "rail": {
+    "earSpacingMm": 236.525,
+    "holeOffsetsPerUMm": [6.35, 22.225, 38.1],
+    "holeTolMm": 1
+  },
+  "equipmentFastener": {
+    "thread": "M6",
+    "perHole": "screw+cage-nut",
+    "screwIds": ["screw-m6x10-bhcs", "screw-m6x12-bhcs", "screw-m6x16-shcs", "screw-m6x20-shcs"],
+    "engagementMm": 6,
+    "nutId": "cage-nut-m6"
+  },
+  "sectionTypes": [{ "id": "rack", "label": "Rack", "heightU": { "min": 2, "max": 22 } }],
+  "stack": {
+    "minU": 2,
+    "maxU": 22
+  }
+}

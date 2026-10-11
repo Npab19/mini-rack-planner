@@ -1,0 +1,59 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+    labels: [chore]
+    groups:
+      # React moves together with the React Three Fiber stack. A dependency joins the first group
+      # it matches, so this one must stay above the catch-all group.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
+          - '@react-three/*'
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+        patterns: ['*']
+    ignore:
+      # @react-three/fiber 9.8 declares react <19.4 as its peer range. Lift these once R3F widens it.
+      - dependency-name: react
+        versions: ['>=19.4.0']
+      - dependency-name: react-dom
+        versions: ['>=19.4.0']
+      - dependency-name: '@types/react'
+        versions: ['>=19.4.0']
+      - dependency-name: '@types/react-dom'
+        versions: ['>=19.4.0']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    labels: [chore]
+    groups:
+      github-actions:
+        patterns: ['*']
+
+  # Dockerfile base images. nginx even minors are stable (1.30, 1.32); odd ones are mainline.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(docker)
+    labels: [chore]
+    ignore:
+      # The build image stays on the Node 24 line that CI uses (actions/setup-node node-version: 24).
+      - dependency-name: node
+        update-types: ['version-update:semver-major']

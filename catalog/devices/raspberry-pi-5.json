@@ -1,0 +1,27 @@
+{
+  "kind": "device",
+  "id": "raspberry-pi-5",
+  "brand": "Raspberry Pi",
+  "model": "5",
+  "category": "sbc",
+  "dims": {
+    "w": 85,
+    "d": 56,
+    "h": 20
+  },
+  "power": {
+    "input": {
+      "kind": "usb-c-pd"
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.raspberrypi.com/products/raspberry-pi-5/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "Board footprint 85 × 56 mm from the plan research 2026-10-09; the 20 mm height is an estimate."
+  }
+}

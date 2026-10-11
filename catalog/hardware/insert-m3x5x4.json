@@ -1,0 +1,24 @@
+{
+  "kind": "hardware",
+  "id": "insert-m3x5x4",
+  "name": "M3 heat-set insert (M3x5x4)",
+  "category": "insert",
+  "spec": {
+    "thread": "M3",
+    "lengthMm": 5,
+    "odMm": 4,
+    "dims": "M3x5x4"
+  },
+  "packSizes": [25, 50, 100],
+  "aliases": ["M3x5x4 insert", "M3 brass insert", "M3 threaded insert 5 mm"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Threaded_insert"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Size label as designers list it; insert brands differ, so match the hole size your design calls for."
+  }
+}

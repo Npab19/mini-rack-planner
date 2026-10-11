@@ -1,0 +1,8 @@
+{
+  "initialJsGzipKb": 300,
+  "lazyChunkGzipKb": {
+    "viewer3d": 350
+  },
+  "workerGzipKb": 150,
+  "tolerancePct": 5
+}

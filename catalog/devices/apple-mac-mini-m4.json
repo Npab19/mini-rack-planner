@@ -1,0 +1,30 @@
+{
+  "kind": "device",
+  "id": "apple-mac-mini-m4",
+  "brand": "Apple",
+  "model": "Mac mini (M4, 2024)",
+  "category": "mini-pc",
+  "dims": {
+    "w": 127,
+    "d": 127,
+    "h": 50
+  },
+  "weightG": 670,
+  "power": {
+    "typW": 4,
+    "maxW": 65,
+    "input": {
+      "kind": "ac"
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.apple.com/mac-mini/specs/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions, weight and power (4 W idle, 65 W maximum, internal power supply) from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "kind": "item",
+  "id": "generic-blank-1u",
+  "name": "Blank panel 1U",
+  "category": "panel",
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/19-inch_rack"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Generic template: print any design of this size. Sizes follow the nominal 10-inch rack; depth and slot sizes are typical values."
+  },
+  "heightSixths": 6,
+  "depthMm": 3,
+  "prints": [
+    {
+      "id": "panel",
+      "plate": "Blank panel 1U",
+      "label": "Blank panel 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "panel",
+      "unit": "item",
+      "ref": {
+        "print": "panel"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4,
+    "holeOffsetsMm": [6.35, 38.1],
+    "clearance": "M6",
+    "earThicknessMm": 4
+  },
+  "render": {
+    "style": "blank"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "hardware",
+  "id": "cable-tie-100mm",
+  "name": "Cable tie 100 mm",
+  "category": "cable-tie",
+  "spec": {
+    "lengthMm": 100
+  },
+  "packSizes": [100],
+  "aliases": ["zip tie 100 mm", "100 mm cable tie"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Cable_tie"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic part: nylon cable tie, 100 mm long."
+  }
+}

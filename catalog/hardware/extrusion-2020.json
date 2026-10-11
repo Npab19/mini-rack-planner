@@ -1,0 +1,21 @@
+{
+  "kind": "hardware",
+  "id": "extrusion-2020",
+  "name": "2020 aluminium extrusion (20×20 mm, 6 mm slot)",
+  "category": "extrusion",
+  "spec": {
+    "dims": "20x20"
+  },
+  "unit": "mm",
+  "aliases": ["2020 profile", "20x20 extrusion", "20x20 aluminium profile 6 mm slot"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/T-slot_nut"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic part: 20 × 20 mm T-slot profile with 6 mm slots, cut to length."
+  }
+}

@@ -1,0 +1,39 @@
+# Keep the build context small and platform-neutral: a Windows node_modules must never reach the
+# Linux build (npm ci installs the right native binaries inside the image).
+**/node_modules
+dist*
+**/*.tsbuildinfo
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# Not needed to build the site.
+.git
+.github
+.claude
+.vscode
+.idea
+docs
+Dockerfile
+.dockerignore
+docker-compose.yml
+**/*.log
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+
+# Secrets and local config.
+.env*
+**/*.pem
+**/*.key
+
+# Model files never enter the repo or the image (MakerWorld licences).
+**/*.stl
+**/*.3mf
+**/*.step
+**/*.stp
+**/*.zip
+**/*.gcode
+local-models

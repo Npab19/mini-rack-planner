@@ -1,0 +1,63 @@
+{
+  "kind": "item",
+  "id": "hp-mini-mount-1u",
+  "name": "HP Mini mount 1U",
+  "category": "mount",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/1138723",
+    "modelId": "1138723",
+    "designer": "just actual kevin",
+    "license": "Standard Digital File License"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, slot size, designer and licence from the plan research 2026-10-09; plates, depth, slot position and ear holes are not verified."
+  },
+  "heightSixths": 6,
+  "depthMm": 182,
+  "prints": [
+    {
+      "id": "mount",
+      "plate": "All plates",
+      "label": "HP Mini mount 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "mount",
+      "unit": "item",
+      "ref": {
+        "print": "mount"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "pc",
+      "label": "Mini PC",
+      "kind": "fixed",
+      "maxW": 178,
+      "maxD": 176,
+      "maxH": 35,
+      "orientations": ["flat"],
+      "accepts": {
+        "categories": ["mini-pc"]
+      },
+      "layout": {
+        "xMm": 22,
+        "yMm": 4,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "tray"
+  }
+}

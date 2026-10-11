@@ -1,0 +1,74 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "dist-ssr/**",
+    "dist-spikes/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    "blob-report/**"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "no-underscore-dangle": "off",
+    "unicorn/require-post-message-target-origin": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-array-sort": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["public/**/*.js"],
+      "rules": {
+        "no-unused-vars": ["error", { "caughtErrors": "none" }]
+      }
+    },
+    {
+      "files": ["src/**"],
+      "excludeFiles": ["src/features/viewer3d/**", "src/workers/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(three(-[a-z0-9-]+)?|meshoptimizer)(/.*)?$|^@react-three/",
+                "allowTypeImports": true,
+                "message": "three (and three-* addons), @react-three/* and meshoptimizer belong in src/features/viewer3d (loaded with React.lazy) or src/workers, so they stay out of the initial bundle. Type-only imports are fine."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/domain/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(react|react-dom|dexie|dexie-react-hooks|zustand|zundo|three(-[a-z0-9-]+)?|meshoptimizer)(/.*)?$|^@react-three/",
+                "message": "src/domain is pure TypeScript: no React, Dexie, Zustand or three (see CLAUDE.md, architecture boundaries)."
+              },
+              {
+                "regex": "^@/",
+                "message": "Imports inside src/domain are relative (no @/ alias), so the domain stays usable from workers and Node scripts."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "kind": "item",
+  "id": "universal-power-strip-1u",
+  "name": "Universal power strip mount 1U",
+  "category": "power",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/2519395",
+    "modelId": "2519395",
+    "designer": "FamousDirector",
+    "license": "MakerWorld Exclusive License"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, designer and licence from the plan research 2026-10-09; plates, depth, slot size and ear holes are estimates."
+  },
+  "heightSixths": 6,
+  "depthMm": 80,
+  "prints": [
+    {
+      "id": "mount",
+      "plate": "All plates",
+      "label": "Universal power strip mount 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "mount",
+      "unit": "item",
+      "ref": {
+        "print": "mount"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "strip",
+      "label": "Power strip",
+      "kind": "area",
+      "maxW": 210,
+      "maxD": 70,
+      "maxH": 40,
+      "accepts": {
+        "categories": ["pdu"]
+      },
+      "layout": {
+        "xMm": 6,
+        "yMm": 2,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "power"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "device",
+  "id": "minisforum-ms-a2",
+  "brand": "Minisforum",
+  "model": "MS-A2",
+  "category": "mini-pc",
+  "dims": {
+    "w": 196,
+    "d": 189,
+    "h": 48
+  },
+  "weightG": 1400,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 240,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://store.minisforum.com/products/minisforum-ms-a2"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "Dimensions and weight from the plan research 2026-10-09; the power brick output (about 240 W) is approximate."
+  }
+}

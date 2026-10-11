@@ -1,0 +1,31 @@
+{
+  "kind": "device",
+  "id": "minisforum-ms-01",
+  "brand": "Minisforum",
+  "model": "MS-01",
+  "category": "mini-pc",
+  "dims": {
+    "w": 196,
+    "d": 189,
+    "h": 48
+  },
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 180,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://store.minisforum.com/products/minisforum-ms-01"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and power brick from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

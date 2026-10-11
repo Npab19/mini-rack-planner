@@ -1,0 +1,29 @@
+name: release-please
+
+# Keeps a release PR open that bumps package.json and CHANGELOG.md from Conventional Commits.
+# Merging it tags vX.Y.Z, which publishes the Docker image and deploys SWA production.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          # Tags pushed with the default GITHUB_TOKEN do not start other workflows. A fine-grained
+          # PAT in RELEASE_PLEASE_TOKEN (contents + pull requests: read/write) lets the release tag
+          # trigger docker-publish.yml and azure-swa.yml. See docs/deploy.md.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

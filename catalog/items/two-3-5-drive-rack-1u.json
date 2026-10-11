@@ -1,0 +1,80 @@
+{
+  "kind": "item",
+  "id": "two-3-5-drive-rack-1u",
+  "name": "Two 3.5-inch drive rack 1U",
+  "category": "mount",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/1838737",
+    "modelId": "1838737",
+    "designer": "mklements",
+    "license": "BY-NC-SA"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, two 3.5-inch drive slots, designer and licence from the plan research 2026-10-09; plates, depth, slot positions and ear holes are estimates."
+  },
+  "heightSixths": 6,
+  "depthMm": 160,
+  "prints": [
+    {
+      "id": "rack",
+      "plate": "All plates",
+      "label": "Two 3.5-inch drive rack 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "rack",
+      "unit": "item",
+      "ref": {
+        "print": "rack"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "drive-left",
+      "label": "Left drive",
+      "kind": "fixed",
+      "maxW": 102,
+      "maxD": 147,
+      "maxH": 27,
+      "orientations": ["flat"],
+      "accepts": {
+        "deviceIds": ["drive-3-5-inch"]
+      },
+      "layout": {
+        "xMm": 5,
+        "yMm": 4,
+        "zMm": 0
+      }
+    },
+    {
+      "id": "drive-right",
+      "label": "Right drive",
+      "kind": "fixed",
+      "maxW": 102,
+      "maxD": 147,
+      "maxH": 27,
+      "orientations": ["flat"],
+      "accepts": {
+        "deviceIds": ["drive-3-5-inch"]
+      },
+      "layout": {
+        "xMm": 115,
+        "yMm": 4,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "tray"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "magnet-10x5",
+  "name": "Round neodymium magnet 10×5 mm",
+  "category": "magnet",
+  "spec": {
+    "odMm": 10,
+    "dims": "10x5"
+  },
+  "packSizes": [10, 20, 50, 100],
+  "aliases": ["10x5 magnet", "10 x 5 mm disc magnet", "10x5 mm neodymium magnet"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Neodymium_magnet"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic part: disc magnet, diameter × thickness in mm."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "screw-m6x10-bhcs",
+  "name": "M6×10 button head screw",
+  "category": "screw",
+  "spec": {
+    "thread": "M6",
+    "lengthMm": 10,
+    "head": "bhcs"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M6x10 BHCS", "M6 x 10 button head", "ISO 7380 M6x10"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 7380 button head screw."
+  }
+}

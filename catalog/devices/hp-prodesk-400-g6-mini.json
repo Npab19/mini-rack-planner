@@ -1,0 +1,32 @@
+{
+  "kind": "device",
+  "id": "hp-prodesk-400-g6-mini",
+  "brand": "HP",
+  "model": "ProDesk 400 G6 Desktop Mini",
+  "category": "mini-pc",
+  "dims": {
+    "w": 177,
+    "d": 175,
+    "h": 34
+  },
+  "weightG": 1250,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 65,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.hp.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page."
+  }
+}

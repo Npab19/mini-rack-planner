@@ -1,0 +1,61 @@
+name: Catalog submission
+description: Suggest a rack frame, printed part, device or hardware item for the shared catalog
+title: 'catalog: '
+labels: [catalog]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The shared catalog stores **links and facts only**: sizes, U height, part counts, grams,
+        hardware. Please do not paste images, the designer's description text or model files.
+        Nobody fetches the page you link to; it is shown as an *Open page* link in the app.
+        See CONTRIBUTING.md for the entry format and the rules.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Frame (a rack system, e.g. KWS Rack v2)
+        - Item (a printed mount, shelf, panel or accessory)
+        - Device (equipment such as a mini PC, switch or drive)
+        - Hardware (screw, insert, nut, magnet…)
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: MakerWorld or other link
+      description: The designer's or maker's page (MakerWorld, Printables, Thingiverse, a product page…).
+      placeholder: https://makerworld.com/en/models/…
+    validations:
+      required: true
+  - type: input
+    id: designer
+    attributes:
+      label: Designer
+      description: As shown on the page, for attribution. Leave empty for devices and hardware.
+  - type: input
+    id: licence
+    attributes:
+      label: Licence label as shown
+      description: Copy it exactly as the page shows it, e.g. "Standard Digital File License", "CC BY-NC-SA 4.0" or "MakerWorld Exclusive".
+  - type: textarea
+    id: entry
+    attributes:
+      label: Catalog entry (JSON)
+      description: Exported from the app or written by hand (see CONTRIBUTING.md).
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: How did you verify the facts?
+      description: e.g. calipers on my print, grams from Bambu Studio or OrcaSlicer, the designer's hardware list.
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: The entry holds facts and a link only (no images, no copied description text, no model files), and I checked the facts myself.
+          required: true

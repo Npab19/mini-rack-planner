@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "rubber-foot-10x3",
+  "name": "Adhesive rubber foot 10×3 mm",
+  "category": "foot",
+  "spec": {
+    "odMm": 10,
+    "dims": "10x3"
+  },
+  "packSizes": [10, 20, 50],
+  "aliases": ["10x3 rubber feet", "rubber bumper 10 mm", "bumpon 10x3"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Bumpon"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic part: self-adhesive bumper, diameter × height in mm."
+  }
+}

@@ -1,0 +1,20 @@
+name: Chore
+description: Tooling, dependencies, CI, infrastructure or refactoring
+title: 'chore: '
+labels: [chore]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What and why
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when
+      placeholder: |
+        - [ ] CI is green
+        - [ ] …
+    validations:
+      required: true

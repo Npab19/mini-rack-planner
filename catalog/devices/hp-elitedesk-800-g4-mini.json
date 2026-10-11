@@ -1,0 +1,31 @@
+{
+  "kind": "device",
+  "id": "hp-elitedesk-800-g4-mini",
+  "brand": "HP",
+  "model": "EliteDesk 800 G4 Desktop Mini",
+  "category": "mini-pc",
+  "dims": {
+    "w": 177,
+    "d": 175,
+    "h": 34.2
+  },
+  "weightG": 1050,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.hp.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page."
+  }
+}

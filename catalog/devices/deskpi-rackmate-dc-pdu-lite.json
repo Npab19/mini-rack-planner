@@ -1,0 +1,38 @@
+{
+  "kind": "device",
+  "id": "deskpi-rackmate-dc-pdu-lite",
+  "brand": "DeskPi",
+  "model": "RackMate DC PDU Lite (DP-0042)",
+  "category": "pdu",
+  "dims": {
+    "w": 250,
+    "d": 64,
+    "h": 21
+  },
+  "power": {
+    "input": {
+      "kind": "dc"
+    },
+    "outputs": [
+      {
+        "kind": "dc",
+        "count": 7
+      }
+    ]
+  },
+  "rackmount": {
+    "heightSixths": 3,
+    "face": "front",
+    "depthMm": 64
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://deskpi.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "Size, ½U rack mount and 7 DC outputs from the plan research 2026-10-09; how the PDU itself is powered (DC input assumed) is not confirmed. The source links to the manufacturer's site."
+  }
+}

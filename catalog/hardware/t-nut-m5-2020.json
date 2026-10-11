@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "t-nut-m5-2020",
+  "name": "M5 T-nut for 2020 extrusion",
+  "category": "t-nut",
+  "spec": {
+    "thread": "M5",
+    "dims": "6 mm slot"
+  },
+  "packSizes": [10, 20, 50],
+  "aliases": ["M5 T-nut 2020", "M5 slot nut 6 mm", "2020 T-nut M5"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/T-slot_nut"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Generic part: M5 T-nut for 6 mm slot (2020) profiles."
+  }
+}

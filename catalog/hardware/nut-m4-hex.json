@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "nut-m4-hex",
+  "name": "M4 hex nut",
+  "category": "nut",
+  "spec": {
+    "thread": "M4",
+    "head": "hex"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M4 nut", "DIN 934 M4", "ISO 4032 M4"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Nut_(hardware)"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 4032 / DIN 934 hex nut."
+  }
+}

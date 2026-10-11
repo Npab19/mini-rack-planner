@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "id": "plan-kws-new-6-6",
+  "rackId": "rack-kws-new",
+  "name": "New KWS 12U (6U + 6U)",
+  "notes": "Fixture: a new KWS Rack v2 with two 6U sections; nothing is built yet.",
+  "createdAt": "2026-10-01T00:00:00.000Z",
+  "updatedAt": "2026-10-01T00:00:00.000Z",
+  "rev": 0,
+  "frame": {
+    "frameId": "kws-rack-v2",
+    "options": {},
+    "caps": {
+      "top": {},
+      "bottom": {}
+    },
+    "sections": [
+      {
+        "id": "sec-lower-6u",
+        "typeId": "s6"
+      },
+      {
+        "id": "sec-upper-6u",
+        "typeId": "s6"
+      }
+    ]
+  },
+  "placements": [],
+  "equipment": [],
+  "extras": [],
+  "retired": []
+}

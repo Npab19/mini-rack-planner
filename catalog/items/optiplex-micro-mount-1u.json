@@ -1,0 +1,63 @@
+{
+  "kind": "item",
+  "id": "optiplex-micro-mount-1u",
+  "name": "Dell OptiPlex Micro mount 1U",
+  "category": "mount",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/2533485",
+    "modelId": "2533485",
+    "designer": "Ropsu11",
+    "license": "Standard Digital File License"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "unverified",
+    "note": "U height, slot size, designer and licence from the plan research 2026-10-09; plates, depth, slot position and ear holes are not verified."
+  },
+  "heightSixths": 6,
+  "depthMm": 185,
+  "prints": [
+    {
+      "id": "mount",
+      "plate": "All plates",
+      "label": "Dell OptiPlex Micro mount 1U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "mount",
+      "unit": "item",
+      "ref": {
+        "print": "mount"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 4
+  },
+  "slots": [
+    {
+      "id": "pc",
+      "label": "Mini PC",
+      "kind": "fixed",
+      "maxW": 183,
+      "maxD": 179,
+      "maxH": 37,
+      "orientations": ["flat"],
+      "accepts": {
+        "categories": ["mini-pc"]
+      },
+      "layout": {
+        "xMm": 19.5,
+        "yMm": 3.5,
+        "zMm": 0
+      }
+    }
+  ],
+  "render": {
+    "style": "tray"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "id": "plan-kws-3-6-plus3-top",
+  "rackId": "rack-kws-home",
+  "name": "KWS 9U to 12U: new 3U on top",
+  "notes": "Fixture: the KWS Rack v2 as built (3U at the bottom, 6U above it, top and bottom caps, all Have) plus one new 3U section on top.",
+  "createdAt": "2026-10-01T00:00:00.000Z",
+  "updatedAt": "2026-10-01T00:00:00.000Z",
+  "rev": 0,
+  "frame": {
+    "frameId": "kws-rack-v2",
+    "options": {},
+    "caps": {
+      "top": {
+        "have": {
+          "at": "2026-10-01T00:00:00.000Z",
+          "options": {
+            "magnets": true,
+            "insert-policy": "all",
+            "top": "handle",
+            "stoppers": false,
+            "high-rack": false,
+            "side-panels": "none",
+            "deep-320": false
+          }
+        }
+      },
+      "bottom": {
+        "have": {
+          "at": "2026-10-01T00:00:00.000Z",
+          "options": {
+            "magnets": true,
+            "insert-policy": "all",
+            "top": "handle",
+            "stoppers": false,
+            "high-rack": false,
+            "side-panels": "none",
+            "deep-320": false
+          }
+        }
+      }
+    },
+    "sections": [
+      {
+        "id": "sec-built-3u",
+        "typeId": "s3",
+        "have": {
+          "at": "2026-10-01T00:00:00.000Z",
+          "typeId": "s3",
+          "heightU": 3,
+          "options": {
+            "magnets": true,
+            "insert-policy": "all",
+            "top": "handle",
+            "stoppers": false,
+            "high-rack": false,
+            "side-panels": "none",
+            "deep-320": false
+          }
+        }
+      },
+      {
+        "id": "sec-built-6u",
+        "typeId": "s6",
+        "have": {
+          "at": "2026-10-01T00:00:00.000Z",
+          "typeId": "s6",
+          "heightU": 6,
+          "options": {
+            "magnets": true,
+            "insert-policy": "all",
+            "top": "handle",
+            "stoppers": false,
+            "high-rack": false,
+            "side-panels": "none",
+            "deep-320": false
+          }
+        }
+      },
+      {
+        "id": "sec-new-3u",
+        "typeId": "s3"
+      }
+    ]
+  },
+  "placements": [],
+  "equipment": [],
+  "extras": [],
+  "retired": []
+}

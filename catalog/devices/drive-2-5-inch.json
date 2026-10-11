@@ -1,0 +1,22 @@
+{
+  "kind": "device",
+  "id": "drive-2-5-inch",
+  "brand": "Generic",
+  "model": "2.5-inch drive (9.5 mm)",
+  "category": "drive",
+  "dims": {
+    "w": 69.85,
+    "d": 100,
+    "h": 9.5
+  },
+  "source": {
+    "platform": "other",
+    "url": "https://www.snia.org/technology-communities/sff/specifications"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Form factor dimensions from SFF-8201 (9.5 mm height; 7 mm and 15 mm drives also exist)."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "kind": "device",
+  "id": "beelink-eq14",
+  "brand": "Beelink",
+  "model": "EQ14",
+  "category": "mini-pc",
+  "dims": {
+    "w": 126,
+    "d": 126,
+    "h": 39
+  },
+  "weightG": 490,
+  "power": {
+    "input": {
+      "kind": "ac"
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.bee-link.com/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09). The source links to the manufacturer's site; replace it with the product's spec page. Internal power supply."
+  }
+}

@@ -1,0 +1,2 @@
+# Every issue starts from a form so it gets the right label (feature, bug, chore, catalog).
+blank_issues_enabled: false

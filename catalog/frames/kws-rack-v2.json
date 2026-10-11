@@ -1,0 +1,568 @@
+{
+  "kind": "frame",
+  "id": "kws-rack-v2",
+  "name": "KWS Rack v2",
+  "source": {
+    "platform": "makerworld",
+    "url": "https://makerworld.com/en/models/2139130",
+    "modelId": "2139130",
+    "profileId": "2317125",
+    "designer": "Ilan Kushnir",
+    "license": "MakerWorld Exclusive License"
+  },
+  "verified": {
+    "by": "maintainer (designer page)",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "From the designer page (profile 2317125): plates, grams, times, hardware table. Measurements image: front mount spacing 260 mm (= depthMm, front-to-rear rails), rear/side 244, outer rail 288, inner rail 258. Unverified: innerWidthMm 222 (assumed standard), 3D envelopes, connector pieces per plate, location of the 7 rack-level magnets."
+  },
+  "standard": {
+    "panelWidthMm": 254,
+    "innerWidthMm": 222,
+    "depthMm": 260,
+    "rearOpen": true
+  },
+  "rail": {
+    "earSpacingMm": 236.525,
+    "holeOffsetsPerUMm": [6.35, 22.225, 38.1],
+    "holeTolMm": 1
+  },
+  "equipmentFastener": {
+    "thread": "M5",
+    "perHole": "screw",
+    "screwIds": ["screw-m5x10-shcs", "screw-m5x12-shcs", "screw-m5x16-shcs"],
+    "engagementMm": 6
+  },
+  "sectionTypes": [
+    {
+      "id": "s3",
+      "label": "3U section",
+      "heightU": 3
+    },
+    {
+      "id": "s6",
+      "label": "6U section",
+      "heightU": 6
+    }
+  ],
+  "stack": {
+    "minU": 3,
+    "maxU": 30
+  },
+  "options": [
+    {
+      "id": "magnets",
+      "label": "Magnetic frame (10x5 mm magnets)",
+      "scope": "section",
+      "kind": "boolean",
+      "default": true
+    },
+    {
+      "id": "insert-policy",
+      "label": "Heat-set inserts",
+      "scope": "rack",
+      "kind": "choice",
+      "choices": [
+        {
+          "id": "all",
+          "label": "Every rail hole (designer table)"
+        },
+        {
+          "id": "top-bottom",
+          "label": "Top and bottom hole of each U"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "id": "top",
+      "label": "Top",
+      "scope": "top",
+      "kind": "choice",
+      "choices": [
+        {
+          "id": "handle",
+          "label": "Handle"
+        },
+        {
+          "id": "flat",
+          "label": "Flat connector"
+        }
+      ],
+      "default": "handle"
+    },
+    {
+      "id": "stoppers",
+      "label": "Bottom base stoppers",
+      "scope": "bottom",
+      "kind": "boolean",
+      "default": false
+    },
+    {
+      "id": "high-rack",
+      "label": "Connector for high racks",
+      "scope": "rack",
+      "kind": "boolean",
+      "default": false
+    },
+    {
+      "id": "side-panels",
+      "label": "Side panels",
+      "scope": "section",
+      "kind": "choice",
+      "choices": [
+        {
+          "id": "none",
+          "label": "None"
+        },
+        {
+          "id": "printed",
+          "label": "Printed side plates (grill)"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "id": "deep-320",
+      "label": "320 mm deep connectors",
+      "scope": "rack",
+      "kind": "boolean",
+      "default": false,
+      "effects": {
+        "depthMm": 320
+      }
+    }
+  ],
+  "prints": [
+    {
+      "id": "leg-6u",
+      "plate": "[Print x4] - Magnetic frame - 6U",
+      "label": "6U frame leg",
+      "material": "PETG",
+      "gramsPerPrint": 125,
+      "minutesPerPrint": 323,
+      "pieces": [
+        {
+          "partId": "leg-6u",
+          "perPrint": 1
+        }
+      ],
+      "embeds": [
+        {
+          "hardwareId": "insert-m5x8x7",
+          "perPrint": 18,
+          "when": {
+            "option": {
+              "insert-policy": "all"
+            }
+          }
+        },
+        {
+          "hardwareId": "insert-m5x8x7",
+          "perPrint": 12,
+          "when": {
+            "option": {
+              "insert-policy": "top-bottom"
+            }
+          }
+        },
+        {
+          "hardwareId": "magnet-10x5",
+          "perPrint": 14,
+          "when": {
+            "option": {
+              "magnets": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "plate-3u",
+      "plate": "[Optional] - Magnetic frame - 3U",
+      "label": "3U leg plate (4 legs)",
+      "material": "PETG",
+      "gramsPerPrint": 214,
+      "minutesPerPrint": 528,
+      "pieces": [
+        {
+          "partId": "leg-3u",
+          "perPrint": 4
+        }
+      ],
+      "embeds": [
+        {
+          "hardwareId": "insert-m5x8x7",
+          "perPrint": 36,
+          "when": {
+            "option": {
+              "insert-policy": "all"
+            }
+          }
+        },
+        {
+          "hardwareId": "insert-m5x8x7",
+          "perPrint": 24,
+          "when": {
+            "option": {
+              "insert-policy": "top-bottom"
+            }
+          }
+        },
+        {
+          "hardwareId": "magnet-10x5",
+          "perPrint": 16,
+          "when": {
+            "option": {
+              "magnets": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "frame-connectors",
+      "plate": "Frame connectors",
+      "label": "Frame connectors",
+      "material": "PETG",
+      "gramsPerPrint": 68,
+      "minutesPerPrint": 180,
+      "pieces": [
+        {
+          "partId": "connector",
+          "perPrint": 4
+        }
+      ]
+    },
+    {
+      "id": "top-handle",
+      "plate": "[Print x2] - Top frame handle",
+      "label": "Top frame handle",
+      "material": "PETG",
+      "gramsPerPrint": 217,
+      "minutesPerPrint": 421,
+      "pieces": [
+        {
+          "partId": "top",
+          "perPrint": 1
+        }
+      ]
+    },
+    {
+      "id": "top-flat",
+      "plate": "[Optional] - [Print x2] - Top frame flat connector",
+      "label": "Top frame flat connector",
+      "material": "PETG",
+      "gramsPerPrint": 132,
+      "minutesPerPrint": 286
+    },
+    {
+      "id": "top-connectors",
+      "plate": "[Print x2] - Top frame connectors",
+      "label": "Top frame connectors",
+      "material": "PETG",
+      "gramsPerPrint": 44,
+      "minutesPerPrint": 85
+    },
+    {
+      "id": "base-legs",
+      "plate": "[Print x2] - Bottom frame base legs",
+      "label": "Bottom frame base legs",
+      "material": "PETG",
+      "gramsPerPrint": 131,
+      "minutesPerPrint": 248,
+      "pieces": [
+        {
+          "partId": "bottom",
+          "perPrint": 1
+        }
+      ]
+    },
+    {
+      "id": "bottom-connectors",
+      "plate": "[Print x2] - Bottom frame connectors",
+      "label": "Bottom frame connectors",
+      "material": "PETG",
+      "gramsPerPrint": 45,
+      "minutesPerPrint": 89
+    },
+    {
+      "id": "base-stoppers",
+      "plate": "[Optional] - Bottom base stoppers",
+      "label": "Bottom base stoppers",
+      "material": "PETG",
+      "gramsPerPrint": 43,
+      "minutesPerPrint": 99
+    },
+    {
+      "id": "high-rack-connector",
+      "plate": "[Optional] - connector for HIGH RACKS",
+      "label": "Connector for high racks",
+      "material": "PETG",
+      "gramsPerPrint": 52,
+      "minutesPerPrint": 117
+    },
+    {
+      "id": "side-plate-3u",
+      "plate": "Side plate 3U (grill)",
+      "label": "Side plate 3U (grill)",
+      "material": "PETG",
+      "gramsPerPrint": 49,
+      "minutesPerPrint": 80
+    },
+    {
+      "id": "spacer-6u",
+      "plate": "Spacer for 6U side plates",
+      "label": "Spacer for 6U side plates",
+      "material": "PETG",
+      "gramsPerPrint": 6,
+      "minutesPerPrint": 18
+    }
+  ],
+  "recipe": [
+    {
+      "id": "legs-6u",
+      "unit": "section",
+      "ref": {
+        "print": "leg-6u"
+      },
+      "count": {
+        "perSection": {
+          "s6": 4
+        }
+      }
+    },
+    {
+      "id": "plate-3u",
+      "unit": "section",
+      "ref": {
+        "print": "plate-3u"
+      },
+      "count": {
+        "perSection": {
+          "s3": 1
+        }
+      }
+    },
+    {
+      "id": "m6x8",
+      "unit": "section",
+      "ref": {
+        "hardware": "screw-m6x8-shcs"
+      },
+      "count": {
+        "perSectionAny": 16
+      }
+    },
+    {
+      "id": "m6x10",
+      "unit": "section",
+      "ref": {
+        "hardware": "screw-m6x10-shcs"
+      },
+      "count": {
+        "perSectionAny": 24
+      }
+    },
+    {
+      "id": "m6-nyloc",
+      "unit": "section",
+      "ref": {
+        "hardware": "nut-m6-nyloc"
+      },
+      "count": {
+        "perSectionAny": 40
+      }
+    },
+    {
+      "id": "side-plates",
+      "unit": "section",
+      "ref": {
+        "print": "side-plate-3u"
+      },
+      "count": {
+        "perSection": {
+          "s3": 2,
+          "s6": 4
+        }
+      },
+      "when": {
+        "option": {
+          "side-panels": "printed"
+        }
+      }
+    },
+    {
+      "id": "side-spacers",
+      "unit": "section",
+      "ref": {
+        "print": "spacer-6u"
+      },
+      "count": {
+        "perSection": {
+          "s6": 2
+        }
+      },
+      "when": {
+        "option": {
+          "side-panels": "printed"
+        }
+      }
+    },
+    {
+      "id": "frame-connectors",
+      "unit": "joint",
+      "ref": {
+        "print": "frame-connectors"
+      },
+      "count": 1
+    },
+    {
+      "id": "top-handle",
+      "unit": "top",
+      "ref": {
+        "print": "top-handle"
+      },
+      "count": 2,
+      "when": {
+        "option": {
+          "top": "handle"
+        }
+      }
+    },
+    {
+      "id": "top-flat",
+      "unit": "top",
+      "ref": {
+        "print": "top-flat"
+      },
+      "count": 2,
+      "when": {
+        "option": {
+          "top": "flat"
+        }
+      }
+    },
+    {
+      "id": "top-connectors",
+      "unit": "top",
+      "ref": {
+        "print": "top-connectors"
+      },
+      "count": 2
+    },
+    {
+      "id": "base-legs",
+      "unit": "bottom",
+      "ref": {
+        "print": "base-legs"
+      },
+      "count": 2
+    },
+    {
+      "id": "bottom-connectors",
+      "unit": "bottom",
+      "ref": {
+        "print": "bottom-connectors"
+      },
+      "count": 2
+    },
+    {
+      "id": "base-stoppers",
+      "unit": "bottom",
+      "ref": {
+        "print": "base-stoppers"
+      },
+      "count": 1,
+      "when": {
+        "option": {
+          "stoppers": true
+        }
+      }
+    },
+    {
+      "id": "rack-magnets",
+      "unit": "rack",
+      "ref": {
+        "hardware": "magnet-10x5"
+      },
+      "count": 7,
+      "when": {
+        "option": {
+          "magnets": true
+        }
+      },
+      "note": "7 per rack (designer table; where they go is still to be checked)"
+    },
+    {
+      "id": "high-rack-connector",
+      "unit": "rack",
+      "ref": {
+        "print": "high-rack-connector"
+      },
+      "count": 1,
+      "when": {
+        "option": {
+          "high-rack": true
+        }
+      }
+    }
+  ],
+  "parts3d": [
+    {
+      "id": "leg-6u",
+      "label": "6U frame leg",
+      "role": "leg",
+      "envelopeMm": {
+        "w": 20,
+        "d": 20,
+        "h": 266.7
+      },
+      "nameHints": ["Magnetic frame - 6U"]
+    },
+    {
+      "id": "leg-3u",
+      "label": "3U frame leg",
+      "role": "leg",
+      "envelopeMm": {
+        "w": 20,
+        "d": 20,
+        "h": 133.35
+      },
+      "nameHints": ["Magnetic frame - 3U"]
+    },
+    {
+      "id": "connector",
+      "label": "Frame connector",
+      "role": "connector",
+      "envelopeMm": {
+        "w": 20,
+        "d": 20,
+        "h": 20
+      },
+      "nameHints": ["Frame connectors"]
+    },
+    {
+      "id": "top",
+      "label": "Top frame handle",
+      "role": "cap",
+      "envelopeMm": {
+        "w": 20,
+        "d": 250,
+        "h": 30
+      },
+      "nameHints": ["Top frame handle"]
+    },
+    {
+      "id": "bottom",
+      "label": "Bottom frame base leg",
+      "role": "cap",
+      "envelopeMm": {
+        "w": 20,
+        "d": 250,
+        "h": 30
+      },
+      "nameHints": ["Bottom frame base legs"]
+    }
+  ]
+}

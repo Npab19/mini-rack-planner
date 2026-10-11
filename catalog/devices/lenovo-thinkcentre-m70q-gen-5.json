@@ -1,0 +1,31 @@
+{
+  "kind": "device",
+  "id": "lenovo-thinkcentre-m70q-gen-5",
+  "brand": "Lenovo",
+  "model": "ThinkCentre M70q Gen 5",
+  "category": "mini-pc",
+  "dims": {
+    "w": 179,
+    "d": 182.9,
+    "h": 36.5
+  },
+  "weightG": 1250,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://psref.lenovo.com/Product/ThinkCentre/ThinkCentre_M70q_Gen_5"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

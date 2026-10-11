@@ -1,0 +1,44 @@
+# deps / build
+node_modules
+dist
+dist-ssr
+dist-spikes
+*.tsbuildinfo
+.vite
+coverage
+
+# test output
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# local model files — NEVER commit (MakerWorld licences). Use MRP_LOCAL_MODELS=<dir> outside the repo.
+*.stl
+*.3mf
+*.step
+*.stp
+*.zip
+*.gcode
+*.gcode.3mf
+local-models/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.log
+npm-debug.log*
+
+# claude local settings
+.claude/settings.local.json

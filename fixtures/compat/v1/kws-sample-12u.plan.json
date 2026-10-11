@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "id": "plan-kws-sample",
+  "rackId": "rack-kws-sample",
+  "name": "KWS 9U → 12U",
+  "notes": "Built 3U + 6U. One more 3U on top for the NAS.",
+  "createdAt": "2026-10-11T09:30:00.000Z",
+  "updatedAt": "2026-10-11T09:30:00.000Z",
+  "rev": 12,
+  "catalogRev": "fixture-1",
+  "frame": {
+    "frameId": "kws-v2",
+    "options": {
+      "magnets": true
+    },
+    "caps": {
+      "top": {
+        "options": {
+          "top": "handle"
+        },
+        "have": {
+          "at": "2026-10-11T09:30:00.000Z",
+          "options": {
+            "top": "handle"
+          }
+        }
+      },
+      "bottom": {
+        "have": {
+          "at": "2026-10-11T09:30:00.000Z",
+          "options": {}
+        }
+      }
+    },
+    "sections": [
+      {
+        "id": "sec-bottom-3u",
+        "typeId": "s3",
+        "have": {
+          "at": "2026-10-11T09:30:00.000Z",
+          "typeId": "s3",
+          "heightU": 3,
+          "options": {
+            "magnets": true
+          }
+        }
+      },
+      {
+        "id": "sec-middle-6u",
+        "typeId": "s6",
+        "have": {
+          "at": "2026-10-11T09:30:00.000Z",
+          "typeId": "s6",
+          "heightU": 6,
+          "options": {
+            "magnets": true
+          }
+        }
+      },
+      {
+        "id": "sec-top-3u",
+        "typeId": "s3"
+      }
+    ]
+  },
+  "placements": [
+    {
+      "id": "pl-power",
+      "itemId": "kws-power-strip-1u",
+      "name": "Power strip 1U",
+      "heightSixths": 6,
+      "y": 0,
+      "face": "front",
+      "bay": "full",
+      "have": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-power-strip-1u",
+        "options": {}
+      },
+      "devices": []
+    },
+    {
+      "id": "pl-tiny-1",
+      "itemId": "kws-tiny-mount-1u",
+      "name": "Lenovo Tiny mount 1U",
+      "heightSixths": 6,
+      "y": 6,
+      "face": "front",
+      "bay": "full",
+      "have": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-tiny-mount-1u",
+        "options": {}
+      },
+      "label": "Proxmox 1",
+      "devices": [
+        {
+          "id": "dev-tiny-1",
+          "deviceId": "lenovo-m920q",
+          "slotId": "cradle",
+          "orientation": "flat",
+          "have": true
+        }
+      ]
+    },
+    {
+      "id": "pl-tiny-2",
+      "itemId": "kws-tiny-mount-1u",
+      "name": "Lenovo Tiny mount 1U",
+      "heightSixths": 6,
+      "y": 12,
+      "face": "front",
+      "bay": "full",
+      "have": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-tiny-mount-1u",
+        "options": {}
+      },
+      "label": "Proxmox 2",
+      "devices": [
+        {
+          "id": "dev-tiny-2",
+          "deviceId": "lenovo-m920q",
+          "slotId": "cradle",
+          "have": true
+        }
+      ]
+    },
+    {
+      "id": "pl-shelf",
+      "itemId": "kws-shelf-2u",
+      "name": "Shelf 2U",
+      "heightSixths": 12,
+      "y": 24,
+      "face": "front",
+      "bay": "full",
+      "have": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-shelf-2u",
+        "options": {}
+      },
+      "devices": [
+        {
+          "id": "dev-pi",
+          "deviceId": "raspberry-pi-5",
+          "slotId": "deck",
+          "have": true
+        },
+        {
+          "id": "dev-switch",
+          "deviceId": "ubiquiti-usw-flex-mini",
+          "slotId": "deck",
+          "xMm": 100,
+          "have": false
+        }
+      ]
+    },
+    {
+      "id": "pl-patch",
+      "itemId": "kws-patch-panel-1u",
+      "name": "Keystone patch panel 1U",
+      "heightSixths": 6,
+      "y": 42,
+      "face": "front",
+      "bay": "full",
+      "have": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-patch-panel-1u",
+        "options": {}
+      },
+      "devices": []
+    },
+    {
+      "id": "pl-nas",
+      "itemId": "kws-nas-tray-2u",
+      "name": "NAS tray 2U",
+      "heightSixths": 12,
+      "y": 54,
+      "face": "front",
+      "bay": "full",
+      "options": {},
+      "devices": [
+        {
+          "id": "dev-nas",
+          "deviceId": "custom:diy-n100-nas",
+          "slotId": "bay",
+          "have": false
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "id": "eq-mac",
+      "deviceId": "mac-mini-m4",
+      "have": false,
+      "note": "Maybe later"
+    },
+    {
+      "id": "eq-pi",
+      "deviceId": "raspberry-pi-5",
+      "have": true
+    }
+  ],
+  "extras": [
+    {
+      "id": "ex-feet",
+      "itemId": "rubber-feet",
+      "qty": 4,
+      "haveQty": 4
+    }
+  ],
+  "retired": [
+    {
+      "id": "ret-blank",
+      "kind": "placement",
+      "snapshot": {
+        "at": "2026-10-11T09:30:00.000Z",
+        "itemId": "kws-blank-1u",
+        "options": {}
+      },
+      "sourceId": "pl-old-blank"
+    }
+  ],
+  "custom": {
+    "frames": [],
+    "items": [],
+    "devices": [
+      {
+        "kind": "device",
+        "id": "custom:diy-n100-nas",
+        "brand": "DIY",
+        "model": "N100 NAS",
+        "category": "nas",
+        "dims": {
+          "w": 180,
+          "d": 200,
+          "h": 70
+        },
+        "weightG": 2400,
+        "power": {
+          "typW": 20,
+          "maxW": 45,
+          "input": {
+            "kind": "dc",
+            "brick": {
+              "outputW": 60,
+              "included": true,
+              "plug": "c7"
+            }
+          }
+        },
+        "verified": {
+          "by": "me",
+          "date": "2026-10-01",
+          "method": "calipers"
+        }
+      }
+    ],
+    "hardware": []
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "hardware",
+  "id": "nut-m5-hex",
+  "name": "M5 hex nut",
+  "category": "nut",
+  "spec": {
+    "thread": "M5",
+    "head": "hex"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M5 nut", "DIN 934 M5", "ISO 4032 M5"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/Nut_(hardware)"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 4032 / DIN 934 hex nut."
+  }
+}

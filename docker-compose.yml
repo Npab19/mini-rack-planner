@@ -1,0 +1,32 @@
+# Mini Rack Planner as a hardened static site on http://localhost:8080
+#
+#   docker compose up -d --build            # build from this checkout
+#   MRP_IMAGE=ghcr.io/npab19/mini-rack-planner:latest docker compose up -d --no-build --pull always
+#
+# Plain HTTP on a LAN address is not a secure context: the app still works, with fallbacks
+# (see README "LAN and secure contexts"). Put it behind an HTTPS reverse proxy for the full set.
+name: mini-rack-planner
+
+services:
+  mini-rack-planner:
+    image: ${MRP_IMAGE:-mini-rack-planner:local}
+    build:
+      context: .
+      args:
+        GIT_SHA: ${GIT_SHA:-}
+    ports:
+      - '8080:8080'
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/healthz']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

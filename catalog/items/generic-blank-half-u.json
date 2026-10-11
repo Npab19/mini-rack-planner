@@ -1,0 +1,43 @@
+{
+  "kind": "item",
+  "id": "generic-blank-half-u",
+  "name": "Blank panel ½U",
+  "category": "panel",
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/19-inch_rack"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "unverified",
+    "note": "Generic template: print any design of this size. Sizes follow the nominal 10-inch rack; depth and slot sizes are typical values. Ear hole positions depend on the design, so it snaps to whole U until they are set."
+  },
+  "heightSixths": 3,
+  "depthMm": 3,
+  "prints": [
+    {
+      "id": "panel",
+      "plate": "Blank panel ½U",
+      "label": "Blank panel ½U"
+    }
+  ],
+  "recipe": [
+    {
+      "id": "panel",
+      "unit": "item",
+      "ref": {
+        "print": "panel"
+      },
+      "count": 1
+    }
+  ],
+  "mount": {
+    "front": 2,
+    "clearance": "M6",
+    "earThicknessMm": 4
+  },
+  "render": {
+    "style": "blank"
+  }
+}

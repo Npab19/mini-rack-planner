@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "screw-m6x8-shcs",
+  "name": "M6×8 socket head cap screw",
+  "category": "screw",
+  "spec": {
+    "thread": "M6",
+    "lengthMm": 8,
+    "head": "shcs"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M6x8 SHCS", "M6 x 8 socket head cap screw", "DIN 912 M6x8", "ISO 4762 M6x8"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 4762 / DIN 912 socket head cap screw."
+  }
+}

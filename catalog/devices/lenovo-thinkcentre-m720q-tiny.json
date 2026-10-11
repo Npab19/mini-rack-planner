@@ -1,0 +1,32 @@
+{
+  "kind": "device",
+  "id": "lenovo-thinkcentre-m720q-tiny",
+  "brand": "Lenovo",
+  "model": "ThinkCentre M720q Tiny",
+  "category": "mini-pc",
+  "dims": {
+    "w": 179,
+    "d": 183,
+    "h": 34.5
+  },
+  "weightG": 1320,
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "outputW": 65,
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://psref.lenovo.com/Product/ThinkCentre/ThinkCentre_M720q"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions and weight from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

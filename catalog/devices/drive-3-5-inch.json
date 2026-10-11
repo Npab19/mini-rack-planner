@@ -1,0 +1,22 @@
+{
+  "kind": "device",
+  "id": "drive-3-5-inch",
+  "brand": "Generic",
+  "model": "3.5-inch drive",
+  "category": "drive",
+  "dims": {
+    "w": 101.6,
+    "d": 146.05,
+    "h": 26.11
+  },
+  "source": {
+    "platform": "other",
+    "url": "https://www.snia.org/technology-communities/sff/specifications"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Form factor dimensions from SFF-8301."
+  }
+}

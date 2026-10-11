@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mini Rack Planner catalog: hardware",
+  "description": "A screw, nut, insert, magnet or other bought part, one file per part in catalog/hardware/<id>.json.",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "const": "hardware"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^(?:custom:)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "screw",
+        "nut",
+        "insert",
+        "cage-nut",
+        "t-nut",
+        "washer",
+        "magnet",
+        "foot",
+        "extrusion",
+        "standoff",
+        "cable-tie",
+        "other"
+      ]
+    },
+    "spec": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "thread": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lengthMm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "head": {
+          "type": "string",
+          "enum": [
+            "shcs",
+            "bhcs",
+            "fhcs",
+            "hex",
+            "nyloc",
+            "square",
+            "cage",
+            "other"
+          ]
+        },
+        "odMm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "dims": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "unit": {
+      "default": "pcs",
+      "type": "string",
+      "enum": [
+        "pcs",
+        "mm"
+      ]
+    },
+    "packSizes": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": [
+            "makerworld",
+            "printables",
+            "thingiverse",
+            "github",
+            "vendor",
+            "other"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "format": "uri"
+        },
+        "modelId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profileId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "designer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "platform",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "verified": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "page",
+            "user-files",
+            "calipers",
+            "vendor-spec",
+            "unverified"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "by",
+        "date",
+        "method"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "category"
+  ],
+  "additionalProperties": false
+}

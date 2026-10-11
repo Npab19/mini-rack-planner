@@ -1,0 +1,30 @@
+{
+  "kind": "device",
+  "id": "tp-link-tl-sg108e",
+  "brand": "TP-Link",
+  "model": "TL-SG108E",
+  "category": "switch",
+  "dims": {
+    "w": 158,
+    "d": 101,
+    "h": 25
+  },
+  "power": {
+    "input": {
+      "kind": "dc",
+      "brick": {
+        "included": true
+      }
+    }
+  },
+  "source": {
+    "platform": "vendor",
+    "url": "https://www.tp-link.com/us/business-networking/easy-smart-switch/tl-sg108e/"
+  },
+  "verified": {
+    "by": "seed research",
+    "date": "2026-10-09",
+    "method": "vendor-spec",
+    "note": "Dimensions from the manufacturer specifications (plan research 2026-10-09)."
+  }
+}

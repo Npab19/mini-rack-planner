@@ -1,0 +1,23 @@
+{
+  "kind": "hardware",
+  "id": "screw-m5x12-shcs",
+  "name": "M5×12 socket head cap screw",
+  "category": "screw",
+  "spec": {
+    "thread": "M5",
+    "lengthMm": 12,
+    "head": "shcs"
+  },
+  "packSizes": [10, 25, 50, 100],
+  "aliases": ["M5x12 SHCS", "M5 x 12 socket head cap screw", "DIN 912 M5x12", "ISO 4762 M5x12"],
+  "source": {
+    "platform": "other",
+    "url": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  "verified": {
+    "by": "catalog seed",
+    "date": "2026-10-11",
+    "method": "page",
+    "note": "Standard part: ISO 4762 / DIN 912 socket head cap screw."
+  }
+}

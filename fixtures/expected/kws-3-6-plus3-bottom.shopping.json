@@ -1,0 +1,103 @@
+{
+  "plan": {
+    "id": "plan-kws-3-6-plus3-bottom",
+    "name": "KWS 9U to 12U: new 3U at the bottom"
+  },
+  "lines": [
+    {
+      "key": "print:kws-rack-v2/plate-3u",
+      "kind": "print",
+      "refId": "plate-3u",
+      "label": "3U leg plate (4 legs)",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 1,
+      "need": 1,
+      "buy": 1,
+      "material": "PETG",
+      "gramsEach": 214,
+      "minutesEach": 528
+    },
+    {
+      "key": "print:kws-rack-v2/frame-connectors",
+      "kind": "print",
+      "refId": "frame-connectors",
+      "label": "Frame connectors",
+      "unit": "plates",
+      "target": 2,
+      "asBuilt": 1,
+      "need": 1,
+      "buy": 1,
+      "material": "PETG",
+      "gramsEach": 68,
+      "minutesEach": 180
+    },
+    {
+      "key": "hw:insert-m5x8x7",
+      "kind": "hardware",
+      "refId": "insert-m5x8x7",
+      "label": "M5 heat-set insert (M5x8x7)",
+      "unit": "pcs",
+      "category": "insert",
+      "target": 144,
+      "asBuilt": 108,
+      "need": 36,
+      "buy": 50
+    },
+    {
+      "key": "hw:nut-m6-nyloc",
+      "kind": "hardware",
+      "refId": "nut-m6-nyloc",
+      "label": "M6 nyloc nut",
+      "unit": "pcs",
+      "category": "nut",
+      "target": 120,
+      "asBuilt": 80,
+      "need": 40,
+      "buy": 50
+    },
+    {
+      "key": "hw:screw-m6x10-shcs",
+      "kind": "hardware",
+      "refId": "screw-m6x10-shcs",
+      "label": "M6×10 socket head cap screw",
+      "unit": "pcs",
+      "category": "screw",
+      "target": 72,
+      "asBuilt": 48,
+      "need": 24,
+      "buy": 25
+    },
+    {
+      "key": "hw:screw-m6x8-shcs",
+      "kind": "hardware",
+      "refId": "screw-m6x8-shcs",
+      "label": "M6×8 socket head cap screw",
+      "unit": "pcs",
+      "category": "screw",
+      "target": 48,
+      "asBuilt": 32,
+      "need": 16,
+      "buy": 25
+    },
+    {
+      "key": "hw:magnet-10x5",
+      "kind": "hardware",
+      "refId": "magnet-10x5",
+      "label": "Round neodymium magnet 10×5 mm",
+      "unit": "pcs",
+      "category": "magnet",
+      "target": 95,
+      "asBuilt": 79,
+      "need": 16,
+      "buy": 20
+    }
+  ],
+  "totals": {
+    "needGramsByMaterial": {
+      "PETG": 282
+    },
+    "needMinutes": 708
+  },
+  "warnings": []
+}
