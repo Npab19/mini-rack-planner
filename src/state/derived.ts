@@ -12,6 +12,7 @@ import { formatU, sixthsToU, uToSixths } from '@/domain/geometry'
 import { sectionHeightU } from '@/domain/recipe'
 import { withCustomEntries, type CatalogLookup } from '@/domain/schema/catalog'
 import type { Plan } from '@/domain/schema/plan'
+import type { Inventory, Settings } from '@/domain/schema/settings'
 import { lookupForPlan, useCatalog } from './catalogStore'
 import { useInventory } from './inventoryStore'
 import { usePlanStore } from './planStore'
@@ -119,6 +120,55 @@ export function usePlanLookup(): CatalogLookup {
   return plan === null ? lookup : lookupForPlan(lookup, plan)
 }
 
+/**
+ * The last result of `compute`, reused while its key stays the same (each part compared with
+ * `Object.is`). Every component that shows the open plan's BOM or checks (the toolbar's summary
+ * and its panel) asks separately, so an edit is computed once for all of them, not once each.
+ */
+function lastResult<A extends readonly unknown[], R>(
+  keyOf: (...args: A) => readonly unknown[],
+  compute: (...args: A) => R,
+): (...args: A) => R {
+  let last: { key: readonly unknown[]; result: R } | undefined
+  return (...args: A): R => {
+    const key = keyOf(...args)
+    if (
+      last !== undefined &&
+      last.key.length === key.length &&
+      last.key.every((part, index) => Object.is(part, key[index]))
+    ) {
+      return last.result
+    }
+    const result = compute(...args)
+    last = { key, result }
+    return result
+  }
+}
+
+/**
+ * Settings and the inventory by content: each component reads them through its own live query,
+ * so equal values arrive as different objects. Both are small.
+ */
+function contentKey(value: Settings | Inventory): string {
+  return JSON.stringify(value)
+}
+
+const sharedBom = lastResult(
+  (plan: Plan, lookup: CatalogLookup, settings: Settings, inventory: Inventory) => [
+    plan,
+    lookup,
+    contentKey(settings),
+    contentKey(inventory),
+  ],
+  (plan, lookup, settings, inventory) =>
+    computeBom(plan, lookupForPlan(lookup, plan), settings, inventory),
+)
+
+const sharedChecks = lastResult(
+  (plan: Plan, lookup: CatalogLookup, settings: Settings) => [plan, lookup, contentKey(settings)],
+  (plan, lookup, settings) => runChecks(plan, lookupForPlan(lookup, plan), settings),
+)
+
 /** BOM of the open plan against the global settings and inventory; undefined without a plan. */
 export function useBom(): BomResult | undefined {
   const plan = usePlanStore((state) => state.plan)
@@ -126,10 +176,7 @@ export function useBom(): BomResult | undefined {
   const settings = useSettings()
   const inventory = useInventory()
   return useMemo(
-    () =>
-      plan === null
-        ? undefined
-        : computeBom(plan, lookupForPlan(lookup, plan), settings, inventory),
+    () => (plan === null ? undefined : sharedBom(plan, lookup, settings, inventory)),
     [plan, lookup, settings, inventory],
   )
 }
@@ -142,7 +189,7 @@ export function useChecks(): Issue[] {
   const { lookup } = useCatalog()
   const settings = useSettings()
   return useMemo(
-    () => (plan === null ? NO_ISSUES : runChecks(plan, lookupForPlan(lookup, plan), settings)),
+    () => (plan === null ? NO_ISSUES : sharedChecks(plan, lookup, settings)),
     [plan, lookup, settings],
   )
 }

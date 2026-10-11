@@ -85,8 +85,9 @@ Failed writes are reported to `dbStatus` and rethrown, so the caller can show a 
 ## Derived values (`derived.ts`)
 
 - `useBom()`: `computeBom(plan, lookupForPlan(…), settings, inventory)`, memoized; undefined
-  without a plan.
-- `useChecks()`: `runChecks(…)`, memoized; `[]` without a plan.
+  without a plan. Components share the last result (same plan and catalog objects, same settings
+  and inventory content), so the toolbar's summary and the BOM panel compute it once per edit.
+- `useChecks()`: `runChecks(…)`, memoized and shared the same way; `[]` without a plan.
 - `planStats(plan, lookup)` / `usePlanStats()`: `{ heightU, usedU, freeU, usedSixths, freeSixths,
 sectionSummary ("3U + 6U · 9U"), haveCount, needCount }`. Used U is the union of placement
   heights within the stack (any face or bay). `sectionSummaryText(heightsU)` is the summary text
@@ -103,7 +104,10 @@ undefined while loading; `error` instead of crashing the page when storage is un
 Not undoable: `recordingMode` per plan id (`setRecordingMode`, `useRecordingMode(planId)`,
 `isRecording(planId)`; kept in sessionStorage so a reload mid-recording stays in Recording mode),
 `selection` (`select`, `toggleSelected`, `clearSelection`; cleared when another plan loads), `zoom`
-(`setZoom`, clamped to `ZOOM_MIN`..`ZOOM_MAX`), `face`, `panels` (`setPanelOpen`, `togglePanel`).
+(`setZoom`, clamped to `ZOOM_MIN`..`ZOOM_MAX`), `face`, `panels` (`setPanelOpen`, `togglePanel`;
+the editor uses `panels.bom` for its BOM drawer). The editor selects through
+`selectInEditor` (`src/features/editor/selection.ts`), which also shows the Selection tab and
+turns the rack to the part's face.
 
 ## Status and reloads
 

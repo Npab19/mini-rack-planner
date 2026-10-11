@@ -1,6 +1,7 @@
 /**
  * Editor UI state that is neither part of the plan nor undoable: Recording mode per plan, the
- * selection, zoom and face (placeholders for M3a) and which panels are open.
+ * selection, zoom and face, and which panels are open (the editor uses `panels.bom` for its BOM
+ * drawer; the other panels are always shown on desktop and open as sheets below lg).
  *
  * Recording mode ("Recording what you have": everything added is marked Have) survives a reload
  * of the same tab through sessionStorage, so a refresh mid-recording does not silently switch to
