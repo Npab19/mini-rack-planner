@@ -37,6 +37,7 @@ Read the sections relevant to your task before writing code.
 - `three`, `@react-three/*` and `meshoptimizer` are imported only under `src/features/viewer3d/**` (loaded via `React.lazy`) and `src/workers/**`. Initial-bundle budgets are enforced by `scripts/check-budgets.ts`.
 - Workers are module workers: `new Worker(new URL('./x.worker.ts', import.meta.url), { type: 'module' })`.
 - `src/main.tsx` must import `./lib/shared/zod-setup` first, and every worker entry must too. It sets `z.config({ jitless: true })` so the strict CSP never sees `new Function`.
+- Modules that `main.tsx` imports statically must **not build zod schemas at module load**. Rolldown evaluates the whole static graph before `main.tsx` body runs `z.config`, so such modules would trip the CSP. Load them with a dynamic `import()` or `React.lazy` instead; `AppLayout` and the plan store already do this, and E2E fails on any CSP violation.
 
 ## Conventions
 

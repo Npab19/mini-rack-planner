@@ -1,6 +1,25 @@
+import { LoaderCircle } from 'lucide-react'
 import { createBrowserRouter } from 'react-router'
 import { AppLayout } from './AppLayout'
 import { RouteError } from './RouteError'
+
+/**
+ * Shown while the first route's lazy code loads (React Router warns without one). The spinner
+ * fades in after 300 ms, so fast loads never flash it.
+ */
+function AppLoading() {
+  return (
+    <div role="status" className="flex min-h-dvh items-center justify-center">
+      <div className="animate-in duration-300 fade-in fill-mode-both delay-300">
+        <LoaderCircle
+          aria-hidden="true"
+          className="size-6 animate-spin text-muted-foreground motion-reduce:animate-none"
+        />
+      </div>
+      <span className="sr-only">Loading Mini Rack Planner…</span>
+    </div>
+  )
+}
 
 /** Spike/dev pages: present in dev, or in builds made with VITE_SPIKES=1 (used by the CSP spike). */
 const devRoutes =
@@ -30,6 +49,7 @@ export const router = createBrowserRouter([
     path: '/',
     Component: AppLayout,
     ErrorBoundary: RouteError,
+    HydrateFallback: AppLoading,
     children: [
       {
         index: true,

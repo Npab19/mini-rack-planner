@@ -1,6 +1,9 @@
-import { Laptop, Moon, Sun } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { Laptop, Menu, Moon, Sun } from 'lucide-react'
+import { lazy, Suspense, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useTheme, type ThemePreference } from '@/lib/theme'
@@ -19,6 +22,16 @@ const NEXT_THEME: Record<ThemePreference, ThemePreference> = {
   dark: 'system',
 }
 
+const FOCUS_RING = 'outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
+
+/**
+ * Loaded after the entry ran: the banners read the plan store, which builds zod schemas, and the
+ * entry's static imports all run before main.tsx sets zod up for the CSP (see main.tsx).
+ */
+const StatusBanners = lazy(async () => ({
+  default: (await import('@/components/status/StatusBanners')).StatusBanners,
+}))
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Laptop
@@ -34,40 +47,104 @@ function ThemeToggle() {
   )
 }
 
+/** The current page is marked by weight and background as well as colour (and aria-current). */
+function navLinkClass(base: string) {
+  return ({ isActive }: { isActive: boolean }) =>
+    cn(
+      base,
+      FOCUS_RING,
+      'rounded-md text-muted-foreground transition-colors hover:text-foreground',
+      isActive && 'bg-muted font-medium text-foreground',
+    )
+}
+
+/** Below `sm` the links do not fit next to the title: they move into a sheet. */
+function MobileNav() {
+  const [open, setOpen] = useState(false)
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        render={<Button variant="ghost" size="icon" className="sm:hidden" aria-label="Menu" />}
+      >
+        <Menu />
+      </SheetTrigger>
+      <SheetContent side="right" className="w-64">
+        <SheetHeader>
+          <SheetTitle>Menu</SheetTitle>
+        </SheetHeader>
+        <nav aria-label="Main" className="flex flex-col gap-1 px-2">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={'end' in item ? item.end : false}
+              className={navLinkClass('px-3 py-2.5 text-base')}
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
 export function AppLayout() {
+  const { pathname } = useLocation()
   return (
     <TooltipProvider>
       <div className="flex min-h-dvh flex-col bg-background text-foreground">
         <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-          <div className="mx-auto flex h-12 max-w-screen-2xl items-center gap-4 px-4">
-            <NavLink to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <img src="/favicon.svg" alt="" className="size-6" />
-              <span>Mini Rack Planner</span>
+          <div className="mx-auto flex h-12 max-w-screen-2xl items-center gap-2 px-3 sm:gap-4 sm:px-4">
+            <NavLink
+              to="/"
+              className={cn(
+                'flex min-w-0 items-center gap-2 rounded-md font-semibold tracking-tight',
+                FOCUS_RING,
+              )}
+            >
+              <img src="/favicon.svg" alt="" className="size-6 shrink-0" />
+              <span className="truncate">Mini Rack Planner</span>
             </NavLink>
-            <nav aria-label="Main" className="flex items-center gap-1 text-sm">
+            <nav aria-label="Main" className="hidden items-center gap-1 text-sm sm:flex">
               {NAV.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   end={'end' in item ? item.end : false}
-                  className={({ isActive }) =>
-                    cn(
-                      'rounded-md px-2 py-1 text-muted-foreground transition-colors hover:text-foreground',
-                      isActive && 'bg-muted text-foreground',
-                    )
-                  }
+                  className={navLinkClass('px-2 py-1 whitespace-nowrap')}
                 >
                   {item.label}
                 </NavLink>
               ))}
             </nav>
-            <div className="ml-auto">
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               <ThemeToggle />
+              <MobileNav />
             </div>
           </div>
         </header>
         <main className="flex flex-1 flex-col">
-          <Outlet />
+          {/* App-wide banners (storage, other tabs, reload): inside <main>, above every page.
+              Outside the route's error boundary, so a crashed page still shows them. */}
+          <div id="app-status-slot">
+            {/* A broken banner must not take the page with it (the error is still recorded). */}
+            <ErrorBoundary name="status-banners" fallback={null}>
+              <Suspense fallback={null}>
+                <StatusBanners />
+              </Suspense>
+            </ErrorBoundary>
+          </div>
+          {/* A page that crashes keeps the header; moving to another page clears the error. */}
+          <ErrorBoundary
+            name="route"
+            title="This page hit an error"
+            resetKeys={[pathname]}
+            className="m-4 sm:mx-auto sm:my-8 sm:w-full sm:max-w-lg"
+          >
+            <Outlet />
+          </ErrorBoundary>
         </main>
         <Toaster position="bottom-right" />
       </div>

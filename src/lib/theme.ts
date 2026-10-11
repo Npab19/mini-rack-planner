@@ -36,6 +36,18 @@ media?.addEventListener('change', () => {
   if (preference === 'system') apply()
 })
 
+// The choice made in another tab of this origin applies here too (`storage` fires in the other
+// tabs only; a null key means storage was cleared).
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key !== null && event.key !== STORAGE_KEY) return
+    const next = readPreference()
+    if (next === preference) return
+    preference = next
+    apply()
+  })
+}
+
 export function setTheme(next: ThemePreference): void {
   preference = next
   try {
