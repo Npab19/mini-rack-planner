@@ -4,8 +4,6 @@
  * each step's heading gets focus when the step changes, and a failed Next focuses the first
  * control with a problem, whose message is tied to it with aria-describedby.
  */
-import { Radio as RadioPrimitive } from '@base-ui/react/radio'
-import { RadioGroup as RadioGroupPrimitive } from '@base-ui/react/radio-group'
 import {
   ArrowDown,
   ArrowUp,
@@ -29,7 +27,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import { HAVE_TEXT, HaveIcon, NEED_TEXT, NeedIcon } from '@/components/common/HaveNeed'
+import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { LiveRegion, useAnnouncer } from '@/components/common/LiveRegion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -255,44 +254,6 @@ function StepIndicator({ mode, step }: { mode: WizardMode; step: NumberedStep })
         )
       })}
     </ol>
-  )
-}
-
-/** Have/Need as a two-option radio group styled like a segmented control. */
-function HaveNeedChoice({
-  have,
-  label,
-  onChange,
-}: {
-  have: boolean
-  label: string
-  onChange: (have: boolean) => void
-}) {
-  return (
-    <RadioGroupPrimitive
-      value={have ? 'have' : 'need'}
-      onValueChange={(value) => onChange(value === 'have')}
-      aria-label={label}
-      className="inline-flex shrink-0 rounded-lg border bg-background p-0.5"
-    >
-      {(['have', 'need'] as const).map((value) => {
-        const Icon = value === 'have' ? HaveIcon : NeedIcon
-        return (
-          <RadioPrimitive.Root
-            key={value}
-            value={value}
-            className={cn(
-              'inline-flex h-7 cursor-pointer items-center gap-1 rounded-md px-2 text-xs text-muted-foreground outline-none select-none',
-              'focus-visible:ring-3 focus-visible:ring-ring/50',
-              'data-checked:bg-primary data-checked:font-semibold data-checked:text-primary-foreground',
-            )}
-          >
-            <Icon aria-hidden className="size-3.5" />
-            {value === 'have' ? HAVE_TEXT : NEED_TEXT}
-          </RadioPrimitive.Root>
-        )
-      })}
-    </RadioGroupPrimitive>
   )
 }
 
@@ -528,7 +489,7 @@ function OnePieceStack({
           className="w-24"
         />
         {recording ? (
-          <HaveNeedChoice
+          <HaveNeedToggle
             have={section.have}
             label="Your rack: in my rack or to get"
             onChange={(have) => update((current) => setSectionHave(current, section.key, have))}
@@ -699,7 +660,7 @@ function SectionStack({ state, frame, update, announce, stackErrorId }: StackSte
                     </p>
                   </div>
                   {recording ? (
-                    <HaveNeedChoice
+                    <HaveNeedToggle
                       have={row.have}
                       label={`${name}: in my rack or to get`}
                       onChange={(have) => {

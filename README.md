@@ -9,10 +9,26 @@ The first supported frame is the KWS Rack v2 from MakerWorld; a generic 10" rack
 frames follow. The app is a static site: run it from one Docker image or on Azure Static Web
 Apps (Free).
 
-> **Status:** early development. The foundations (M0), the rack and BOM engine (M1) and
-> persistence with the app shell (M2: saved plans, the new-plan wizard, import and export,
-> settings) are built; the editor UI comes next. See [Features](#features-by-milestone),
-> [docs/status/m0-m1.md](docs/status/m0-m1.md) and [docs/status/m2.md](docs/status/m2.md).
+> **Status:** v0.1 is ready. The foundations (M0), the rack and BOM engine (M1), persistence
+> with the app shell (M2) and the minimal editor (M3a) are built: record the rack you have, plan
+> an extension, and get the shopping list of what to print and buy. Drag and drop, pointer moves,
+> touch gestures and custom parts come next (M3b). See [Features](#features-by-milestone),
+> [docs/status/m0-m1.md](docs/status/m0-m1.md), [docs/status/m2.md](docs/status/m2.md) and
+> [docs/status/m3a.md](docs/status/m3a.md).
+
+## A first plan (v0.1)
+
+1. **Record my rack and plan an upgrade**: pick the frame and the sections you have built.
+2. In _Recording what you have_, add your mounts from **Parts**: **Place**, then click the spot on
+   the rack (or **Add at U…** to pick the U from a list). Add the devices in each mount from the
+   inspector. Everything you add now is marked _In my rack_. Then **Done, start planning**.
+3. Plan the change: the inspector's **Rack** tab sets the height (at the top or the bottom) and
+   reorders sections; new parts are marked _To get_.
+4. Open the **BOM**: the _Shopping list_ says what to print and buy, with the sum behind every
+   line (_Why_). Tick _Got it_ as parts arrive, **Finish build** when it is built, or export a CSV.
+
+Everything works with the keyboard too (`?` lists the keys; `F6` moves between panels), and on a
+phone the panels open as sheets.
 
 ## Privacy: everything stays in your browser
 
@@ -29,17 +45,17 @@ Apps (Free).
 
 ## Features by milestone
 
-| Milestone                   | What you get                                                                             | Status  |
-| --------------------------- | ---------------------------------------------------------------------------------------- | ------- |
-| M0 Foundations              | App shell, Docker image, Azure SWA hosting, CI/CD, security headers                      | Built   |
-| M1 Domain and BOM           | Rack and BOM engine, KWS Rack v2 catalog entry, `npm run bom -- <plan.json>`             | Built   |
-| M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export, settings, diagnostics   | Built   |
-| M3a Minimal editor (v0.1)   | 2D rack editor, Have/Need, BOM drawer, shopping list, CSV                                | Planned |
-| M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Planned |
-| M4 Share and compare (v0.2) | Share links, read-only viewer, compare ideas, Markdown/SVG/PNG export                    | Planned |
-| M5 File import helpers      | Add a part from a MakerWorld 3MF/ZIP or a plain STL: print rows, U and depth suggestions | Planned |
-| M6 3D view                  | Lazy-loaded 3D view of the plan with accurate proxies                                    | Planned |
-| M7 Real models (v1.0)       | Your downloaded printed parts in 3D, relinked automatically after a restore              | Planned |
+| Milestone                   | What you get                                                                             | Status             |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| M0 Foundations              | App shell, Docker image, Azure SWA hosting, CI/CD, security headers                      | Built              |
+| M1 Domain and BOM           | Rack and BOM engine, KWS Rack v2 catalog entry, `npm run bom -- <plan.json>`             | Built              |
+| M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export, settings, diagnostics   | Built              |
+| M3a Minimal editor (v0.1)   | 2D rack editor, Have/Need, BOM drawer, shopping list, CSV                                | Built (v0.1 ready) |
+| M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Planned            |
+| M4 Share and compare (v0.2) | Share links, read-only viewer, compare ideas, Markdown/SVG/PNG export                    | Planned            |
+| M5 File import helpers      | Add a part from a MakerWorld 3MF/ZIP or a plain STL: print rows, U and depth suggestions | Planned            |
+| M6 3D view                  | Lazy-loaded 3D view of the plan with accurate proxies                                    | Planned            |
+| M7 Real models (v1.0)       | Your downloaded printed parts in 3D, relinked automatically after a restore              | Planned            |
 
 ## Quick start (development)
 

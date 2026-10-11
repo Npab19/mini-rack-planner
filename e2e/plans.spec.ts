@@ -1,5 +1,5 @@
 /**
- * M2 end to end: the Plans page, the New plan wizard (Recording mode), the editor stub (rename,
+ * M2 end to end: the Plans page, the New plan wizard (Recording mode), the editor (rename,
  * autosave, undo/redo), duplicate/delete, export and import (copy, replace), Settings > Storage,
  * the two-tab conflict banner and axe checks. Every test starts from an empty browser profile
  * (Playwright gives each test its own context), seeds data through the UI, and waits for text,
@@ -188,15 +188,18 @@ test.describe('Plans page and wizard', () => {
     await expect(wizard).toBeHidden()
     await expect(nameField(page)).toHaveValue(RECORDED_NAME)
     await expect(page.getByRole('heading', { name: 'Recording what you have' })).toBeVisible()
-    // Top to bottom: the new 3U to get, then the 6U and 3U already built.
-    const sections = page.getByTestId('section-row')
+    // The inspector's Rack tab lists the stack top to bottom: the new 3U to get, then the 6U and
+    // 3U already built (In my rack / To get is in data-have; the row's toggle shows both words).
+    const sections = page.locator('[data-testid^="stack-row-"]')
     await expect(sections).toHaveCount(3)
     await expect(sections).toHaveText([
-      /3U section U10–U12\s*To get/,
-      /6U section U4–U9\s*In my rack/,
-      /3U section U1–U3\s*In my rack/,
+      /3U section\s*U10–U12/,
+      /6U section\s*U4–U9/,
+      /3U section\s*U1–U3/,
     ])
-    await expect(sections.first()).toHaveAttribute('data-have', 'false')
+    await expect(sections.nth(0)).toHaveAttribute('data-have', 'false')
+    await expect(sections.nth(1)).toHaveAttribute('data-have', 'true')
+    await expect(sections.nth(2)).toHaveAttribute('data-have', 'true')
 
     await page.getByRole('link', { name: 'Your racks' }).click()
     const card = planCard(page, RECORDED_NAME)

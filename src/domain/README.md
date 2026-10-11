@@ -96,15 +96,17 @@ plan and share link in `fixtures/compat/v<n>/` and fails when `PlanSchema` no lo
 
 ## File map
 
-| File                              | Contents                                                                 |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `geometry.ts`                     | rack constants and unit conversions                                      |
-| `schema/`                         | zod schemas + inferred types (catalog, plan, settings, align), integrity |
-| `ids.ts`                          | `newId` (no `randomUUID`: works on plain-HTTP LAN origins), line keys    |
-| `qty.ts`                          | `evaluateQty`, `evaluateLength`, `evaluateCondition`                     |
-| `recipe.ts`                       | option resolution and effects, `expandFrameRecipe`, `expandItemRecipe`   |
-| `migrate.ts`                      | `migratePlan`, typed load errors                                         |
-| `api.ts`                          | type-only contracts for the modules below                                |
-| `frame.ts`, `placement.ts`        | stack operations (`StackOpResult`), remap, hole phases, occupancy        |
-| `bom.ts`, `checks.ts`, `power.ts` | `ComputeBom`, `RunChecks`, `PowerSummary`                                |
-| `share.ts`, `assembly.ts`         | share links (`ShareMode`), `Assemble` -> `PartInstance[]`                |
+| File                              | Contents                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `geometry.ts`                     | rack constants and unit conversions                                         |
+| `schema/`                         | zod schemas + inferred types (catalog, plan, settings, align), integrity    |
+| `ids.ts`                          | `newId` (no `randomUUID`: works on plain-HTTP LAN origins), line keys       |
+| `qty.ts`                          | `evaluateQty`, `evaluateLength`, `evaluateCondition`                        |
+| `recipe.ts`                       | option resolution and effects, `expandFrameRecipe`, `expandItemRecipe`      |
+| `migrate.ts`                      | `migratePlan`, typed load errors                                            |
+| `api.ts`                          | type-only contracts for the modules below                                   |
+| `frame.ts`, `placement.ts`        | stack operations (`StackOpResult`), remap, hole phases, occupancy           |
+| `bom.ts`, `checks.ts`, `power.ts` | `ComputeBom`, `RunChecks`, `PowerSummary`                                   |
+| `share.ts`, `assembly.ts`         | share links (`ShareMode`), `Assemble` -> `PartInstance[]`                   |
+| `build.ts`                        | Have/Need marks (placements, devices, caps, extras, sections), Finish build |
+| `devices.ts`                      | devices in slots, the equipment tray, mount suggestions, U estimates        |
