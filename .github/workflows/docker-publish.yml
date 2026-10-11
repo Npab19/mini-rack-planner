@@ -2,8 +2,8 @@ name: Docker image
 
 # main  -> ghcr.io/npab19/mini-rack-planner:edge and :sha-<short>
 # v*    -> :X.Y.Z, :X.Y and :latest
-# Tags created by release-please only start this workflow when it runs with a PAT
-# (secret RELEASE_PLEASE_TOKEN); otherwise run it by hand on the tag (workflow_dispatch).
+# release-please.yml dispatches this workflow on each release tag (workflow_dispatch), because
+# tags it creates with GITHUB_TOKEN do not trigger the tag push event.
 on:
   push:
     branches: [main]

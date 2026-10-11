@@ -1,7 +1,9 @@
 name: release-please
 
 # Keeps a release PR open that bumps package.json and CHANGELOG.md from Conventional Commits.
-# Merging it tags vX.Y.Z, which publishes the Docker image and deploys SWA production.
+# Merging it tags vX.Y.Z; this workflow then dispatches the Docker publish and the SWA production
+# deploy on that tag (tags created with GITHUB_TOKEN never start tag-triggered workflows, but
+# workflow_dispatch runs started with it do).
 on:
   push:
     branches: [main]
@@ -13,6 +15,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # gh workflow run (publish the release)
 
 jobs:
   release-please:
@@ -20,10 +23,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
-          # Tags pushed with the default GITHUB_TOKEN do not start other workflows. A fine-grained
-          # PAT in RELEASE_PLEASE_TOKEN (contents + pull requests: read/write) lets the release tag
-          # trigger docker-publish.yml and azure-swa.yml. See docs/deploy.md.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Publish the release (image + SWA production)
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          gh workflow run docker-publish.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
+          gh workflow run azure-swa.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
+          echo "Dispatched the Docker publish and the SWA production deploy for $TAG" >> "$GITHUB_STEP_SUMMARY"
