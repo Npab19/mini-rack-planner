@@ -227,6 +227,24 @@ export async function listPlanSummaries(lookup?: CatalogLookup): Promise<PlanSum
   return rows.toReversed().map((row) => summarizePlanRow(row, lookup))
 }
 
+/**
+ * Every readable plan, migrated and validated, most recently changed first. Plans that cannot be
+ * read (damaged, or too new to parse) are left out. For views over all plans, such as what they
+ * still need from the parts on hand.
+ */
+export async function listPlans(): Promise<LoadedPlan[]> {
+  const rows = await withRetry((db) => db.plans.orderBy('updatedAt').toArray())
+  const plans: LoadedPlan[] = []
+  for (const row of rows.toReversed()) {
+    try {
+      plans.push(readPlanRow(row))
+    } catch {
+      // Unreadable: the Plans page shows it with its own message.
+    }
+  }
+  return plans
+}
+
 // ---------------------------------------------------------------------------------------------
 // CRUD
 

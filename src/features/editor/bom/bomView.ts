@@ -43,7 +43,7 @@ export const FINISH_BUILD_CLASSES =
 // Lines per tab
 
 /**
- * "Got it": spares already cover what this line still needs. `need` is 0 while there is
+ * "Got it": what is on hand already covers what this line still needs. `need` is 0 while there is
  * something to install only when the inventory covers it (install + spare − inventory ≤ 0).
  */
 export function isGotIt(line: BomLine): boolean {
@@ -87,7 +87,7 @@ export function groupByKind(lines: readonly BomLine[]): LineGroup[] {
 // ---------------------------------------------------------------------------------------------
 // Got it
 
-/** Ticking adds what is still missing, so the spares then hold install + spare. */
+/** Ticking adds what is still missing, so what is on hand then holds install + spare. */
 export function gotItAddQty(line: BomLine): number {
   return Math.max(0, line.need)
 }

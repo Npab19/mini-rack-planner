@@ -60,7 +60,7 @@ export interface BomLine {
   minutesEach?: number
   material?: string
   provenance: BomProvenance[]
-  /** Plain-language sum, e.g. "36 = 144 in plan − 108 in your rack − 0 spares". */
+  /** Plain-language sum, e.g. "36 = 144 in plan − 108 in your rack − 0 on hand". */
   why: string
 }
 

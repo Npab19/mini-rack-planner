@@ -180,7 +180,9 @@ describe('snapY', () => {
     const y = snapY(raw, phases)
     expect(Number.isInteger(y)).toBe(true)
     expect(phases).toContain(((y % 6) + 6) % 6)
-    expect(Math.abs(y - raw)).toBeLessThanOrEqual(3 + 1e-9)
+    // Near-ties (within snapY's 1e-6 epsilon) go to the lower start, so a raw value just past
+    // the midpoint may land 3 + up to 1e-6 away (3 + 1e-9 failed for 3.000000001).
+    expect(Math.abs(y - raw)).toBeLessThanOrEqual(3 + 2e-6)
   })
 })
 

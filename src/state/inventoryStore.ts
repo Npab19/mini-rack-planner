@@ -1,6 +1,6 @@
 /**
- * The inventory (loose spares by BOM line key) as React state: a live query over the inventory
- * table, empty while loading. Setters write through the repository; the live query brings the
+ * The inventory (what is on hand: loose parts not in a rack, by BOM line key) as React state: a
+ * live query over the inventory table, empty while loading. Setters write through the repository; the live query brings the
  * change back (in every tab).
  */
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -47,12 +47,12 @@ async function reported<T>(write: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Sets a line's spare quantity (0 removes it). */
+/** Sets how many of a line are on hand (0 removes it). */
 export function setInventoryQty(key: string, qty: number): Promise<void> {
   return reported(() => setQty(key, qty))
 }
 
-/** Adds (or, negative, consumes) spares; returns the new quantity. */
+/** Adds to what is on hand (or, negative, uses it up); returns the new quantity. */
 export function adjustInventory(key: string, delta: number): Promise<number> {
   return reported(() => adjust(key, delta))
 }

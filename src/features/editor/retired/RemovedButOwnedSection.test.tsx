@@ -174,14 +174,14 @@ describe('Rack tab: Removed but owned', () => {
     )
   })
 
-  it('keeps a part as spare: its parts go into the spares, and Undo takes them out again', async () => {
+  it('keeps a part as spare: its parts go on hand, and Undo takes them off again', async () => {
     await openPlan(planWithRemoved())
     render(<Inspector />)
     fireEvent.click(
       within(removed()).getByRole('button', { name: 'Keep as spare: Zeta PC mount 1U' }),
     )
     const dialog = await screen.findByRole('dialog', { name: 'Keep Zeta PC mount 1U as spare?' })
-    const spares = within(dialog).getByRole('list', { name: 'Goes into your spares' })
+    const spares = within(dialog).getByRole('list', { name: 'Goes on hand' })
     expect(
       within(spares)
         .getAllByRole('listitem')
@@ -197,9 +197,7 @@ describe('Rack tab: Removed but owned', () => {
       }),
     )
     await waitFor(() =>
-      expect(announced()).toContain(
-        'Kept Zeta PC mount 1U as spare: its parts are in your spares now.',
-      ),
+      expect(announced()).toContain('Kept Zeta PC mount 1U as spare: its parts are on hand now.'),
     )
     const kept = screen.getByTestId('retired-kept')
     expect(kept).toHaveTextContent('Kept Zeta PC mount 1U as spare.')

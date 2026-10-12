@@ -82,10 +82,10 @@ export function useSpareContext(): SpareContext {
   return useMemo(() => ({ lookup, settings, inventory }), [lookup, settings, inventory])
 }
 
-/** " Used 16 loose spares from your inventory." (leading space), or "" when none were used. */
+/** " Used 16 parts you had on hand." (leading space), or "" when none were used. */
 export function sparesText(count: number): string {
   if (count <= 0) return ''
-  return ` Used ${count} loose ${count === 1 ? 'spare' : 'spares'} from your inventory.`
+  return ` Used ${count} ${count === 1 ? 'part' : 'parts'} you had on hand.`
 }
 
 /** Capture time for Have snapshots and retired entries. */

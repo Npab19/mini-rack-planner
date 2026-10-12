@@ -205,7 +205,7 @@ describe('importBackup', () => {
     const result = await importBackup(file, 'copy')
     expect(result).toMatchObject({ added: 2, updated: 0, errors: [] })
     expect(result.warnings).toContain(
-      'Settings and inventory in the file were not imported (copy mode).',
+      'Settings and parts on hand in the file were not imported (copy mode).',
     )
     const copyId = result.renamedIds[sample.id]
     const siblingCopyId = result.renamedIds[sibling.id]

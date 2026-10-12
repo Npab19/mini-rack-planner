@@ -54,12 +54,12 @@ const MODE_TEXT: Record<ImportMode, { title: string; description: string }> = {
   merge: {
     title: 'Merge (recommended)',
     description:
-      'Adds the plans that are new here and updates those the file has a newer copy of. Your other plans stay. Settings and inventory in the file are applied.',
+      'Adds the plans that are new here and updates those the file has a newer copy of. Your other plans stay. Settings and parts on hand in the file are applied.',
   },
   copy: {
     title: 'Copy',
     description:
-      'Adds every plan as a new plan with “In my rack” cleared, so nothing here is overwritten. Settings and inventory are not imported.',
+      'Adds every plan as a new plan with “In my rack” cleared, so nothing here is overwritten. Settings and parts on hand are not imported.',
   },
   replace: {
     title: 'Replace everything',
@@ -117,7 +117,7 @@ function contentsSummary(preview: ImportPreview, existing: ReadonlySet<string>):
   if (preview.kind === 'backup') {
     parts.push(plural(preview.parts.valid, 'custom part'))
     parts.push(preview.settings === 'valid' ? 'settings included' : 'no settings')
-    parts.push(preview.inventory === 'valid' ? 'inventory included' : 'no inventory')
+    parts.push(preview.inventory === 'valid' ? 'parts on hand included' : 'no parts on hand')
   }
   return parts.join(', ')
 }
@@ -140,7 +140,7 @@ function resultSummary(result: ImportResult): string[] {
     lines.push(`Custom parts: ${library.added} added${kept}.`)
   }
   if (result.settingsImported) lines.push('Settings imported.')
-  if (result.inventoryImported) lines.push('Inventory imported.')
+  if (result.inventoryImported) lines.push('Parts on hand imported.')
   return lines
 }
 
@@ -265,7 +265,7 @@ export function ImportPage() {
             ? ['The settings in this file are not valid; yours are kept.']
             : []),
           ...(preview.inventory === 'invalid'
-            ? ['The inventory in this file is not valid; yours is kept.']
+            ? ['The parts on hand in this file are not valid; yours are kept.']
             : []),
         ]
 

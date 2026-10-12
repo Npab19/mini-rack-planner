@@ -29,6 +29,11 @@ Apps (Free).
 4. Open the **BOM**: the _Shopping list_ says what to print and buy, with the sum behind every
    line (_Why_). Tick _Got it_ as parts arrive, **Finish build** when it is built, or export a CSV.
 
+**On hand** (in the header) counts the loose hardware you already own, part by part: type a count
+or use − and +. Every shopping list subtracts it before it buys anything, each hardware line shows
+(and lets you change) what is on hand, and the page shows what each saved plan still needs to buy.
+Ticking _Got it_ adds to it; **Finish build** uses it up.
+
 On a computer you can also drag parts from **Parts**, or devices from **Equipment to fit**, onto
 the rack, and drag placed parts to move them; a device dropped on empty space asks which mount to
 use. **Fit it for me** places everything waiting in Equipment to fit and grows the rack if needed.
@@ -61,6 +66,7 @@ and pinch to zoom.
 | M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export, settings, diagnostics   | Built              |
 | M3a Minimal editor (v0.1)   | 2D rack editor, Have/Need, BOM drawer, shopping list, CSV                                | Built (v0.1 ready) |
 | M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Built              |
+| Hardware on hand            | Count the hardware you own; every shopping list buys only what is missing                | Built              |
 | M4 Share and compare (v0.2) | Share links, read-only viewer, compare ideas, Markdown/SVG/PNG export                    | Planned            |
 | M5 File import helpers      | Add a part from a MakerWorld 3MF/ZIP or a plain STL: print rows, U and depth suggestions | Planned            |
 | M6 3D view                  | Lazy-loaded 3D view of the plan with accurate proxies                                    | Planned            |

@@ -533,7 +533,7 @@ async function writeImport(db: MrpDb, mode: ImportMode, data: Prepared): Promise
   }
   if (mode === 'copy') {
     if (data.settings !== undefined || data.inventory !== undefined) {
-      out.warnings.push('Settings and inventory in the file were not imported (copy mode).')
+      out.warnings.push('Settings and parts on hand in the file were not imported (copy mode).')
     }
     return out
   }
@@ -571,7 +571,7 @@ export async function importBackup(json: unknown, mode: ImportMode): Promise<Imp
   if (envelope.inventory !== undefined) {
     const inventory = InventorySchema.safeParse(envelope.inventory)
     if (inventory.success) data.inventory = inventory.data
-    else warnings.push('The inventory in this file is not valid; your inventory was kept.')
+    else warnings.push('The parts on hand in this file are not valid; yours were kept.')
   }
   if (mode === 'replace' && errors.length > 0) {
     throw new BackupFormatError(
