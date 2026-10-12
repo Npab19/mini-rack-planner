@@ -19,6 +19,8 @@ import {
 } from '@dnd-kit/react'
 import { CircleCheck, CircleDot, CircleX, GripVertical, Move } from 'lucide-react'
 import { useLayoutEffect } from 'react'
+import { RoleDot } from '@/components/common/PartRole'
+import { catalogEntryRole } from '@/domain/partRole'
 import { cn } from '@/lib/utils'
 import { usePlanLookup } from '@/state/derived'
 import { useEditorState } from '../editorState'
@@ -139,7 +141,24 @@ const TONE_ICON: Record<CarryStatus['tone'], typeof CircleCheck> = {
   idle: Move,
 }
 
-/** The carried part's name and what a drop here would do (icon and words, not colour alone). */
+/** The chip's border and status line per tone: accent until it is over the rack. */
+const TONE_BORDER: Record<CarryStatus['tone'], string> = {
+  ok: 'border-have-border',
+  blocked: 'border-dashed border-destructive',
+  choose: 'border-info-border',
+  idle: 'border-primary',
+}
+const TONE_TEXT: Record<CarryStatus['tone'], string> = {
+  ok: 'text-have',
+  blocked: 'text-destructive',
+  choose: 'text-info',
+  idle: 'text-muted-foreground',
+}
+
+/**
+ * The carried part's name (with its role dot) and what a drop here would do: icon and words,
+ * with colour as a second cue.
+ */
 function RackDragChip({ source }: { source: { type?: unknown; data?: unknown } }) {
   const subject = subjectOfSource(source)
   const lookup = usePlanLookup()
@@ -147,26 +166,23 @@ function RackDragChip({ source }: { source: { type?: unknown; data?: unknown } }
   if (subject === null) return null
   const tone = status?.tone ?? 'idle'
   const Icon = TONE_ICON[tone]
+  const id = subject.kind === 'item' ? subject.itemId : subject.deviceId
   return (
     <div
       aria-hidden="true"
       data-testid="rack-drag-chip"
       data-tone={tone}
       className={cn(
-        'flex size-full min-h-12 min-w-40 flex-col justify-center gap-0.5 rounded-lg border-2 bg-card/95 px-3 py-2 text-sm text-card-foreground shadow-lg',
-        tone === 'blocked' ? 'border-dashed border-destructive' : 'border-foreground/60',
+        'flex size-full min-h-12 min-w-40 flex-col justify-center gap-0.5 rounded-lg border-2 bg-card px-3 py-2 text-sm text-card-foreground shadow-lg',
+        TONE_BORDER[tone],
       )}
     >
       <span className="flex min-w-0 items-center gap-1.5 font-medium">
-        <GripVertical aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+        <GripVertical aria-hidden className="size-4 shrink-0 text-primary" />
+        <RoleDot role={catalogEntryRole(lookup, id)} className="size-2.5" />
         <span className="truncate">{subjectName(subject, lookup)}</span>
       </span>
-      <span
-        className={cn(
-          'flex min-w-0 items-center gap-1 text-xs',
-          tone === 'blocked' ? 'text-destructive' : 'text-muted-foreground',
-        )}
-      >
+      <span className={cn('flex min-w-0 items-center gap-1 text-xs', TONE_TEXT[tone])}>
         <Icon aria-hidden className="size-3.5 shrink-0" />
         <span className="truncate">{status?.text ?? 'Drop it on the rack'}</span>
       </span>

@@ -4,6 +4,7 @@
  * wizard and "Create a custom part" the custom part editor, both through `useAddPart` (whoever
  * renders them listens there). The search text names the new part; a pasted link (http or https)
  * starts the wizard from that link instead. The app never opens or fetches the link itself.
+ * They are outlined (the row's own Place stays the main action), with icons in the primary colour.
  */
 import { FileUp, PencilRuler } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -83,7 +84,7 @@ export function CustomPartActions({
         className={cn(layout === 'stack' && 'justify-start')}
         onClick={() => useAddPart.getState().open(requests.fromLink)}
       >
-        <FileUp aria-hidden />
+        <FileUp aria-hidden className="text-primary" />
         Add a part from a link or file
       </Button>
       <Button
@@ -95,7 +96,7 @@ export function CustomPartActions({
         className={cn(layout === 'stack' && 'justify-start')}
         onClick={() => useAddPart.getState().open(requests.create)}
       >
-        <PencilRuler aria-hidden />
+        <PencilRuler aria-hidden className="text-primary" />
         Create a custom part
       </Button>
     </div>

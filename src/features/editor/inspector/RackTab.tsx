@@ -75,8 +75,8 @@ export function RackTab({ open, ops, spares, announce, onPick }: RackTabProps) {
   if (frame === undefined) {
     return (
       <div className="grid gap-5">
-        <p className="flex items-start gap-2 rounded-lg border border-dashed p-3 text-sm">
-          <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <p className="flex items-start gap-2 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm">
+          <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
           <span>
             This plan uses the frame “{open.plan.frame.frameId}”, which is not in your catalog, so
             its stack cannot be edited here.

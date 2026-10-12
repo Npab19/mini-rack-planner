@@ -49,6 +49,7 @@ import { LiveRegion, useAnnouncer } from '@/components/common/LiveRegion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { formatU, uToSixths } from '@/domain/geometry'
+import { catalogEntryRole, type PartRole } from '@/domain/partRole'
 import { effectiveFrameSize } from '@/domain/recipe'
 import type { CatalogLookup, Frame } from '@/domain/schema/catalog'
 import type { PlacementBay, Plan } from '@/domain/schema/plan'
@@ -117,6 +118,12 @@ const KEYBOARD_HELP =
 
 const PLACING_HELP =
   'Placing: the arrow keys move the spot, Shift moves 5 steps, left and right pick a half for half-width parts, Enter places it.'
+
+/** What the part being placed is for (tints its ghost). */
+function placingRole(placing: PlaceSource | null, catalog: CatalogLookup): PartRole {
+  if (placing === null) return 'neutral'
+  return catalogEntryRole(catalog, placing.kind === 'item' ? placing.itemId : placing.deviceId)
+}
 
 export function RackView() {
   const plan = usePlanStore((state) => state.plan)
@@ -820,8 +827,11 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
   // ---- Rendering
   const shownGhost = ghost !== null && ghost.face === face ? ghost : null
   const placingGhost = useMemo(
-    () => (shownGhost === null ? null : placingGhostView(shownGhost, ghostBay)),
-    [shownGhost, ghostBay],
+    () =>
+      shownGhost === null
+        ? null
+        : placingGhostView(shownGhost, ghostBay, placingRole(placing, catalog)),
+    [shownGhost, ghostBay, placing, catalog],
   )
   const focused = keyboardFocusId === null ? undefined : viewById.get(keyboardFocusId)
   const focusRingView = focused?.face === face ? focused : undefined
@@ -845,7 +855,7 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
           // over it (or long-press menus): it would cancel them halfway (spike S2, pitfall 10).
           'relative touch-none p-2 select-none [-webkit-touch-callout:none]',
           standalone && 'min-h-0 flex-1 overflow-auto overscroll-contain',
-          dropOver && 'rounded-md ring-2 ring-ring/60 ring-inset',
+          dropOver && 'rounded-md bg-primary/5 ring-2 ring-primary/70 ring-inset',
         )}
         {...dnd.faceProps}
       >
@@ -921,7 +931,13 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
               {placingGhost === null ? null : (
                 <GhostShape ghost={placingGhost} layout={layout} patterns={patterns} />
               )}
-              <DragGhostLayer face={face} layout={layout} patterns={patterns} />
+              <DragGhostLayer
+                face={face}
+                layout={layout}
+                patterns={patterns}
+                views={faceViews}
+                catalog={catalog}
+              />
             </svg>
             {readOnly ? null : (
               <InsertHandles
@@ -979,7 +995,7 @@ function EmptyStack({
 }) {
   const gap = gaps[0]
   return (
-    <div className="mx-auto grid max-w-sm gap-3 rounded-xl border border-dashed bg-background p-4 text-sm">
+    <div className="mx-auto grid max-w-sm gap-3 rounded-xl border border-dashed border-primary/50 bg-card p-4 text-sm text-card-foreground shadow-sm">
       <p className="font-medium">This rack has no sections yet.</p>
       <p className="text-muted-foreground">
         {frame.name} racks are built from sections. Add the first one to start.

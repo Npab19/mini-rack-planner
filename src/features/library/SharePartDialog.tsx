@@ -4,7 +4,7 @@
  * what the catalog's reviewers will ask for, and when the entry is too long for the link, offers
  * the file to attach instead.
  */
-import { Download, ExternalLink } from 'lucide-react'
+import { Download, ExternalLink, Info, TriangleAlert } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -50,8 +50,11 @@ function ShareBody({
           files.
         </p>
         {report.needed.length === 0 ? null : (
-          <div className="grid gap-1">
-            <h3 className="font-medium">Before it can be added, it needs:</h3>
+          <div className="grid gap-1 rounded-lg border border-warning-border bg-warning-soft p-2.5">
+            <h3 className="flex items-center gap-1.5 font-medium text-warning">
+              <TriangleAlert aria-hidden className="size-4 shrink-0" />
+              Before it can be added, it needs:
+            </h3>
             <ul className="list-disc pl-5">
               {report.needed.map((problem) => (
                 <li key={problem}>{problem}</li>
@@ -60,8 +63,11 @@ function ShareBody({
           </div>
         )}
         {report.suggested.length === 0 ? null : (
-          <div className="grid gap-1">
-            <h3 className="font-medium">Good to add:</h3>
+          <div className="grid gap-1 rounded-lg border border-info-border bg-info-soft p-2.5">
+            <h3 className="flex items-center gap-1.5 font-medium text-info">
+              <Info aria-hidden className="size-4 shrink-0" />
+              Good to add:
+            </h3>
             <ul className="list-disc pl-5">
               {report.suggested.map((problem) => (
                 <li key={problem}>{problem}</li>
@@ -78,7 +84,7 @@ function ShareBody({
         {link.prefilled ? (
           <p>The form opens with this part’s facts filled in.</p>
         ) : (
-          <div className="grid gap-2 rounded-lg bg-muted/50 p-2.5">
+          <div className="grid gap-2 rounded-lg border bg-muted/50 p-2.5">
             <p>
               This part is too long to fill in the form by itself. Download it, then paste the
               file’s contents into the form’s “Catalog entry (JSON)” field, or attach the file.

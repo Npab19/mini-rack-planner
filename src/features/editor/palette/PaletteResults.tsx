@@ -8,6 +8,9 @@
  * and ear-mounted gear land where the ghost says, a device drops into a slot or asks for a mount.
  * Accessories (no rack space) and read-only plans are not draggable. Dragging never replaces a
  * button: Place, Add at U… and Add to Equipment to fit do the same from the keyboard or a tap.
+ *
+ * Colour: a role dot before each name (the facts line names the category in words), the main
+ * action in the primary colour and the rest outlined, Unverified in the warning tone.
  */
 import { GripVertical, MousePointerClick, PackagePlus, Plus } from 'lucide-react'
 import {
@@ -19,6 +22,7 @@ import {
   type KeyboardEvent,
   type Ref,
 } from 'react'
+import { RoleDot } from '@/components/common/PartRole'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -115,7 +119,10 @@ function RowItem({
           />
         ) : null}
         <div className="min-w-0 flex-1 basis-36">
-          <p className="text-sm leading-snug font-medium break-words">{row.name}</p>
+          <p className="text-sm leading-snug font-medium break-words">
+            <RoleDot role={row.role} className="mr-1.5 mb-px align-middle" />
+            {row.name}
+          </p>
           <p id={factsId} className="text-xs text-muted-foreground">
             {rowFacts(row).join(' · ')}
             <span className="sr-only">
@@ -127,7 +134,7 @@ function RowItem({
           {row.unverified || row.frameSpecific || row.custom ? (
             <div className="mt-1 flex flex-wrap gap-1" aria-hidden>
               {row.unverified ? <UnverifiedBadge /> : null}
-              {row.frameSpecific ? <Badge variant="secondary">For this frame</Badge> : null}
+              {row.frameSpecific ? <Badge variant="info">For this frame</Badge> : null}
               {row.custom ? <Badge variant="outline">My part</Badge> : null}
             </div>
           ) : null}

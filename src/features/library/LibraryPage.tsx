@@ -4,22 +4,33 @@
  * exported as a catalog entry file, suggested for the shared catalog on GitHub, or deleted (the
  * dialog says which plans use it). The list follows the database live, also changes from other
  * tabs. Results are announced with toasts.
+ *
+ * Colour: each group heading has its own icon colour, each device, mount or accessory card names
+ * its role in a chip (dot + words), Unverified is in the warning tone, and Open page links and
+ * the Add a part actions use the primary colour.
  */
 import {
   Copy,
+  Cpu,
   Ellipsis,
   ExternalLink,
   FileDown,
+  Frame as FrameIcon,
+  PackagePlus,
   Pencil,
   Plus,
   Search,
   Share2,
   ShieldQuestion,
+  SquareStack,
   Trash2,
   TriangleAlert,
+  Wrench,
+  type LucideIcon,
 } from 'lucide-react'
 import { useDeferredValue, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { RoleChip } from '@/components/common/PartRole'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -35,10 +46,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { putLibraryEntry } from '@/db/libraryRepo'
 import { errorMessage } from '@/db/errors'
 import { duplicateCustomEntry } from '@/domain/customParts'
+import { deviceRole, itemRole, type PartRole } from '@/domain/partRole'
 import type { CatalogEntry } from '@/domain/schema/catalog'
 import { useAddPart } from '@/features/custom/addPartStore'
 import { takenPartIds } from '@/features/custom/partIds'
 import { downloadBlob } from '@/lib/download'
+import { cn } from '@/lib/utils'
 import { useCatalog, useCatalogStore } from '@/state/catalogStore'
 import { DeletePartDialog } from './DeletePartDialog'
 import {
@@ -49,11 +62,27 @@ import {
   groupLibrary,
   partFacts,
   partName,
+  type LibraryGroupId,
 } from './libraryModel'
 import { SharePartDialog } from './SharePartDialog'
 
 const LINK_CLASS =
-  'inline-flex items-center gap-1 rounded-sm text-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
+  'inline-flex items-center gap-1 rounded-sm text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
+
+/** Group heading icons in fixed categorical colours, the same in every accent (as in the BOM). */
+const GROUP_ICONS: Readonly<Record<LibraryGroupId, { icon: LucideIcon; className: string }>> = {
+  devices: { icon: Cpu, className: 'text-info' },
+  items: { icon: SquareStack, className: 'text-chart-1' },
+  frames: { icon: FrameIcon, className: 'text-chart-2' },
+  hardware: { icon: Wrench, className: 'text-muted-foreground' },
+}
+
+/** What a part is for, for its chip: devices by category, mounts and accessories by what they hold. */
+function partRole(part: CatalogEntry): PartRole | undefined {
+  if (part.kind === 'device') return deviceRole(part.category)
+  if (part.kind === 'item' || part.kind === 'extra') return itemRole(part)
+  return undefined
+}
 
 function editRequestKind(entry: CatalogEntry): 'device' | 'item' | 'frame' {
   if (entry.kind === 'device') return 'device'
@@ -82,6 +111,7 @@ function PartCard({ part, actions }: { part: CatalogEntry; actions: PartActions 
   const name = partName(part)
   const url = part.source?.url
   const unverified = part.verified?.method === 'unverified'
+  const role = partRole(part)
   return (
     <article
       aria-labelledby={titleId}
@@ -127,13 +157,13 @@ function PartCard({ part, actions }: { part: CatalogEntry; actions: PartActions 
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {role === undefined ? null : <RoleChip role={role} />}
       <p className="text-muted-foreground">{partFacts(part)}</p>
       {unverified || url !== undefined ? (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           {unverified ? (
             <Badge
-              variant="outline"
-              className="border-dashed"
+              variant="warning"
               title="Its sizes are not checked yet: measure before you print or buy."
             >
               <ShieldQuestion aria-hidden />
@@ -185,9 +215,10 @@ function EmptyLibrary() {
   return (
     <section
       aria-labelledby={headingId}
-      className="grid gap-3 rounded-xl border border-dashed p-5 text-sm sm:p-6"
+      className="grid gap-3 rounded-xl border border-dashed border-primary/50 bg-accent/30 p-5 text-sm sm:p-6"
     >
-      <h2 id={headingId} className="text-lg font-medium">
+      <h2 id={headingId} className="flex items-center gap-2 text-lg font-medium">
+        <PackagePlus aria-hidden className="size-5 shrink-0 text-primary" />
         You have no parts of your own yet
       </h2>
       <p>
@@ -311,27 +342,34 @@ export function LibraryPage() {
         {groups.length === 0 ? (
           <p className="text-sm text-muted-foreground">No part matches “{trimmed}”.</p>
         ) : (
-          groups.map((group) => (
-            <section
-              key={group.id}
-              aria-labelledby={`${searchId}-${group.id}`}
-              className="grid gap-3"
-            >
-              <h2 id={`${searchId}-${group.id}`} className="text-lg font-medium">
-                {group.title}{' '}
-                <span className="text-sm font-normal text-muted-foreground">
-                  ({group.entries.length})
-                </span>
-              </h2>
-              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {group.entries.map((part) => (
-                  <li key={part.id}>
-                    <PartCard part={part} actions={actions} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
+          groups.map((group) => {
+            const { icon: GroupIcon, className: iconClass } = GROUP_ICONS[group.id]
+            return (
+              <section
+                key={group.id}
+                aria-labelledby={`${searchId}-${group.id}`}
+                className="grid gap-3"
+              >
+                <h2
+                  id={`${searchId}-${group.id}`}
+                  className="flex items-center gap-2 text-lg font-medium"
+                >
+                  <GroupIcon aria-hidden className={cn('size-5 shrink-0', iconClass)} />
+                  {group.title}{' '}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    ({group.entries.length})
+                  </span>
+                </h2>
+                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.entries.map((part) => (
+                    <li key={part.id}>
+                      <PartCard part={part} actions={actions} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )
+          })
         )}
       </div>
     )

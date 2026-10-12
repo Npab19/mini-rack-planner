@@ -4,8 +4,17 @@
  * prints and hardware from the model page, and where it is from.
  */
 import { useId } from 'react'
+import { RoleDot } from '@/components/common/PartRole'
+import { deviceRole } from '@/domain/partRole'
 import type { Hardware } from '@/domain/schema/catalog'
-import { CheckboxField, FieldGroup, NumberField, SelectField, TextField } from './fields'
+import {
+  CheckboxField,
+  CHOICE_CARD,
+  FieldGroup,
+  NumberField,
+  SelectField,
+  TextField,
+} from './fields'
 import type { FormView } from './formView'
 import {
   DEVICE_CATEGORY_CHOICES,
@@ -18,6 +27,7 @@ import {
   type ItemForm,
   type ItemHoldsKind,
 } from './partForms'
+import { cn } from '@/lib/utils'
 import { HardwareRows, PrintRows } from './PartRows'
 import { SourceFields } from './SourceFields'
 
@@ -79,10 +89,7 @@ function HoldsChoice({
         {HOLDS_CHOICES.map((choice) => {
           const id = `${base}-${choice.value}`
           return (
-            <div
-              key={choice.value}
-              className="flex items-start gap-2.5 rounded-lg border p-2.5 has-[:checked]:border-primary has-[:checked]:bg-muted/50"
-            >
+            <div key={choice.value} className={cn(CHOICE_CARD, 'gap-2.5 p-2.5')}>
               <input
                 id={id}
                 type="radio"
@@ -238,7 +245,15 @@ export function ItemFields({
                           : form.slotCategories.filter((category) => category !== choice.value),
                       })
                     }
-                    label={choice.label}
+                    label={
+                      <>
+                        <RoleDot
+                          role={deviceRole(choice.value)}
+                          className="mr-1.5 mb-px align-middle"
+                        />
+                        {choice.label}
+                      </>
+                    }
                   />
                 ))}
               </div>

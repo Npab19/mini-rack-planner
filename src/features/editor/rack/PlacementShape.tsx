@@ -176,7 +176,7 @@ export const PlacementShape = memo(function PlacementShape({
           y={box.y + box.height / 2 - 4}
           width={8}
           height={8}
-          className="text-foreground"
+          className="text-primary"
         />
       ) : null}
     </g>

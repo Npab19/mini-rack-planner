@@ -10,6 +10,10 @@
  * Focus: the dialog opens on its first field; a new step focuses its heading; a failed save
  * focuses the first field with a problem, whose message is tied to it. After "Save and place"
  * focus goes to the rack drawing, where the arrow keys move the part.
+ *
+ * Colour follows the New plan wizard: the step indicator and the chosen kind card in the primary
+ * colour with the accent tint, problems in the destructive tone (always with an icon and words)
+ * and the "never uploaded" note as info.
  */
 import { Check, ChevronLeft, ChevronRight, CircleAlert, FileBox, TriangleAlert } from 'lucide-react'
 import {
@@ -60,6 +64,7 @@ import { useCatalog, useCatalogStore } from '@/state/catalogStore'
 import { useAddPart, type AddPartRequest, type AddPartTarget } from './addPartStore'
 import { useFirstSlot } from './dialogSlot'
 import { DeviceFields } from './DeviceFields'
+import { CHOICE_CARD } from './fields'
 import { FrameFields } from './FrameFields'
 import { focusField, useFormView } from './formView'
 import { ItemFields } from './ItemFields'
@@ -173,14 +178,15 @@ function StepIndicator({ step }: { step: Step }) {
               className={cn(
                 'flex size-5 items-center justify-center rounded-full border text-[0.7rem] font-medium',
                 status === 'current' && 'border-primary bg-primary text-primary-foreground',
-                status === 'done' && 'border-primary',
+                status === 'done' && 'border-primary bg-accent text-primary',
+                status === 'todo' && 'border-input text-muted-foreground',
               )}
             >
               {status === 'done' ? <Check className="size-3" /> : index + 1}
             </span>
             <span
               className={cn(
-                status === 'current' ? 'font-medium text-foreground' : 'text-muted-foreground',
+                status === 'current' ? 'font-semibold text-foreground' : 'text-muted-foreground',
                 status !== 'current' && 'max-sm:sr-only',
               )}
             >
@@ -196,8 +202,8 @@ function StepIndicator({ step }: { step: Step }) {
 
 function ModelFilesNote() {
   return (
-    <p className="flex items-start gap-2 rounded-lg bg-muted/50 p-2.5 text-xs text-muted-foreground">
-      <FileBox aria-hidden className="mt-px size-4 shrink-0" />
+    <p className="flex items-start gap-2 rounded-lg border border-info-border bg-info-soft p-2.5 text-xs text-muted-foreground">
+      <FileBox aria-hidden className="mt-px size-4 shrink-0 text-info" />
       <span>{MODEL_FILES_NOTE}</span>
     </p>
   )
@@ -260,7 +266,7 @@ function LinkStep({
             </p>
           ) : parsed !== undefined ? (
             <p className="flex items-start gap-1.5 text-muted-foreground">
-              <Check aria-hidden className="mt-px size-3.5 shrink-0" />
+              <Check aria-hidden className="mt-px size-3.5 shrink-0 text-have" />
               <span>
                 {summary ?? 'A link to keep as it is.'}
                 {parsed.name === undefined ? null : ` Name from the link: “${parsed.name}”.`}
@@ -304,10 +310,7 @@ function KindStep({
         {KIND_CHOICES.map((choice) => {
           const id = `${base}-${choice.value}`
           return (
-            <div
-              key={choice.value}
-              className="flex items-start gap-3 rounded-lg border p-3 has-[:checked]:border-primary has-[:checked]:bg-muted/50"
-            >
+            <div key={choice.value} className={cn(CHOICE_CARD, 'gap-3 p-3')}>
               <input
                 id={id}
                 type="radio"
@@ -607,7 +610,7 @@ function PartFlow({
                 </StepHeading>
               ) : null}
               {advanced.length === 0 ? null : (
-                <p className="rounded-lg bg-muted/50 p-2.5 text-sm">
+                <p className="rounded-lg border border-info-border bg-info-soft p-2.5 text-sm">
                   This part also has {advanced.join(', ')}. This form does not show{' '}
                   {advanced.length === 1 ? 'it' : 'them'}; saving keeps{' '}
                   {advanced.length === 1 ? 'it' : 'them'} as{' '}

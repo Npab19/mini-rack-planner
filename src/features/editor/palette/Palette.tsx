@@ -26,7 +26,6 @@ import { allEntries, createCatalogSearch } from '@/catalog/search'
 import { addEquipment } from '@/domain/devices'
 import { ID_PREFIX, newId } from '@/domain/ids'
 import type { Plan } from '@/domain/schema/plan'
-import { cn } from '@/lib/utils'
 import { useEditorState, type PlaceSource } from '../editorState'
 import { CustomPartActions } from '../inspector/CustomPartActions'
 import { applyPlanOp, sparesText, useSpareContext } from '../inspector/planOps'
@@ -105,7 +104,7 @@ function EmptyResults({
   readOnly: boolean
 }) {
   return (
-    <div className="grid gap-1.5 rounded-lg border border-dashed p-3 text-sm">
+    <div className="grid gap-1.5 rounded-lg border border-dashed border-primary/50 bg-accent/30 p-3 text-sm">
       <p className="font-medium">
         {query.trim() === ''
           ? tab === 'mine'
@@ -278,7 +277,7 @@ export function Palette() {
                     variant="outline"
                     pressed={pressed}
                     onPressedChange={(next) => toggleCategory(category, next)}
-                    className={cn('rounded-full', pressed && 'border-foreground/60 font-semibold')}
+                    className="rounded-full"
                   >
                     {pressed ? <Check aria-hidden /> : null}
                     {categoryLabel(category)}

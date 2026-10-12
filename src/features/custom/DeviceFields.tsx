@@ -3,7 +3,9 @@
  * whether it has its own 10-inch rack ears.
  */
 import { useId } from 'react'
+import { RoleChip } from '@/components/common/PartRole'
 import type { CustomPowerChoice } from '@/domain/customParts'
+import { deviceRole } from '@/domain/partRole'
 import { CheckboxField, FieldGroup, NumberField, SelectField, TextField } from './fields'
 import type { FormView } from './formView'
 import {
@@ -56,7 +58,18 @@ export function DeviceFields({
         <SelectField
           {...field('category')}
           label="What kind of device is it?"
-          hint="Mounts made for a kind of device (mini PCs, drives…) are offered for it."
+          hint={
+            <>
+              Mounts made for a kind of device (mini PCs, drives…) are offered for it.
+              {form.category === '' ? null : (
+                <>
+                  {' '}
+                  On the rack it shows as{' '}
+                  <RoleChip role={deviceRole(form.category)} className="align-middle" />
+                </>
+              )}
+            </>
+          }
           value={form.category}
           placeholder="Choose…"
           choices={DEVICE_CATEGORY_CHOICES}

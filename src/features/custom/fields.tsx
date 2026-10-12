@@ -10,6 +10,13 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import type { Choice, FormIssue } from './partForms'
 
+/**
+ * A choice card around a radio, as in the New plan wizard: the checked one gets the accent tint
+ * and a primary outline, and its radio shows the dot, so the choice never rests on colour alone.
+ */
+export const CHOICE_CARD =
+  'flex items-start rounded-lg border transition-colors hover:bg-accent/40 has-[:checked]:border-primary has-[:checked]:bg-accent has-[:checked]:ring-1 has-[:checked]:ring-primary'
+
 /** Space-separated ids for aria-describedby, skipping missing ones. */
 export function describedBy(
   ...values: ReadonlyArray<string | false | undefined>
@@ -36,7 +43,7 @@ export function FieldMessage({ id, error, warning }: FieldState & { id: string }
   if (warning === undefined) return null
   return (
     <p id={id} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-      <Info aria-hidden className="mt-px size-3.5 shrink-0" />
+      <Info aria-hidden className="mt-px size-3.5 shrink-0 text-info" />
       <span>
         <span className="sr-only">Note: </span>
         {warning.message}
