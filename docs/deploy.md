@@ -139,12 +139,13 @@ each carries exactly the `Content-Security-Policy` from the build plus
 and a GitHub release, which should publish the `X.Y.Z`, `X.Y` and `latest` images and deploy SWA
 production.
 
-- Tags pushed with the default `GITHUB_TOKEN` do not start other workflows. Add a fine-grained
-  personal access token for this repository (_Contents_ and _Pull requests_: read and write) as
-  the secret `RELEASE_PLEASE_TOKEN` and the release tag triggers both workflows. Without it, run
-  _Docker image_ and _Azure Static Web Apps_ by hand on the new tag.
-- With only `GITHUB_TOKEN`, release-please also needs _Settings > Actions > General > Allow GitHub
-  Actions to create and approve pull requests_.
+- Tags created with the default `GITHUB_TOKEN` do not start tag-triggered workflows, so after a
+  release the workflow dispatches _Docker image_ and _Azure Static Web Apps_ on the new tag itself
+  (`gh workflow run`; dispatched runs are allowed). No personal access token is needed.
+- release-please needs _Settings > Actions > General > Allow GitHub Actions to create and approve
+  pull requests_ (enabled on this repository).
+- The first release is `0.1.0` (`initial-version` in `release-please-config.json`); while the
+  version is below 1.0.0, `feat` bumps the minor version.
 
 ## Security headers
 
