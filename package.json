@@ -1,7 +1,7 @@
 {
   "name": "mini-rack-planner",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Plan 3D-printed 10-inch homelab racks: drag-and-drop layout, 2D/3D preview, and a bill of materials / shopping list.",
   "license": "MIT",
   "type": "module",
