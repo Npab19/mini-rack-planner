@@ -9,11 +9,20 @@
  * own; it fits a 360 px sheet and spreads its groups into columns in a wide drawer. Announcements
  * go to the shell's live region, which outlives the panel.
  */
-import { CircleCheck, Download, Info, PackageCheck, ShoppingCart, Undo2, X } from 'lucide-react'
+import {
+  CircleCheck,
+  Download,
+  Info,
+  PackageCheck,
+  ShoppingCart,
+  TriangleAlert,
+  Undo2,
+  X,
+} from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { HAVE_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_NEED_CLASSES, HAVE_TEXT } from '@/components/common/HaveNeed'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { errorMessage } from '@/db/errors'
@@ -21,10 +30,12 @@ import { duplicatePlan, nowIso } from '@/db/plansRepo'
 import type { BomLine, BomResult } from '@/domain/api'
 import { computeBom, consumeInventory, designerTableNote } from '@/domain/bom'
 import { finishBuild } from '@/domain/build'
+import { catalogEntryRole, deviceRole, type PartRole } from '@/domain/partRole'
 import type { Plan } from '@/domain/schema/plan'
 import type { Inventory } from '@/domain/schema/settings'
 import { bomToCsvRows, toCsv, type BomCsvMode } from '@/lib/csv'
 import { downloadBlob } from '@/lib/download'
+import { cn } from '@/lib/utils'
 import { useBom, usePlanLookup } from '@/state/derived'
 import { adjustInventory, replaceInventory, useInventory } from '@/state/inventoryStore'
 import { usePlanStore } from '@/state/planStore'
@@ -35,6 +46,7 @@ import { FinishBuildDialog } from './FinishBuildDialog'
 import {
   bomCsvFileName,
   bomSummary,
+  FINISH_BUILD_CLASSES,
   gotItAddQty,
   gotItRemoveQty,
   groupByKind,
@@ -60,6 +72,13 @@ const EMPTY_TEXT: Record<BomTab, string> = {
   shopping: 'Nothing to get: everything this plan uses is in your rack or in your spares.',
   full: 'This plan has no parts yet. Add sections and mounts to see what it takes.',
   leftovers: 'No leftovers: everything you own is still used by this plan.',
+}
+
+/** The empty notes: nothing to get (or left over) is good news; an empty plan is just empty. */
+const EMPTY_CLASSES: Record<BomTab, { box: string; icon: string }> = {
+  shopping: { box: 'border-have-border bg-have-soft text-foreground', icon: 'text-have' },
+  full: { box: 'border-dashed text-muted-foreground', icon: '' },
+  leftovers: { box: 'border-have-border bg-have-soft text-foreground', icon: 'text-have' },
 }
 
 /** What the last Finish build did, so it can be undone together with the spares it used. */
@@ -103,9 +122,10 @@ function TabBody({
   context: LineContext
 }) {
   if (groups.length === 0) {
+    const tone = EMPTY_CLASSES[tab]
     return (
-      <p className="flex items-start gap-1.5 rounded-lg border border-dashed p-3 text-muted-foreground">
-        <CircleCheck aria-hidden className="mt-px size-4 shrink-0" />
+      <p className={cn('flex items-start gap-1.5 rounded-lg border p-3', tone.box)}>
+        <CircleCheck aria-hidden className={cn('mt-px size-4 shrink-0', tone.icon)} />
         {EMPTY_TEXT[tab]}
       </p>
     )
@@ -113,7 +133,8 @@ function TabBody({
   return (
     <>
       {tab === 'leftovers' ? (
-        <p className="mb-2 text-xs text-muted-foreground">
+        <p className="mb-2 flex items-start gap-1.5 rounded-lg border border-info-border bg-info-soft px-2.5 py-2 text-xs">
+          <Info aria-hidden className="mt-px size-3.5 shrink-0 text-info" />
           Parts you own that this plan no longer uses: keep them as spares or reuse them.
         </p>
       ) : null}
@@ -170,6 +191,19 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
     for (const line of bom.lines) {
       const plate = printPlate(line, lookup)
       if (plate !== undefined) byKey.set(line.key, plate)
+    }
+    return byKey
+  }, [bom, lookup])
+  const roles = useMemo(() => {
+    const byKey = new Map<string, PartRole>()
+    for (const line of bom.lines) {
+      if (line.kind !== 'device') continue
+      // A power brick line is keyed by the device it powers, but it is power gear itself.
+      const role =
+        line.category === 'power-brick'
+          ? deviceRole('power-brick')
+          : catalogEntryRole(lookup, line.refId)
+      byKey.set(line.key, role)
     }
     return byKey
   }, [bom, lookup])
@@ -340,6 +374,7 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
     plates,
     includedBricks,
     busy: busyKeys,
+    roles,
     onGotIt: (line, checked) => void toggleGotIt(line, checked),
   }
   const showFinished = finished !== null && finished.planId === planId
@@ -355,7 +390,10 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
         <div className="flex flex-wrap items-center gap-2">
           <p
             data-testid="bom-summary"
-            className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
+            className={cn(
+              'inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
+              HAVE_NEED_CLASSES[summary.lines === 0 ? 'have' : 'need'],
+            )}
           >
             {summary.lines === 0 ? (
               <CircleCheck aria-hidden className="size-3.5 shrink-0" />
@@ -367,6 +405,7 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
           <div className="flex flex-wrap gap-2 @xl:ml-auto">
             <Button
               size="sm"
+              className={FINISH_BUILD_CLASSES}
               data-testid="bom-finish-build"
               // Without its frame in the catalog nothing can be captured as built.
               disabled={readOnly || frame === undefined}
@@ -391,7 +430,7 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
         </div>
         {note === undefined ? null : (
           <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-            <Info aria-hidden className="mt-px size-3.5 shrink-0" />
+            <Info aria-hidden className="mt-px size-3.5 shrink-0 text-info" />
             <span>{note}.</span>
           </p>
         )}
@@ -400,10 +439,10 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
       {showFinished ? (
         <div
           data-testid="bom-finished"
-          className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 p-2.5"
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-have-border bg-have-soft p-2.5"
         >
           <p className="flex min-w-48 flex-1 items-center gap-1.5 font-medium">
-            <CircleCheck aria-hidden className="size-4 shrink-0" />
+            <CircleCheck aria-hidden className="size-4 shrink-0 text-have" />
             Build finished: {plural(finished.changed, 'item')} marked {HAVE_TEXT}.
           </p>
           <Button
@@ -459,8 +498,9 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
       </Tabs>
 
       {bom.warnings.length === 0 ? null : (
-        <details className="rounded-lg border p-2.5 text-xs text-muted-foreground">
+        <details className="rounded-lg border border-warning-border bg-warning-soft p-2.5 text-xs text-muted-foreground">
           <summary className="cursor-pointer font-medium text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <TriangleAlert aria-hidden className="mr-1.5 mb-px inline size-3.5 text-warning" />
             Not counted ({bom.warnings.length})
           </summary>
           <ul className="mt-1.5 grid list-disc gap-1 pl-4">

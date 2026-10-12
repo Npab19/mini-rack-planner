@@ -15,6 +15,7 @@ import {
   type PersistResult,
   type StorageStatus,
 } from '@/lib/storage'
+import { cn } from '@/lib/utils'
 import { formatBytes, formatShare } from './format'
 import { SettingsSection } from './SettingsSection'
 
@@ -28,10 +29,25 @@ function persistMessage(result: PersistResult): string {
     : 'The browser said no for now. It may agree later as you use the app more; until then, export a backup now and then.'
 }
 
-function Fact({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) {
+/** The icon's tone; the sentence next to it always says the same. */
+const FACT_TONE = {
+  good: 'text-have',
+  warning: 'text-warning',
+  neutral: 'text-muted-foreground',
+} as const
+
+function Fact({
+  icon: Icon,
+  tone = 'neutral',
+  children,
+}: {
+  icon: LucideIcon
+  tone?: keyof typeof FACT_TONE
+  children: ReactNode
+}) {
   return (
     <span className="flex items-start gap-1.5">
-      <Icon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+      <Icon aria-hidden="true" className={cn('mt-0.5 size-4 shrink-0', FACT_TONE[tone])} />
       <span>{children}</span>
     </span>
   )
@@ -45,11 +61,15 @@ function unavailable(status: StorageStatus): string {
 function PersistedFact({ status }: { status: StorageStatus }) {
   if (!status.supported) return <Fact icon={ShieldOff}>{unavailable(status)}</Fact>
   if (status.persisted === true) {
-    return <Fact icon={ShieldCheck}>Yes. The browser will not clear it to free up space.</Fact>
+    return (
+      <Fact icon={ShieldCheck} tone="good">
+        Yes. The browser will not clear it to free up space.
+      </Fact>
+    )
   }
   if (status.persisted === false) {
     return (
-      <Fact icon={ShieldAlert}>
+      <Fact icon={ShieldAlert} tone="warning">
         Not yet. The browser may clear it when space runs low, and Safari after 7 days without a
         visit.
       </Fact>
@@ -189,7 +209,7 @@ export function StorageSection() {
           </p>
 
           {status.secureContext ? null : (
-            <Alert role="note">
+            <Alert role="note" variant="warning">
               <LockOpen aria-hidden="true" />
               <AlertTitle>This address uses plain HTTP, so some features are limited</AlertTitle>
               <AlertDescription>

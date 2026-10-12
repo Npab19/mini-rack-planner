@@ -25,6 +25,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -39,6 +40,64 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+
+  /* Status: have = in my rack / got it, need = to get, warning = check warnings, info = notes. */
+  --color-have: var(--have);
+  --color-have-foreground: var(--have-foreground);
+  --color-have-soft: var(--have-soft);
+  --color-have-border: var(--have-border);
+  --color-need: var(--need);
+  --color-need-foreground: var(--need-foreground);
+  --color-need-soft: var(--need-soft);
+  --color-need-border: var(--need-border);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-border: var(--warning-border);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-border: var(--info-border);
+
+  /* Part roles (src/domain/partRole.ts), for static use. `part-*` follows the nearest [data-role]. */
+  --color-role-compute: var(--role-compute);
+  --color-role-compute-fill: var(--role-compute-fill);
+  --color-role-compute-strong: var(--role-compute-strong);
+  --color-role-compute-soft: var(--role-compute-soft);
+  --color-role-storage: var(--role-storage);
+  --color-role-storage-fill: var(--role-storage-fill);
+  --color-role-storage-strong: var(--role-storage-strong);
+  --color-role-storage-soft: var(--role-storage-soft);
+  --color-role-network: var(--role-network);
+  --color-role-network-fill: var(--role-network-fill);
+  --color-role-network-strong: var(--role-network-strong);
+  --color-role-network-soft: var(--role-network-soft);
+  --color-role-power: var(--role-power);
+  --color-role-power-fill: var(--role-power-fill);
+  --color-role-power-strong: var(--role-power-strong);
+  --color-role-power-soft: var(--role-power-soft);
+  --color-role-neutral: var(--role-neutral);
+  --color-role-neutral-fill: var(--role-neutral-fill);
+  --color-role-neutral-strong: var(--role-neutral-strong);
+  --color-role-neutral-soft: var(--role-neutral-soft);
+  --color-part: var(--part);
+  --color-part-fill: var(--part-fill);
+  --color-part-strong: var(--part-strong);
+  --color-part-soft: var(--part-soft);
+
+  /* The rack drawing. */
+  --color-rack-canvas: var(--rack-canvas);
+  --color-rack-grid: var(--rack-grid);
+  --color-rack-inner: var(--rack-inner);
+  --color-rack-inner-alt: var(--rack-inner-alt);
+  --color-rack-rail: var(--rack-rail);
+  --color-rack-rail-edge: var(--rack-rail-edge);
+  --color-rack-hole: var(--rack-hole);
+  --color-rack-hole-edge: var(--rack-hole-edge);
+  --color-rack-label: var(--rack-label);
+  --color-rack-joint: var(--rack-joint);
+  --color-rack-outline: var(--rack-outline);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,77 +107,307 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Values are Tailwind v4 palette colours (named in the comments). Every text, outline and focus pair
+   is checked for WCAG contrast in src/theme.contrast.test.ts, in both themes and every accent. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: oklch(1 0 0); /* white */
+  --foreground: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --card: oklch(1 0 0); /* white */
+  --card-foreground: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --popover: oklch(1 0 0); /* white */
+  --popover-foreground: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --primary: oklch(51.1% 0.262 276.966); /* indigo-600 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --secondary: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --secondary-foreground: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --muted: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --muted-foreground: oklch(44.6% 0.043 257.281); /* slate-600 */
+  --accent: oklch(96.2% 0.018 272.314); /* indigo-50 */
+  --accent-foreground: oklch(39.8% 0.195 277.366); /* indigo-800 */
   /* Darker than shadcn's red-600: red text on the 10% red tint of destructive buttons, badges and
      menu items keeps WCAG AA contrast (about 5.3:1 instead of 4:1). */
   --destructive: oklch(0.505 0.213 27.518);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --destructive-soft: oklch(97.1% 0.013 17.38); /* red-50 */
+  --border: oklch(92.9% 0.013 255.508); /* slate-200 */
+  --input: oklch(86.9% 0.022 252.894); /* slate-300 */
+  --ring: oklch(58.5% 0.233 277.117); /* indigo-500 */
+  --chart-1: oklch(58.5% 0.233 277.117); /* indigo-500 */
+  --chart-2: oklch(60% 0.118 184.704); /* teal-600 */
+  --chart-3: oklch(76.9% 0.188 70.08); /* amber-500 */
+  --chart-4: oklch(59.1% 0.293 322.896); /* fuchsia-600 */
+  --chart-5: oklch(68.5% 0.169 237.323); /* sky-500 */
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  --have: oklch(50.8% 0.118 165.612); /* emerald-700 */
+  --have-foreground: oklch(1 0 0); /* white */
+  --have-soft: oklch(97.9% 0.021 166.113); /* emerald-50 */
+  --have-border: oklch(59.6% 0.145 163.225); /* emerald-600 */
+  --need: oklch(55.5% 0.163 48.998); /* amber-700 */
+  --need-foreground: oklch(1 0 0); /* white */
+  --need-soft: oklch(98.7% 0.022 95.277); /* amber-50 */
+  --need-border: oklch(66.6% 0.179 58.318); /* amber-600 */
+  --warning: var(--need);
+  --warning-foreground: var(--need-foreground);
+  --warning-soft: var(--need-soft);
+  --warning-border: var(--need-border);
+  --info: oklch(50% 0.134 242.749); /* sky-700 */
+  --info-foreground: oklch(1 0 0); /* white */
+  --info-soft: oklch(97.7% 0.013 236.62); /* sky-50 */
+  --info-border: oklch(58.8% 0.158 241.966); /* sky-600 */
+
+  /* Part roles: outline (the bare name), fill (in my rack), strong (a device in a mount), soft (to get). */
+  --role-compute: oklch(50% 0.134 242.749); /* sky-700 */
+  --role-compute-fill: oklch(90.1% 0.058 230.902); /* sky-200 */
+  --role-compute-strong: oklch(82.8% 0.111 230.318); /* sky-300 */
+  --role-compute-soft: oklch(97.7% 0.013 236.62); /* sky-50 */
+  --role-storage: oklch(51.8% 0.253 323.949); /* fuchsia-700 */
+  --role-storage-fill: oklch(90.3% 0.076 319.62); /* fuchsia-200 */
+  --role-storage-strong: oklch(83.3% 0.145 321.434); /* fuchsia-300 */
+  --role-storage-soft: oklch(97.7% 0.017 320.058); /* fuchsia-50 */
+  --role-network: oklch(53.2% 0.157 131.589); /* lime-700 */
+  --role-network-fill: oklch(93.8% 0.127 124.321); /* lime-200 */
+  --role-network-strong: oklch(89.7% 0.196 126.665); /* lime-300 */
+  --role-network-soft: oklch(98.6% 0.031 120.757); /* lime-50 */
+  --role-power: oklch(50.5% 0.213 27.518); /* red-700 */
+  --role-power-fill: oklch(88.5% 0.062 18.334); /* red-200 */
+  --role-power-strong: oklch(80.8% 0.114 19.571); /* red-300 */
+  --role-power-soft: oklch(97.1% 0.013 17.38); /* red-50 */
+  --role-neutral: oklch(44.6% 0.043 257.281); /* slate-600 */
+  --role-neutral-fill: oklch(92.9% 0.013 255.508); /* slate-200 */
+  --role-neutral-strong: oklch(86.9% 0.022 252.894); /* slate-300 */
+  --role-neutral-soft: oklch(98.4% 0.003 247.858); /* slate-50 */
+
+  --rack-canvas: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --rack-grid: oklch(86.9% 0.022 252.894); /* slate-300 */
+  --rack-inner: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --rack-inner-alt: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --rack-rail: oklch(37.2% 0.044 257.287); /* slate-700 */
+  --rack-rail-edge: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --rack-hole: oklch(1 0 0); /* white */
+  --rack-hole-edge: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --rack-label: oklch(44.6% 0.043 257.281); /* slate-600 */
+  --rack-joint: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --rack-outline: oklch(37.2% 0.044 257.287); /* slate-700 */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --foreground: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --card: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --card-foreground: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --popover: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --popover-foreground: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --primary: oklch(67.3% 0.182 276.935); /* indigo-400 */
+  --primary-foreground: oklch(25.7% 0.09 281.288); /* indigo-950 */
+  --secondary: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --secondary-foreground: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --muted: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --muted-foreground: oklch(70.4% 0.04 256.788); /* slate-400 */
+  --accent: oklch(25.7% 0.09 281.288); /* indigo-950 */
+  --accent-foreground: oklch(87% 0.065 274.039); /* indigo-200 */
   /* Lighter than shadcn's red-400 for the same reason as above: on the 20% red tint of the dark
      theme, red-400 text measures about 4.2:1; red-300 keeps it above 4.5:1. */
   --destructive: oklch(0.808 0.114 19.571);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --destructive-soft: oklch(25.8% 0.092 26.042); /* red-950 */
+  --border: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --input: oklch(44.6% 0.043 257.281); /* slate-600 */
+  --ring: oklch(67.3% 0.182 276.935); /* indigo-400 */
+  --chart-1: oklch(67.3% 0.182 276.935); /* indigo-400 */
+  --chart-2: oklch(77.7% 0.152 181.912); /* teal-400 */
+  --chart-3: oklch(82.8% 0.189 84.429); /* amber-400 */
+  --chart-4: oklch(74% 0.238 322.16); /* fuchsia-400 */
+  --chart-5: oklch(74.6% 0.16 232.661); /* sky-400 */
+  --sidebar: oklch(20.8% 0.042 265.755); /* slate-900 */
+
+  --have: oklch(76.5% 0.177 163.223); /* emerald-400 */
+  --have-foreground: oklch(26.2% 0.051 172.552); /* emerald-950 */
+  --have-soft: oklch(26.2% 0.051 172.552); /* emerald-950 */
+  --have-border: oklch(69.6% 0.17 162.48); /* emerald-500 */
+  --need: oklch(82.8% 0.189 84.429); /* amber-400 */
+  --need-foreground: oklch(27.9% 0.077 45.635); /* amber-950 */
+  --need-soft: oklch(27.9% 0.077 45.635); /* amber-950 */
+  --need-border: oklch(82.8% 0.189 84.429); /* amber-400 */
+  --info: oklch(74.6% 0.16 232.661); /* sky-400 */
+  --info-foreground: oklch(29.3% 0.066 243.157); /* sky-950 */
+  --info-soft: oklch(29.3% 0.066 243.157); /* sky-950 */
+  --info-border: oklch(68.5% 0.169 237.323); /* sky-500 */
+
+  --role-compute: oklch(74.6% 0.16 232.661); /* sky-400 */
+  --role-compute-fill: oklch(39.1% 0.09 240.876); /* sky-900 */
+  --role-compute-strong: oklch(44.3% 0.11 240.79); /* sky-800 */
+  --role-compute-soft: oklch(29.3% 0.066 243.157); /* sky-950 */
+  --role-storage: oklch(74% 0.238 322.16); /* fuchsia-400 */
+  --role-storage-fill: oklch(40.1% 0.17 325.612); /* fuchsia-900 */
+  --role-storage-strong: oklch(45.2% 0.211 324.591); /* fuchsia-800 */
+  --role-storage-soft: oklch(29.3% 0.136 325.661); /* fuchsia-950 */
+  --role-network: oklch(84.1% 0.238 128.85); /* lime-400 */
+  --role-network-fill: oklch(40.5% 0.101 131.063); /* lime-900 */
+  --role-network-strong: oklch(45.3% 0.124 130.933); /* lime-800 */
+  --role-network-soft: oklch(27.4% 0.072 132.109); /* lime-950 */
+  --role-power: oklch(70.4% 0.191 22.216); /* red-400 */
+  --role-power-fill: oklch(39.6% 0.141 25.723); /* red-900 */
+  --role-power-strong: oklch(44.4% 0.177 26.899); /* red-800 */
+  --role-power-soft: oklch(25.8% 0.092 26.042); /* red-950 */
+  --role-neutral: oklch(70.4% 0.04 256.788); /* slate-400 */
+  --role-neutral-fill: oklch(37.2% 0.044 257.287); /* slate-700 */
+  --role-neutral-strong: oklch(44.6% 0.043 257.281); /* slate-600 */
+  --role-neutral-soft: oklch(27.9% 0.041 260.031); /* slate-800 */
+
+  --rack-canvas: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --rack-grid: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --rack-inner: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --rack-inner-alt: oklch(27.9% 0.041 260.031 / 50%); /* slate-800/50% */
+  --rack-rail: oklch(55.4% 0.046 257.417); /* slate-500 */
+  --rack-rail-edge: oklch(70.4% 0.04 256.788); /* slate-400 */
+  --rack-hole: oklch(12.9% 0.042 264.695); /* slate-950 */
+  --rack-hole-edge: oklch(70.4% 0.04 256.788); /* slate-400 */
+  --rack-label: oklch(70.4% 0.04 256.788); /* slate-400 */
+  --rack-joint: oklch(86.9% 0.022 252.894); /* slate-300 */
+  --rack-outline: oklch(55.4% 0.046 257.417); /* slate-500 */
+}
+
+/* Accent presets (src/lib/theme.ts, public/theme-init.js set data-accent on <html>; indigo, the
+   default, has no attribute). Each sets the brand colours only; the sidebar follows them. The dark
+   selectors carry .dark so they out-rank the light ones, which in turn out-rank .dark. */
+:root[data-accent='blue'] {
+  --primary: oklch(54.6% 0.245 262.881); /* blue-600 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --accent: oklch(97% 0.014 254.604); /* blue-50 */
+  --accent-foreground: oklch(42.4% 0.199 265.638); /* blue-800 */
+  --ring: oklch(62.3% 0.214 259.815); /* blue-500 */
+}
+:root.dark[data-accent='blue'] {
+  --primary: oklch(70.7% 0.165 254.624); /* blue-400 */
+  --primary-foreground: oklch(28.2% 0.091 267.935); /* blue-950 */
+  --accent: oklch(28.2% 0.091 267.935); /* blue-950 */
+  --accent-foreground: oklch(88.2% 0.059 254.128); /* blue-200 */
+  --ring: oklch(70.7% 0.165 254.624); /* blue-400 */
+}
+:root[data-accent='teal'] {
+  --primary: oklch(51.1% 0.096 186.391); /* teal-700 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --accent: oklch(98.4% 0.014 180.72); /* teal-50 */
+  --accent-foreground: oklch(43.7% 0.078 188.216); /* teal-800 */
+  --ring: oklch(60% 0.118 184.704); /* teal-600 */
+}
+:root.dark[data-accent='teal'] {
+  --primary: oklch(77.7% 0.152 181.912); /* teal-400 */
+  --primary-foreground: oklch(27.7% 0.046 192.524); /* teal-950 */
+  --accent: oklch(27.7% 0.046 192.524); /* teal-950 */
+  --accent-foreground: oklch(91% 0.096 180.426); /* teal-200 */
+  --ring: oklch(77.7% 0.152 181.912); /* teal-400 */
+}
+:root[data-accent='green'] {
+  --primary: oklch(52.7% 0.154 150.069); /* green-700 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --accent: oklch(98.2% 0.018 155.826); /* green-50 */
+  --accent-foreground: oklch(44.8% 0.119 151.328); /* green-800 */
+  --ring: oklch(62.7% 0.194 149.214); /* green-600 */
+}
+:root.dark[data-accent='green'] {
+  --primary: oklch(79.2% 0.209 151.711); /* green-400 */
+  --primary-foreground: oklch(26.6% 0.065 152.934); /* green-950 */
+  --accent: oklch(26.6% 0.065 152.934); /* green-950 */
+  --accent-foreground: oklch(92.5% 0.084 155.995); /* green-200 */
+  --ring: oklch(79.2% 0.209 151.711); /* green-400 */
+}
+:root[data-accent='orange'] {
+  --primary: oklch(55.3% 0.195 38.402); /* orange-700 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --accent: oklch(98% 0.016 73.684); /* orange-50 */
+  --accent-foreground: oklch(47% 0.157 37.304); /* orange-800 */
+  --ring: oklch(64.6% 0.222 41.116); /* orange-600 */
+}
+:root.dark[data-accent='orange'] {
+  --primary: oklch(75% 0.183 55.934); /* orange-400 */
+  --primary-foreground: oklch(26.6% 0.079 36.259); /* orange-950 */
+  --accent: oklch(26.6% 0.079 36.259); /* orange-950 */
+  --accent-foreground: oklch(90.1% 0.076 70.697); /* orange-200 */
+  --ring: oklch(75% 0.183 55.934); /* orange-400 */
+}
+:root[data-accent='rose'] {
+  --primary: oklch(58.6% 0.253 17.585); /* rose-600 */
+  --primary-foreground: oklch(1 0 0); /* white */
+  --accent: oklch(96.9% 0.015 12.422); /* rose-50 */
+  --accent-foreground: oklch(45.5% 0.188 13.697); /* rose-800 */
+  --ring: oklch(64.5% 0.246 16.439); /* rose-500 */
+}
+:root.dark[data-accent='rose'] {
+  --primary: oklch(71.2% 0.194 13.428); /* rose-400 */
+  --primary-foreground: oklch(27.1% 0.105 12.094); /* rose-950 */
+  --accent: oklch(27.1% 0.105 12.094); /* rose-950 */
+  --accent-foreground: oklch(89.2% 0.058 10.001); /* rose-200 */
+  --ring: oklch(71.2% 0.194 13.428); /* rose-400 */
+}
+/* The original monochrome look. */
+:root[data-accent='graphite'] {
+  --primary: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --primary-foreground: oklch(98.4% 0.003 247.858); /* slate-50 */
+  --accent: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --accent-foreground: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --ring: oklch(55.4% 0.046 257.417); /* slate-500 */
+}
+:root.dark[data-accent='graphite'] {
+  --primary: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --primary-foreground: oklch(20.8% 0.042 265.755); /* slate-900 */
+  --accent: oklch(27.9% 0.041 260.031); /* slate-800 */
+  --accent-foreground: oklch(96.8% 0.007 247.896); /* slate-100 */
+  --ring: oklch(55.4% 0.046 257.417); /* slate-500 */
+}
+
+/* What a part is for: components set data-role on a part and paint it with --part (outline),
+   --part-fill, --part-strong and --part-soft, e.g. fill-(--part-fill) stroke-(--part). */
+:root {
+  --part: var(--role-neutral);
+  --part-fill: var(--role-neutral-fill);
+  --part-strong: var(--role-neutral-strong);
+  --part-soft: var(--role-neutral-soft);
+}
+[data-role='compute'] {
+  --part: var(--role-compute);
+  --part-fill: var(--role-compute-fill);
+  --part-strong: var(--role-compute-strong);
+  --part-soft: var(--role-compute-soft);
+}
+[data-role='storage'] {
+  --part: var(--role-storage);
+  --part-fill: var(--role-storage-fill);
+  --part-strong: var(--role-storage-strong);
+  --part-soft: var(--role-storage-soft);
+}
+[data-role='network'] {
+  --part: var(--role-network);
+  --part-fill: var(--role-network-fill);
+  --part-strong: var(--role-network-strong);
+  --part-soft: var(--role-network-soft);
+}
+[data-role='power'] {
+  --part: var(--role-power);
+  --part-fill: var(--role-power-fill);
+  --part-strong: var(--role-power-strong);
+  --part-soft: var(--role-power-soft);
+}
+[data-role='neutral'] {
+  --part: var(--role-neutral);
+  --part-fill: var(--role-neutral-fill);
+  --part-strong: var(--role-neutral-strong);
+  --part-soft: var(--role-neutral-soft);
+}
+
+/* The editor canvas behind the rack: a 1px dot every 16px that scrolls with the content. */
+@utility rack-canvas {
+  background-color: var(--rack-canvas);
+  background-image: radial-gradient(circle, var(--rack-grid) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-attachment: local;
 }
 
 @layer base {

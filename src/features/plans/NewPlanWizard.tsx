@@ -27,7 +27,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_TEXT, haveNeedKey, NEED_TEXT, type HaveNeedKey } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { LiveRegion, useAnnouncer } from '@/components/common/LiveRegion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -235,14 +235,15 @@ function StepIndicator({ mode, step }: { mode: WizardMode; step: NumberedStep })
               className={cn(
                 'flex size-5 items-center justify-center rounded-full border text-[0.7rem] font-medium',
                 status === 'current' && 'border-primary bg-primary text-primary-foreground',
-                status === 'done' && 'border-primary',
+                status === 'done' && 'border-primary bg-accent text-primary',
+                status === 'todo' && 'border-input text-muted-foreground',
               )}
             >
               {status === 'done' ? <Check className="size-3" /> : index + 1}
             </span>
             <span
               className={cn(
-                status === 'current' ? 'font-medium text-foreground' : 'text-muted-foreground',
+                status === 'current' ? 'font-semibold text-foreground' : 'text-muted-foreground',
                 // Narrow screens keep only the current step's name visible.
                 status !== 'current' && 'max-sm:sr-only',
               )}
@@ -257,6 +258,13 @@ function StepIndicator({ mode, step }: { mode: WizardMode; step: NumberedStep })
   )
 }
 
+/**
+ * A choice card around a radio: the checked one gets the accent tint and a primary outline, and
+ * its radio shows the dot, so the choice never rests on colour alone.
+ */
+const OPTION_CARD =
+  'rounded-xl border p-3 transition-colors hover:bg-accent/40 has-data-checked:border-primary has-data-checked:bg-accent has-data-checked:ring-1 has-data-checked:ring-primary'
+
 // ---------------------------------------------------------------------------------------------
 // Step 1: frame
 
@@ -266,12 +274,7 @@ function FrameOption({ frame, checked }: { frame: Frame; checked: boolean }) {
   const makerWorld = frame.source?.platform === 'makerworld' ? frame.source.url : undefined
   const onePiece = isOnePieceFrame(frame)
   return (
-    <div
-      className={cn(
-        'rounded-xl border p-3 transition-colors',
-        checked ? 'border-primary bg-muted/60' : 'hover:bg-muted/30',
-      )}
-    >
+    <div className={cn(OPTION_CARD, checked && 'border-primary bg-accent ring-1 ring-primary')}>
       <label className="flex cursor-pointer items-start gap-3">
         <RadioGroupItem
           value={frame.id}
@@ -504,6 +507,16 @@ function OnePieceStack({
   )
 }
 
+/** Quick-start presets: accent-tinted chips, set apart from the plain Add buttons below. */
+const PRESET_CHIP =
+  'border-primary/40 bg-accent text-accent-foreground hover:bg-accent/70 hover:text-accent-foreground dark:border-primary/40 dark:bg-accent dark:hover:bg-accent/70'
+
+/** Section rows: "To get" is dashed amber, "In my rack" solid green, as everywhere else. */
+const SECTION_ROW: Record<HaveNeedKey, string> = {
+  have: 'border-have-border/70',
+  need: 'border-dashed border-need-border/80',
+}
+
 function SectionStack({ state, frame, update, announce, stackErrorId }: StackStepProps) {
   const presetsLabelId = useId()
   const rows = stackRows(state, frame)
@@ -614,8 +627,9 @@ function SectionStack({ state, frame, update, announce, stackErrorId }: StackSte
               <Button
                 key={preset.id}
                 type="button"
-                variant="secondary"
+                variant="outline"
                 size="sm"
+                className={PRESET_CHIP}
                 aria-label={`${preset.label}: ${preset.description}`}
                 aria-describedby={stackErrorId}
                 onClick={() => {
@@ -648,7 +662,7 @@ function SectionStack({ state, frame, update, announce, stackErrorId }: StackSte
                   key={row.key}
                   className={cn(
                     'flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border bg-card p-2.5',
-                    !row.have && 'border-dashed border-foreground/30',
+                    SECTION_ROW[haveNeedKey(row.have)],
                   )}
                 >
                   <div className="min-w-32 flex-1">
@@ -766,8 +780,9 @@ function GoalChoice({
   return (
     <label
       className={cn(
-        'flex items-start gap-3 rounded-lg border p-3',
-        disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:bg-muted/30',
+        OPTION_CARD,
+        'flex items-start gap-3 rounded-lg',
+        disabled ? 'cursor-not-allowed opacity-70 hover:bg-transparent' : 'cursor-pointer',
       )}
     >
       <RadioGroupItem

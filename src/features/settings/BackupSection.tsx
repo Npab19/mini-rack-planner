@@ -1,14 +1,15 @@
-import { Download, TriangleAlert, Upload } from 'lucide-react'
+import { CircleCheck, Clock, Download, TriangleAlert, Upload } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { errorMessage } from '@/db/errors'
 import { useBackupMeta } from '@/state/backupMeta'
 import { describeExport, exportEverything } from './exportEverything'
-import { formatDate, formatDaysAgo } from './format'
+import { BACKUP_NUDGE_AFTER_DAYS } from './backupNudgeRule'
+import { daysSince, formatDate, formatDaysAgo } from './format'
 import { SettingsSection } from './SettingsSection'
 
-type ExportMessage = { kind: 'none' } | { kind: 'done' | 'error'; text: string }
+type ExportMessage = { kind: 'none' } | { kind: 'done' | 'cancelled' | 'error'; text: string }
 
 function LastBackup({ at, loaded }: { at: string | undefined; loaded: boolean }) {
   if (!loaded) return <>Checking…</>
@@ -22,6 +23,23 @@ function LastBackup({ at, loaded }: { at: string | undefined; loaded: boolean })
   )
 }
 
+/**
+ * The icon before "Last backup": a green check while it is recent, an amber clock once it is as
+ * old as the Plans page reminder, an amber warning when there is none. The words say the same.
+ */
+function LastBackupIcon({ at, loaded }: { at: string | undefined; loaded: boolean }) {
+  if (!loaded) return null
+  const className = 'mt-0.5 size-4 shrink-0'
+  if (at === undefined) {
+    return <TriangleAlert aria-hidden="true" className={`${className} text-warning`} />
+  }
+  const days = daysSince(at)
+  if (days !== undefined && days >= BACKUP_NUDGE_AFTER_DAYS) {
+    return <Clock aria-hidden="true" className={`${className} text-warning`} />
+  }
+  return <CircleCheck aria-hidden="true" className={`${className} text-have`} />
+}
+
 /** Export everything to one JSON file, the way to import one, and when the last backup was. */
 export function BackupSection() {
   const { meta, loaded } = useBackupMeta()
@@ -33,7 +51,9 @@ export function BackupSection() {
     setBusy(true)
     setMessage({ kind: 'none' })
     try {
-      setMessage({ kind: 'done', text: describeExport(await exportEverything()) })
+      const result = await exportEverything()
+      const kind = result.outcome === 'cancelled' ? 'cancelled' : 'done'
+      setMessage({ kind, text: describeExport(result) })
     } catch (error) {
       setMessage({ kind: 'error', text: `Could not export a backup: ${errorMessage(error)}` })
     } finally {
@@ -47,10 +67,13 @@ export function BackupSection() {
       title="Backup"
       description="Plans live only in this browser. A backup file keeps them safe and moves them to another browser or address."
     >
-      <p>
-        <span className="font-medium">Last backup:</span>{' '}
-        <LastBackup at={meta.lastBackupAt} loaded={loaded} />
-      </p>
+      <div className="flex items-start gap-1.5">
+        <LastBackupIcon at={meta.lastBackupAt} loaded={loaded} />
+        <p>
+          <span className="font-medium">Last backup:</span>{' '}
+          <LastBackup at={meta.lastBackupAt} loaded={loaded} />
+        </p>
+      </div>
       <div className="flex flex-wrap gap-2">
         {/* Stays focusable while busy, so keyboard users keep their place. */}
         <Button
@@ -74,6 +97,9 @@ export function BackupSection() {
       <p role="status" className="flex items-start gap-1.5 text-sm empty:-mt-4">
         {message.kind === 'error' ? (
           <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
+        ) : null}
+        {message.kind === 'done' ? (
+          <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-have" />
         ) : null}
         {message.kind === 'none' ? '' : message.text}
       </p>

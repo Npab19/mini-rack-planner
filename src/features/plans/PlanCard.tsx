@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { PlanSummary } from '@/db/plansRepo'
+import { cn } from '@/lib/utils'
 import { sectionSummaryText } from '@/state/derived'
 import { formatDateTime, formatRelativeTime } from './format'
 
@@ -38,7 +39,11 @@ export function PlanCard({ summary, now, onAction }: PlanCardProps) {
   return (
     <article
       aria-labelledby={titleId}
-      className="relative flex h-full flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10 transition-shadow has-[a:focus-visible]:ring-3 has-[a:focus-visible]:ring-ring/50 hover:ring-foreground/25"
+      className={cn(
+        'relative flex h-full flex-col gap-3 overflow-hidden rounded-xl bg-card p-4 pt-5 text-sm ring-1 ring-foreground/10 transition-shadow has-[a:focus-visible]:ring-3 has-[a:focus-visible]:ring-ring/50 hover:ring-primary/50',
+        // A slim accent cap on top: decoration only, the card reads the same without it.
+        'before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-primary/80',
+      )}
     >
       <div className="flex items-start gap-2">
         <h3 id={titleId} className="min-w-0 flex-1 text-base leading-snug font-medium break-words">

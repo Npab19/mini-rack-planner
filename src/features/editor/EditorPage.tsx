@@ -59,9 +59,9 @@ function RecordingBanner({ onDone }: { onDone: () => void }) {
   return (
     <section
       aria-labelledby={titleId}
-      className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b-2 border-dashed border-foreground/40 bg-muted/40 px-3 py-2"
+      className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b-2 border-have-border bg-have-soft px-3 py-2"
     >
-      <CircleDot aria-hidden className="size-4 shrink-0" />
+      <CircleDot aria-hidden className="size-4 shrink-0 text-have" />
       <div className="grid min-w-48 flex-1 basis-72 gap-0.5">
         <h2 id={titleId} className="text-sm font-medium">
           Recording what you have
@@ -234,7 +234,7 @@ export function EditorPage() {
   return (
     <StatusShell>
       {current === 'not-found' ? (
-        <Alert>
+        <Alert variant="warning">
           <TriangleAlert aria-hidden />
           <AlertTitle>Plan not found</AlertTitle>
           <AlertDescription>

@@ -52,7 +52,7 @@ export const InsertHandles = memo(function InsertHandles({
                   aria-label={gap.label}
                   title={gap.label}
                   data-testid={`rack-insert-${gap.where}-${gap.index}`}
-                  className="rounded-full bg-background shadow-sm dark:bg-background"
+                  className="rounded-full border-primary bg-background text-primary shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground dark:border-primary dark:bg-background dark:hover:bg-accent"
                 />
               }
             >

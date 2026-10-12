@@ -7,7 +7,7 @@ import { HAVE_TEXT, HaveIcon, NEED_TEXT, NeedIcon } from '@/components/common/Ha
 import { rangeText, truncateToWidth } from './labels'
 import { SIXTHS_PER_U, U_MM } from '@/domain/geometry'
 import { cn } from '@/lib/utils'
-import type { RackPatterns } from './RackDefs'
+import { SelectionRing, type RackPatterns } from './RackDefs'
 import { holeColumnsX, railHoleYsMm, svgYOfMm, svgYOfSixths, type RackLayout } from './rackLayout'
 import { sectionAriaLabel, type JointView, type SectionView } from './rackModel'
 
@@ -52,7 +52,7 @@ export const RackFrame = memo(
     const unitIndexes = Array.from({ length: units }, (_, index) => index)
     return (
       <g aria-hidden="true" data-layer="frame">
-        <rect x={0} y={top} width={width} height={bottom - top} className="fill-muted/40" />
+        <rect x={0} y={top} width={width} height={bottom - top} className="fill-rack-inner" />
         {unitIndexes.map((u) =>
           u % 2 === 1 ? (
             <rect
@@ -61,7 +61,7 @@ export const RackFrame = memo(
               y={svgYOfMm(layout, (u + 1) * U_MM)}
               width={width}
               height={U_MM}
-              className="fill-muted"
+              className="fill-rack-inner-alt"
             />
           ) : null,
         )}
@@ -84,7 +84,7 @@ export const RackFrame = memo(
             width={layout.railWidthMm}
             height={bottom - top}
             strokeWidth={0.4}
-            className="fill-muted-foreground/15 stroke-foreground/25"
+            className="fill-rack-rail stroke-rack-rail-edge"
           />
         ))}
         {railHoleYsMm(layout).flatMap((yMm) =>
@@ -95,7 +95,7 @@ export const RackFrame = memo(
               cy={svgYOfMm(layout, yMm)}
               r={HOLE_RADIUS_MM}
               strokeWidth={0.45}
-              className="fill-background stroke-foreground/40"
+              className="fill-rack-hole stroke-rack-hole-edge"
             />
           )),
         )}
@@ -108,7 +108,7 @@ export const RackFrame = memo(
             textAnchor="end"
             dominantBaseline="central"
             fontSize={U_LABEL_FONT_MM}
-            className="fill-muted-foreground font-medium tabular-nums"
+            className="fill-rack-label font-medium tabular-nums"
           >
             U{u + 1}
           </text>
@@ -122,7 +122,7 @@ export const RackFrame = memo(
           width={width}
           height={bottom - top}
           strokeWidth={0.6}
-          className="fill-none stroke-foreground/40"
+          className="fill-none stroke-rack-outline"
         />
       </g>
     )
@@ -163,7 +163,7 @@ function JointLine({
         y2={y}
         strokeWidth={0.6}
         strokeDasharray="3 2"
-        className="stroke-foreground/60"
+        className="stroke-rack-joint"
       />
     </g>
   )
@@ -184,7 +184,7 @@ export const JointPlates = memo(
               width={layout.bandWidth + 4}
               height={4.8}
               rx={1.2}
-              className="fill-foreground/70"
+              className="fill-rack-joint"
             />
           )
         })}
@@ -251,7 +251,11 @@ export const SectionBand = memo(function SectionBand({
         rx={3}
         strokeWidth={0.7}
         strokeDasharray={have ? undefined : '3 2'}
-        className={cn(have ? 'fill-secondary' : 'fill-background', 'stroke-foreground/55')}
+        className={
+          have
+            ? 'fill-have-soft stroke-have-border dark:fill-have-soft/60'
+            : 'fill-background stroke-need-border'
+        }
       />
       {have ? null : <rect {...box} rx={3} fill={`url(#${patterns.need})`} />}
       <g pointerEvents="none">
@@ -271,7 +275,7 @@ export const SectionBand = memo(function SectionBand({
           y={blockTop + 11}
           width={6.2}
           height={6.2}
-          className="text-foreground"
+          className={have ? 'text-have' : 'text-need'}
         />
         <text
           x={x + 8.5}
@@ -295,15 +299,13 @@ export const SectionBand = memo(function SectionBand({
         </text>
       </g>
       {selected ? (
-        <rect
+        <SelectionRing
           x={box.x + 1.4}
           y={box.y + 1.4}
           width={Math.max(0, box.width - 2.8)}
           height={Math.max(0, box.height - 2.8)}
           rx={2.4}
           strokeWidth={1.8}
-          className="fill-none stroke-primary"
-          data-selection-ring=""
         />
       ) : null}
       <rect

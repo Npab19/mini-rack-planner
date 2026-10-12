@@ -183,7 +183,7 @@ export function PlansPage() {
         <StartOptions onChoose={choose} busyChoice={sampleBusy ? 'sample' : null} />
         <p className="text-sm text-muted-foreground">
           Moving from another browser or device?{' '}
-          <Link to="/import" className="font-medium text-foreground underline underline-offset-4">
+          <Link to="/import" className="font-medium text-primary underline underline-offset-4">
             Import a backup
           </Link>
           .

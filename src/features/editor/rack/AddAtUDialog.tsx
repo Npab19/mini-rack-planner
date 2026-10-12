@@ -11,6 +11,7 @@
  */
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { LiveRegion, useAnnouncer } from '@/components/common/LiveRegion'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,6 +22,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { catalogEntryRole } from '@/domain/partRole'
 import type { Face } from '@/domain/schema/common'
 import { usePlanLookup } from '@/state/derived'
 import { usePlanStore } from '@/state/planStore'
@@ -153,6 +155,7 @@ function AddAtUContent({
   const name = info?.name ?? 'this item'
   const height = info?.heightSixths ?? 6
   const half = info?.half ?? false
+  const role = catalogEntryRole(catalog, source.kind === 'item' ? source.itemId : source.deviceId)
 
   function submit(): void {
     if (chosen === undefined) return
@@ -173,7 +176,10 @@ function AddAtUContent({
   return (
     <DialogContent data-testid="add-at-u-dialog" className="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Add {name} at…</DialogTitle>
+        <DialogTitle>
+          <RoleDot role={role} className="mr-2 align-middle" />
+          Add {name} at…
+        </DialogTitle>
         <DialogDescription>
           {problem !== undefined
             ? 'It cannot be placed on the rack.'

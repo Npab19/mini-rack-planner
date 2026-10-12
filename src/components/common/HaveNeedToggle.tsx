@@ -1,7 +1,8 @@
 /**
  * "In my rack" / "To get" as a two-option radio group styled like a segmented control. Words,
  * icon and pattern carry the state (never colour alone): the owned segment is solid when chosen,
- * the to-get segment gets a dashed outline, like the badges in the rest of the app.
+ * the to-get segment gets a dashed outline, like the badges in the rest of the app. Colour repeats
+ * it: solid green for In my rack, soft amber for To get.
  */
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
@@ -52,8 +53,8 @@ export function HaveNeedToggle({
               'focus-visible:ring-3 focus-visible:ring-ring/50',
               'data-disabled:cursor-not-allowed data-disabled:opacity-60',
               value === 'have'
-                ? 'data-checked:bg-primary data-checked:font-semibold data-checked:text-primary-foreground'
-                : 'data-checked:border-dashed data-checked:border-foreground/60 data-checked:bg-muted data-checked:font-semibold data-checked:text-foreground',
+                ? 'data-checked:bg-have data-checked:font-semibold data-checked:text-have-foreground'
+                : 'data-checked:border-dashed data-checked:border-need-border data-checked:bg-need-soft data-checked:font-semibold data-checked:text-need',
             )}
           >
             <Icon aria-hidden className="size-3.5" />

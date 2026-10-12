@@ -76,15 +76,13 @@ export function BackupNudge({ plans, className }: BackupNudgeProps) {
     <section
       aria-label="Backup reminder"
       className={cn(
-        'flex flex-col gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground ring-1 ring-foreground/10 sm:flex-row sm:items-center',
+        // The warning look of the alerts (soft amber, coloured icon); the words carry the message.
+        'flex flex-col gap-3 rounded-xl border border-warning-border bg-warning-soft p-3 text-sm text-foreground sm:flex-row sm:items-center',
         className,
       )}
     >
       <div className="flex min-w-0 flex-1 items-start gap-2.5">
-        <DatabaseBackup
-          aria-hidden="true"
-          className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-        />
+        <DatabaseBackup aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="font-medium">Plans live only in this browser. Export a backup now?</p>
           <p className="text-muted-foreground">

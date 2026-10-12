@@ -53,11 +53,30 @@ export function issueSummary({ errors, warnings }: IssueCounts): string {
   return parts.length === 0 ? 'no problems' : parts.join(', ')
 }
 
+type ChecksTone = 'unknown' | 'error' | 'warning' | 'clean'
+
+function checksTone(counts: IssueCounts | null): ChecksTone {
+  if (counts === null) return 'unknown'
+  if (counts.errors > 0) return 'error'
+  return counts.warnings > 0 ? 'warning' : 'clean'
+}
+
+/** The worst finding tints the chip; the icons and counts inside say the same in shapes and words. */
+const CHECKS_TONE_CLASSES: Readonly<Record<ChecksTone, string>> = {
+  unknown: '',
+  error:
+    'border-destructive/50 bg-destructive-soft hover:bg-destructive-soft/60 dark:border-destructive/50 dark:bg-destructive-soft dark:hover:bg-destructive-soft/60',
+  warning:
+    'border-warning-border bg-warning-soft hover:bg-warning-soft/60 dark:border-warning-border dark:bg-warning-soft dark:hover:bg-warning-soft/60',
+  clean:
+    'border-have-border bg-have-soft text-have hover:bg-have-soft/60 hover:text-have dark:border-have-border dark:bg-have-soft dark:hover:bg-have-soft/60',
+}
+
 function ChecksToolbarButton({ counts }: { counts: IssueCounts | null }) {
   const actions = useEditorActions()
   const errors = counts?.errors ?? 0
   const warnings = counts?.warnings ?? 0
-  const clean = counts !== null && errors + warnings === 0
+  const tone = checksTone(counts)
   return (
     <Button
       variant="outline"
@@ -65,9 +84,10 @@ function ChecksToolbarButton({ counts }: { counts: IssueCounts | null }) {
       data-testid="toolbar-checks"
       aria-label={counts === null ? 'Checks' : `Checks: ${issueSummary(counts)}`}
       title="Checks"
+      className={CHECKS_TONE_CLASSES[tone]}
       onClick={actions.showChecks}
     >
-      {clean ? <CircleCheck aria-hidden /> : null}
+      {tone === 'clean' ? <CircleCheck aria-hidden /> : null}
       <span>Checks</span>
       {errors > 0 ? (
         <span className="inline-flex items-center gap-0.5 font-semibold text-destructive">
@@ -76,7 +96,7 @@ function ChecksToolbarButton({ counts }: { counts: IssueCounts | null }) {
         </span>
       ) : null}
       {warnings > 0 ? (
-        <span className="inline-flex items-center gap-0.5 font-semibold">
+        <span className="inline-flex items-center gap-0.5 font-semibold text-warning">
           <TriangleAlert aria-hidden className="size-3.5" />
           {warnings}
         </span>
@@ -85,18 +105,27 @@ function ChecksToolbarButton({ counts }: { counts: IssueCounts | null }) {
   )
 }
 
+const CHECKS_ICON_CLASSES: Readonly<Record<ChecksTone, string>> = {
+  unknown: '',
+  error: 'text-destructive',
+  warning: 'text-warning',
+  clean: 'text-have',
+}
+
 function ChecksView({ counts, variant }: { counts: IssueCounts | null; variant: SummaryVariant }) {
   if (variant === 'toolbar') return <ChecksToolbarButton counts={counts} />
   const errors = counts?.errors ?? 0
   const warnings = counts?.warnings ?? 0
   const total = errors + warnings
+  const tone = checksTone(counts)
   return (
     <PanelTabButton
       panel="checks"
       label="Checks"
       icon={errors > 0 ? CircleX : warnings > 0 ? TriangleAlert : CircleCheck}
+      iconClassName={CHECKS_ICON_CLASSES[tone]}
       badge={total > 0 ? String(total) : undefined}
-      urgent={errors > 0}
+      tone={errors > 0 ? 'error' : 'warning'}
       detail={counts === null ? undefined : `: ${issueSummary(counts)}`}
       testId="toolbar-checks"
     />
@@ -153,7 +182,7 @@ function BomToolbarButton({ toGet }: { toGet: number | null }) {
       <ShoppingCart aria-hidden />
       <span>BOM</span>
       {toGet === null ? null : toGet === 0 ? (
-        <Badge variant="secondary">
+        <Badge variant="have">
           <HaveIcon aria-hidden />
           Nothing to get
         </Badge>
@@ -172,6 +201,7 @@ function BomView({ toGet, variant }: { toGet: number | null; variant: SummaryVar
       label="BOM"
       icon={ShoppingCart}
       badge={toGet !== null && toGet > 0 ? String(toGet) : undefined}
+      tone="need"
       detail={toGet === null ? ': bill of materials' : `: bill of materials, ${toGetText(toGet)}`}
       testId="toolbar-bom"
     />

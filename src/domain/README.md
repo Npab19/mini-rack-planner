@@ -110,3 +110,4 @@ plan and share link in `fixtures/compat/v<n>/` and fails when `PlanSchema` no lo
 | `share.ts`, `assembly.ts`         | share links (`ShareMode`), `Assemble` -> `PartInstance[]`                   |
 | `build.ts`                        | Have/Need marks (placements, devices, caps, extras, sections), Finish build |
 | `devices.ts`                      | devices in slots, the equipment tray, mount suggestions, U estimates        |
+| `partRole.ts`                     | part roles (compute, storage, network, power, neutral) for colour hints     |

@@ -1,12 +1,15 @@
 /**
  * Several things selected: what they are, and "Mark all as In my rack / To get" in one undo step
- * (sections get snapshots, placements too; devices on them keep their own marks).
+ * (sections get snapshots, placements too; devices on them keep their own marks). The buttons wear
+ * the In my rack / To get colours; parts carry a role dot next to their names.
  */
 import { useId } from 'react'
 import { HAVE_TEXT, HaveIcon, NEED_TEXT, NeedIcon } from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { markPlacement } from '@/domain/build'
 import { markSection, placementName } from '@/domain/frame'
+import { placementRole, type PartRole } from '@/domain/partRole'
 import type { Frame } from '@/domain/schema/catalog'
 import type { Placement, Plan, PlanSection } from '@/domain/schema/plan'
 import { useUiStore } from '@/state/uiStore'
@@ -53,11 +56,14 @@ export function MultiInspector({
   const { plan, frame, lookup, readOnly } = open
   const headingId = useId()
   const rows = frame === undefined ? [] : stackRows(plan, frame)
-  const names = [
-    ...sections.map(
-      (section) => rows.find((row) => row.sectionId === section.id)?.name ?? section.typeId,
-    ),
-    ...placements.map((placement) => placementName(placement, lookup)),
+  const names: Array<{ name: string; role?: PartRole }> = [
+    ...sections.map((section) => ({
+      name: rows.find((row) => row.sectionId === section.id)?.name ?? section.typeId,
+    })),
+    ...placements.map((placement) => ({
+      name: placementName(placement, lookup),
+      role: placementRole(placement, lookup),
+    })),
   ]
   const count = names.length
 
@@ -93,12 +99,23 @@ export function MultiInspector({
         {count} selected
       </h2>
       <ul className="grid gap-1 text-sm">
-        {names.map((name, index) => (
-          <li key={`${name}-${index}`}>{name}</li>
+        {names.map(({ name, role }, index) => (
+          <li key={`${name}-${index}`}>
+            {role === undefined ? null : (
+              <RoleDot role={role} className="mr-1.5 mb-px align-middle" />
+            )}
+            {name}
+          </li>
         ))}
       </ul>
       <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" disabled={readOnly} onClick={() => mark(true)}>
+        <Button
+          type="button"
+          size="sm"
+          className="bg-have text-have-foreground hover:bg-have/85"
+          disabled={readOnly}
+          onClick={() => mark(true)}
+        >
           <HaveIcon aria-hidden />
           Mark all as {HAVE_TEXT}
         </Button>
@@ -106,7 +123,7 @@ export function MultiInspector({
           type="button"
           size="sm"
           variant="outline"
-          className="border-dashed"
+          className="border-dashed border-need-border text-need hover:bg-need-soft hover:text-need dark:border-need-border dark:hover:bg-need-soft"
           disabled={readOnly}
           onClick={() => mark(false)}
         >

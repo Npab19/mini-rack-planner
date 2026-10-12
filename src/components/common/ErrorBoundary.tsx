@@ -1,4 +1,4 @@
-import { Check, ClipboardCopy, RefreshCw, RotateCcw, TriangleAlert } from 'lucide-react'
+import { Check, ClipboardCopy, Info, RefreshCw, RotateCcw, TriangleAlert } from 'lucide-react'
 import {
   Component,
   useEffect,
@@ -89,7 +89,11 @@ export function CopyDiagnosticsButton({
         aria-busy={status === 'working' || undefined}
         onClick={() => void copy()}
       >
-        {status === 'copied' ? <Check aria-hidden="true" /> : <ClipboardCopy aria-hidden="true" />}
+        {status === 'copied' ? (
+          <Check aria-hidden="true" className="text-have" />
+        ) : (
+          <ClipboardCopy aria-hidden="true" />
+        )}
         {status === 'copied' ? 'Copied' : 'Copy diagnostics'}
       </Button>
       <span role="status" className="sr-only">
@@ -151,12 +155,18 @@ export function ErrorCard({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-xl bg-card p-4 text-sm text-card-foreground ring-1 ring-foreground/10',
+        'flex flex-col gap-3 rounded-xl p-4 text-sm text-card-foreground ring-1',
+        // A new version is news (info), a crash is an error; the heading says which.
+        update ? 'bg-info-soft ring-info-border' : 'bg-card ring-destructive/50',
         className,
       )}
     >
       <div role="alert" className="flex items-start gap-2.5">
-        <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
+        {update ? (
+          <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-info" />
+        ) : (
+          <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-destructive" />
+        )}
         <div className="flex min-w-0 flex-col gap-1">
           <h2 ref={headingRef} tabIndex={-1} className="font-medium outline-none">
             {update ? 'A new version is available' : title}

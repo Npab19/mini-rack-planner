@@ -15,6 +15,12 @@ const badgeVariants = cva(
         outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
         ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4 hover:underline',
+        // Status tones: soft background, coloured text and border. "To get" is dashed, so the
+        // pattern repeats what the colour says.
+        have: 'border-have-border bg-have-soft text-have [a]:hover:bg-have-soft/70',
+        need: 'border-dashed border-need-border bg-need-soft text-need [a]:hover:bg-need-soft/70',
+        warning: 'border-warning-border bg-warning-soft text-warning [a]:hover:bg-warning-soft/70',
+        info: 'border-info-border bg-info-soft text-info [a]:hover:bg-info-soft/70',
       },
     },
     defaultVariants: {

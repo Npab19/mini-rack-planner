@@ -36,16 +36,17 @@ import {
   type PowerStatus,
 } from './checksView'
 
+/** Icon and words carry the severity; the colour repeats it (also on the group heading). */
 const SEVERITY_ICONS: Record<IssueSeverity, { icon: LucideIcon; className: string }> = {
   error: { icon: OctagonX, className: 'text-destructive' },
-  warning: { icon: TriangleAlert, className: 'text-amber-600 dark:text-amber-400' },
-  info: { icon: Info, className: 'text-muted-foreground' },
+  warning: { icon: TriangleAlert, className: 'text-warning' },
+  info: { icon: Info, className: 'text-info' },
 }
 
-const STATUS_ICONS: Record<PowerStatus, LucideIcon> = {
-  ok: CircleCheck,
-  short: CircleX,
-  note: Info,
+const STATUS_ICONS: Record<PowerStatus, { icon: LucideIcon; className: string }> = {
+  ok: { icon: CircleCheck, className: 'text-have' },
+  short: { icon: CircleX, className: 'font-medium text-destructive' },
+  note: { icon: Info, className: 'text-muted-foreground' },
 }
 
 /** "Error: " for screen readers, where the group heading is not read along. */
@@ -94,7 +95,7 @@ function IssueRow({
         onClick={() => onSelect(issue)}
         className={cn(
           'flex w-full items-start gap-2 rounded-md px-2 py-2 text-left outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50',
-          selected && 'bg-muted ring-1 ring-foreground/20',
+          selected && 'bg-accent ring-1 ring-primary/40 hover:bg-accent',
         )}
       >
         {content}{' '}
@@ -126,8 +127,8 @@ function IssueGroupSection({
   const { icon: Icon, className } = SEVERITY_ICONS[group.severity]
   return (
     <section aria-labelledby={headingId} className="grid gap-1">
-      <h3 id={headingId} className="flex items-center gap-2 text-sm font-medium">
-        <Icon aria-hidden className={cn('size-4 shrink-0', className)} />
+      <h3 id={headingId} className={cn('flex items-center gap-2 text-sm font-medium', className)}>
+        <Icon aria-hidden className="size-4 shrink-0" />
         {SEVERITY_WORDS[group.severity].title}
         <span className="font-normal text-muted-foreground">({group.issues.length})</span>
       </h3>
@@ -154,23 +155,18 @@ function PowerSection({ rows }: { rows: readonly PowerRow[] }) {
       className="grid gap-2 rounded-lg border p-3"
     >
       <h3 id={headingId} className="flex items-center gap-2 text-sm font-medium">
-        <PlugZap aria-hidden className="size-4 shrink-0" />
+        <PlugZap aria-hidden className="size-4 shrink-0 text-role-power" />
         Power
       </h3>
       <dl className="grid gap-2">
         {rows.map((row) => {
-          const StatusIcon = STATUS_ICONS[row.status]
+          const { icon: StatusIcon, className } = STATUS_ICONS[row.status]
           return (
             <div key={row.id} data-testid={`checks-power-${row.id}`} className="grid gap-0.5">
               <dt className="text-xs text-muted-foreground">{row.label}</dt>
               <dd className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span className="font-medium tabular-nums">{row.value}</span>
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1 text-xs',
-                    row.status === 'short' ? 'text-destructive' : 'text-muted-foreground',
-                  )}
-                >
+                <span className={cn('inline-flex items-center gap-1 text-xs', className)}>
                   <StatusIcon aria-hidden className="size-3.5" />
                   {row.statusText}
                 </span>
@@ -232,9 +228,9 @@ export function ChecksPanel() {
           {groups.length === 0 ? (
             <p
               data-testid="checks-empty"
-              className="flex items-center gap-2 rounded-lg border border-dashed p-3"
+              className="flex items-center gap-2 rounded-lg border border-have-border bg-have-soft p-3"
             >
-              <CircleCheck aria-hidden className="size-4 shrink-0" />
+              <CircleCheck aria-hidden className="size-4 shrink-0 text-have" />
               No problems found
             </p>
           ) : (

@@ -4,16 +4,26 @@
  * catalog devices, the ones the slot is made for and that fit first. Picking one assigns it
  * (`assignDevice`: fit-checked, area slots re-pack); when it cannot go in, the domain's reason
  * shows next to the list and the plan is unchanged. In Recording mode a catalog device is marked
- * In my rack.
+ * In my rack. Each device has a role dot next to its name; "Fits" and In my rack / To get repeat
+ * their words in colour.
  * Keyboard: ↓ from the search box enters the list, ↑/↓ move, Escape closes.
  */
 import { CircleCheck, CircleX, Plus } from 'lucide-react'
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import { HAVE_TEXT, HaveIcon, NEED_TEXT, NeedIcon } from '@/components/common/HaveNeed'
+import {
+  HAVE_NEED_TEXT_CLASSES,
+  HAVE_TEXT,
+  HaveIcon,
+  haveNeedKey,
+  NEED_TEXT,
+  NeedIcon,
+} from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createCatalogSearch } from '@/catalog/search'
 import { assignDevice, assignEquipment } from '@/domain/devices'
+import { deviceRole, type PartRole } from '@/domain/partRole'
 import { fitDeviceInSlot, slotAccepts } from '@/domain/placement'
 import { deviceName, type Device, type Slot } from '@/domain/schema/catalog'
 import type { PlanEquipment } from '@/domain/schema/plan'
@@ -49,6 +59,7 @@ interface TrayChoice {
   entry: PlanEquipment
   name: string
   dims: string
+  role: PartRole
 }
 
 function trayChoicesFor(
@@ -63,7 +74,7 @@ function trayChoicesFor(
     if (device === undefined || !fitDeviceInSlot(device, slot).ok) return []
     const name = deviceName(device)
     if (wanted !== '' && !name.toLowerCase().includes(wanted)) return []
-    return [{ entry, name, dims: dimsText(device.dims) }]
+    return [{ entry, name, dims: dimsText(device.dims), role: deviceRole(device.category) }]
   })
 }
 
@@ -268,10 +279,18 @@ export function AddDevicePicker({
                     className="flex w-full items-start justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     <span className="min-w-0">
-                      <span className="block font-medium break-words">{choice.name}</span>
+                      <span className="block font-medium break-words">
+                        <RoleDot role={choice.role} className="mr-1.5 mb-px align-middle" />
+                        {choice.name}
+                      </span>
                       <span className="block text-xs text-muted-foreground">{choice.dims}</span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-1 text-xs">
+                    <span
+                      className={cn(
+                        'flex shrink-0 items-center gap-1 text-xs font-medium',
+                        HAVE_NEED_TEXT_CLASSES[haveNeedKey(choice.entry.have)],
+                      )}
+                    >
                       {choice.entry.have ? (
                         <HaveIcon aria-hidden className="size-3.5" />
                       ) : (
@@ -304,11 +323,20 @@ export function AddDevicePicker({
                   >
                     <span className="min-w-0">
                       <span className="block font-medium break-words text-foreground">
+                        <RoleDot
+                          role={deviceRole(choice.device.category)}
+                          className="mr-1.5 mb-px align-middle"
+                        />
                         {choice.name}
                       </span>
                       <span className="block text-xs">{choice.dims}</span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-1 text-xs">
+                    <span
+                      className={cn(
+                        'flex shrink-0 items-center gap-1 text-xs',
+                        choice.fits && 'font-medium text-have',
+                      )}
+                    >
                       {choice.fits ? (
                         <CircleCheck aria-hidden className="size-3.5" />
                       ) : (

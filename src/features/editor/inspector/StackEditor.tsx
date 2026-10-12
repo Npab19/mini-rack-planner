@@ -2,11 +2,13 @@
  * The Rack tab's stack editor: the sections top -> bottom as on the rack, each with In my rack /
  * To get, move up / down, split, merge, and remove (planned) or retire (owned), plus "Add 3U / 6U"
  * on top or at the bottom. Every change is one undo step; conflicts open the conflict dialog.
- * Focus stays on the row a button belonged to after the list re-renders.
+ * Focus stays on the row a button belonged to after the list re-renders. Rows repeat the rack's
+ * section bands: In my rack is a soft green card with a solid outline, To get a soft amber one with
+ * a dashed outline.
  */
 import { Archive, ArrowDown, ArrowUp, Merge, Plus, Scissors, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_TEXT, haveNeedKey, NEED_TEXT, type HaveNeedKey } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { Button } from '@/components/ui/button'
 import { markSection } from '@/domain/frame'
@@ -35,6 +37,13 @@ export interface StackEditorProps {
   announce: (text: string) => void
   /** Selects a section (its row's title). */
   onPick: (ids: readonly string[]) => void
+}
+
+/** A card in the In my rack / To get tone (stack rows here, the top and bottom option groups). */
+export const HAVE_NEED_CARD_CLASSES: Readonly<Record<HaveNeedKey, string>> = {
+  // Half strength in dark mode: the full soft tones are heavy on large cards there.
+  have: 'border-have-border bg-have-soft dark:bg-have-soft/50',
+  need: 'border-dashed border-need-border bg-need-soft dark:bg-need-soft/50',
 }
 
 function typeHeightU(type: SectionType): number {
@@ -166,8 +175,8 @@ export function StackEditor({ open, ops, spares, announce, onPick }: StackEditor
                 data-testid={`stack-row-${row.sectionId}`}
                 data-have={row.have}
                 className={cn(
-                  'grid gap-2 rounded-lg border bg-card p-2',
-                  !row.have && 'border-dashed border-foreground/30',
+                  'grid gap-2 rounded-lg border p-2',
+                  HAVE_NEED_CARD_CLASSES[haveNeedKey(row.have)],
                 )}
               >
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

@@ -3,15 +3,16 @@
  * drawing of what it is (vent slots, keystones, fans, outlets, a shelf deck, a tray, gear ports),
  * the devices in its slots at their true front size, and its label.
  *
- * Have vs To get never relies on colour: In my rack is a solid fill with a solid outline; To get
- * is hatched with a dashed outline and a "To get" tag. Unknown catalog ids draw as a dotted,
- * labelled placeholder.
+ * Colour says what a part is for (`data-role` picks the `--part` tokens): In my rack is filled with
+ * the role's tint (devices in a mount a step stronger) inside a solid role outline. Have vs To get
+ * never relies on colour: To get is a pale tint with an amber hatch, a dashed outline and an amber
+ * "To get" tag. Unknown catalog ids draw as a dotted, labelled placeholder.
  */
 import { ArrowUpDown, CircleHelp } from 'lucide-react'
 import { memo, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { fitLabel, TAG_FONT_SCALE, TAG_TEXT, textWidthMm } from './labels'
-import type { RackPatterns } from './RackDefs'
+import { SelectionRing, type RackPatterns } from './RackDefs'
 import {
   holeColumnsX,
   innerBox,
@@ -46,7 +47,16 @@ export interface PlacementShapeProps {
   register: (id: string, node: SVGGElement | null) => void
 }
 
-const OUTLINE = 'stroke-foreground/55'
+/** Panel fill: the role's tint when it is in my rack, a paler one when it is still to get. */
+const PANEL_FILL = {
+  have: 'fill-(--part-fill)/80',
+  need: 'fill-(--part-soft)/70 dark:fill-(--part-soft)/45',
+} as const
+/** Device fill: a step stronger than the mount's, so devices stand out on it. */
+const DEVICE_FILL = {
+  have: 'fill-(--part-strong)',
+  need: 'fill-(--part-soft)/70 dark:fill-(--part-soft)/45',
+} as const
 /** Styles drawn across the middle of the panel. */
 const MIDDLE_DECORATION: ReadonlySet<DrawStyle> = new Set([
   'vent',
@@ -94,6 +104,7 @@ export const PlacementShape = memo(function PlacementShape({
       data-have={view.have}
       data-face={view.face}
       data-known={view.known}
+      data-role={view.role}
       data-selected={selected || undefined}
       role="button"
       tabIndex={roving ? 0 : -1}
@@ -102,15 +113,27 @@ export const PlacementShape = memo(function PlacementShape({
       aria-describedby={helpId}
       className="cursor-pointer outline-none"
     >
+      {/* Opaque base: the tints below are translucent and the rails must not show through. */}
+      <rect {...box} rx={1.4} className="fill-rack-inner" />
       <rect
         {...box}
         rx={1.4}
         strokeWidth={0.6}
         strokeDasharray={unknown ? '1 1.6' : view.have ? undefined : '3 2'}
-        className={cn(view.have && !unknown ? 'fill-secondary' : 'fill-background', OUTLINE)}
+        className={
+          unknown
+            ? 'fill-background stroke-foreground/55'
+            : cn(
+                // A catalog colour replaces the role tint; the role outline stays.
+                view.color === undefined
+                  ? PANEL_FILL[view.have ? 'have' : 'need']
+                  : 'fill-background',
+                'stroke-(--part)',
+              )
+        }
       />
       {view.color === undefined || unknown ? null : (
-        <rect {...box} rx={1.4} fill={view.color} fillOpacity={0.16} />
+        <rect {...box} rx={1.4} fill={view.color} fillOpacity={view.have ? 0.35 : 0.14} />
       )}
       {view.have || unknown ? null : (
         <rect {...box} rx={1.4} fill={`url(#${patterns.need})`} data-pattern="need" />
@@ -133,15 +156,13 @@ export const PlacementShape = memo(function PlacementShape({
       ))}
       <PlacementLabel view={view} inner={inner} box={box} unknown={unknown} />
       {selected ? (
-        <rect
+        <SelectionRing
           x={box.x + 1.1}
           y={box.y + 1.1}
           width={Math.max(0, box.width - 2.2)}
           height={Math.max(0, box.height - 2.2)}
           rx={1.2}
           strokeWidth={1.8}
-          className="fill-none stroke-primary"
-          data-selection-ring=""
         />
       ) : null}
       {moving ? (
@@ -254,7 +275,7 @@ function PlacementLabel({
             rx={tagHeight / 2}
             strokeWidth={0.45}
             strokeDasharray="1.6 1"
-            className="fill-background stroke-foreground/70"
+            className="fill-need-soft stroke-need-border"
           />
           <text
             x={tagRight - fit.tagWidth / 2}
@@ -262,7 +283,7 @@ function PlacementLabel({
             textAnchor="middle"
             dominantBaseline="central"
             fontSize={f * TAG_FONT_SCALE}
-            className="fill-foreground font-medium"
+            className="fill-need font-medium"
           >
             {TAG_TEXT}
           </text>
@@ -316,6 +337,7 @@ function DeviceShape({
     <g
       data-device-id={device.id}
       data-have={device.have}
+      data-role={device.role}
       data-selected={selected || undefined}
       className="cursor-pointer"
     >
@@ -324,7 +346,11 @@ function DeviceShape({
         rx={1.2}
         strokeWidth={0.5}
         strokeDasharray={device.known ? (device.have ? undefined : '2.5 1.5') : '1 1.5'}
-        className={cn(device.have ? 'fill-card' : 'fill-background', 'stroke-foreground/70')}
+        className={
+          device.known
+            ? cn(DEVICE_FILL[device.have ? 'have' : 'need'], 'stroke-(--part)')
+            : 'fill-background stroke-foreground/70'
+        }
       />
       {device.have ? null : <rect {...rect} rx={1.2} fill={`url(#${patterns.need})`} />}
       {fit === null ? null : (
@@ -352,7 +378,7 @@ function DeviceShape({
                 rx={tagHeight / 2}
                 strokeWidth={0.4}
                 strokeDasharray="1.6 1"
-                className="fill-background stroke-foreground/70"
+                className="fill-need-soft stroke-need-border"
               />
               <text
                 x={rect.x + rect.width - 1.5 - fit.tagWidth / 2}
@@ -360,7 +386,7 @@ function DeviceShape({
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize={f * TAG_FONT_SCALE}
-                className="fill-foreground"
+                className="fill-need font-medium"
               >
                 {TAG_TEXT}
               </text>
@@ -369,15 +395,13 @@ function DeviceShape({
         </g>
       )}
       {selected ? (
-        <rect
+        <SelectionRing
           x={rect.x + 0.8}
           y={rect.y + 0.8}
           width={Math.max(0, rect.width - 1.6)}
           height={Math.max(0, rect.height - 1.6)}
           rx={0.8}
           strokeWidth={1.4}
-          className="fill-none stroke-primary"
-          data-selection-ring=""
         />
       ) : null}
     </g>
@@ -419,7 +443,9 @@ function Screws({
   )
 }
 
-const DECORATION = 'fill-none stroke-foreground/35'
+/** Decorations take the part's role colour, faintly. */
+const DECORATION = 'fill-none stroke-(--part)/45'
+const SOCKET = 'fill-background/55 stroke-(--part)/45'
 
 function Decoration({
   style,
@@ -449,7 +475,7 @@ function Decoration({
           width={inner.width}
           height={1.8}
           rx={0.6}
-          className="fill-foreground/35"
+          className="fill-(--part)/55"
           aria-hidden="true"
         />
       )
@@ -489,7 +515,7 @@ function Keystones({ inner }: { inner: Box }) {
           height={size}
           rx={1}
           strokeWidth={0.5}
-          className="fill-foreground/5 stroke-foreground/30"
+          className={SOCKET}
         />
       ))}
     </g>
@@ -511,7 +537,7 @@ function Fans({ inner }: { inner: Box }) {
           <g key={x}>
             <circle cx={cx} cy={cy} r={r} strokeWidth={0.6} className={DECORATION} />
             <circle cx={cx} cy={cy} r={r * 0.62} strokeWidth={0.4} className={DECORATION} />
-            <circle cx={cx} cy={cy} r={r * 0.16} className="fill-foreground/30" />
+            <circle cx={cx} cy={cy} r={r * 0.16} className="fill-(--part)/45" />
           </g>
         )
       })}
@@ -538,7 +564,7 @@ function Outlets({ inner }: { inner: Box }) {
             height={height}
             rx={height * 0.25}
             strokeWidth={0.5}
-            className="fill-foreground/5 stroke-foreground/30"
+            className={SOCKET}
           />
           <rect
             x={x + width * 0.3}
@@ -582,7 +608,7 @@ function Ports({ inner }: { inner: Box }) {
           height={height}
           rx={0.5}
           strokeWidth={0.4}
-          className="fill-foreground/5 stroke-foreground/30"
+          className={SOCKET}
         />
       ))}
     </g>

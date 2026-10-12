@@ -7,7 +7,7 @@ import { resetDbForTests } from '@/db/db'
 import { createPlan } from '@/db/plansRepo'
 import { getSettings, updateSettings } from '@/db/settingsRepo'
 import { samplePlan } from '@/domain/__fixtures__/samplePlan'
-import { setTheme } from '@/lib/theme'
+import { DEFAULT_ACCENT, setAccent, setTheme } from '@/lib/theme'
 import { SettingsPage } from './SettingsPage'
 
 function renderPage(path = '/settings') {
@@ -60,6 +60,7 @@ afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
   setTheme('system')
+  setAccent(DEFAULT_ACCENT)
 })
 
 describe('SettingsPage', () => {
@@ -210,6 +211,21 @@ describe('SettingsPage', () => {
     expect(document.documentElement).toHaveClass('dark')
     expect(window.localStorage.getItem('mrp-theme')).toBe('dark')
     expect(within(appearance).getByRole('status')).toHaveTextContent('Saved')
+  })
+
+  it('switches the accent colour and remembers it', () => {
+    renderPage()
+    const accent = within(region('Appearance')).getByRole('radiogroup', { name: 'Accent colour' })
+    expect(within(accent).getAllByRole('radio')).toHaveLength(7)
+    expect(within(accent).getByRole('radio', { name: 'Indigo' })).toBeChecked()
+    const teal = within(accent).getByRole('radio', { name: 'Teal' })
+    fireEvent.click(teal)
+    expect(teal).toBeChecked()
+    expect(document.documentElement.dataset.accent).toBe('teal')
+    expect(window.localStorage.getItem('mrp-accent')).toBe('teal')
+    expect(within(region('Appearance')).getByRole('status')).toHaveTextContent('Saved')
+    fireEvent.click(within(accent).getByRole('radio', { name: 'Indigo' }))
+    expect(document.documentElement).not.toHaveAttribute('data-accent')
   })
 
   it('exports everything to a dated JSON file and remembers when', async () => {

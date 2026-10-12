@@ -3,7 +3,7 @@
  * bring it in (merge, copy or replace) and import it. Files are read in this browser; nothing is
  * uploaded. Share links (#p=…) belong to the read-only viewer, which comes in v0.2.
  */
-import { CircleAlert, FileUp, Info, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { CircleAlert, CircleCheck, FileUp, Info, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type DragEvent } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -91,6 +91,22 @@ function planStatus(plan: PreviewPlan, existing: ReadonlySet<string>): string {
   if (plan.status === 'read-only') return 'Newer app version: read-only'
   return plan.id !== undefined && existing.has(plan.id) ? 'Already in this browser' : 'New'
 }
+
+/** The badge tone next to each plan in the preview; the badge text says the same. */
+function planBadge(
+  plan: PreviewPlan,
+  existing: ReadonlySet<string>,
+): 'destructive' | 'warning' | 'info' | 'outline' {
+  if (plan.status === 'invalid') return 'destructive'
+  if (plan.status === 'read-only') return 'warning'
+  return plan.id !== undefined && existing.has(plan.id) ? 'outline' : 'info'
+}
+
+/** Import modes as choice cards: the checked one is tinted (Replace in the destructive tone). */
+const MODE_CARD =
+  'flex items-start gap-3 rounded-lg border p-3 transition-colors has-data-checked:border-primary has-data-checked:bg-accent has-data-checked:ring-1 has-data-checked:ring-primary'
+const REPLACE_CARD =
+  'flex items-start gap-3 rounded-lg border p-3 transition-colors has-data-checked:border-destructive has-data-checked:bg-destructive-soft has-data-checked:ring-1 has-data-checked:ring-destructive'
 
 function contentsSummary(preview: ImportPreview, existing: ReadonlySet<string>): string {
   const plans = importablePlans(preview)
@@ -264,7 +280,7 @@ export function ImportPage() {
       </header>
 
       {shareLink ? (
-        <Alert role="status">
+        <Alert role="status" variant="info">
           <Info aria-hidden />
           <AlertTitle>This is a share link</AlertTitle>
           <AlertDescription>
@@ -295,10 +311,10 @@ export function ImportPage() {
           onDrop={onDrop}
           className={cn(
             'grid place-items-center gap-2 rounded-xl border-2 border-dashed p-6 text-center transition-colors',
-            dragging ? 'border-primary bg-muted' : 'border-border',
+            dragging ? 'border-primary bg-accent' : 'border-primary/30 bg-accent/30',
           )}
         >
-          <FileUp aria-hidden className="size-8 text-muted-foreground" />
+          <FileUp aria-hidden className="size-8 text-primary" />
           <p className="font-medium">
             {dragging ? 'Drop the file to read it' : 'Drop a backup or plan file here'}
           </p>
@@ -388,7 +404,7 @@ export function ImportPage() {
                   )}
                 >
                   <span className="min-w-0 break-words">{plan.name}</span>
-                  <Badge variant={plan.status === 'invalid' ? 'destructive' : 'outline'}>
+                  <Badge variant={planBadge(plan, picked.existing)}>
                     {plan.status === 'invalid' ? <CircleAlert aria-hidden /> : null}
                     {planStatus(plan, picked.existing)}
                   </Badge>
@@ -403,7 +419,7 @@ export function ImportPage() {
           )}
 
           {leftOut.length === 0 ? null : (
-            <Alert role="status">
+            <Alert role="status" variant="warning">
               <TriangleAlert aria-hidden />
               <AlertTitle>Some of the file will be left out</AlertTitle>
               <AlertDescription>
@@ -435,9 +451,9 @@ export function ImportPage() {
                       <label
                         key={value}
                         className={cn(
-                          'flex items-start gap-3 rounded-lg border p-3',
+                          value === 'replace' ? REPLACE_CARD : MODE_CARD,
                           disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer',
-                          value === 'replace' && mode === 'replace' && 'border-destructive',
+                          !disabled && value !== mode && 'hover:bg-accent/40',
                         )}
                       >
                         <RadioGroupItem
@@ -540,8 +556,9 @@ export function ImportPage() {
             ref={resultHeadingRef}
             id={resultHeadingId}
             tabIndex={-1}
-            className="text-base font-medium outline-none"
+            className="flex items-center gap-2 text-base font-medium outline-none"
           >
+            <CircleCheck aria-hidden className="size-5 shrink-0 text-have" />
             Imported {imported.fileName}
           </h2>
           <ul className="grid gap-1 text-sm">
@@ -557,7 +574,7 @@ export function ImportPage() {
                   <li key={id}>
                     <Link
                       to={`/plan/${encodeURIComponent(id)}`}
-                      className="text-sm font-medium underline underline-offset-4"
+                      className="text-sm font-medium text-primary underline underline-offset-4"
                     >
                       {imported.names.get(id) ?? id}
                     </Link>
@@ -567,7 +584,7 @@ export function ImportPage() {
             </div>
           )}
           {imported.result.errors.length + imported.result.warnings.length === 0 ? null : (
-            <Alert role="status">
+            <Alert role="status" variant="warning">
               <TriangleAlert aria-hidden />
               <AlertTitle>Notes</AlertTitle>
               <AlertDescription>

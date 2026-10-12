@@ -1,18 +1,21 @@
 /**
  * The frame's options grouped by where they apply: the whole rack, the top and the bottom of the
  * rack (each a once-per-rack assembly with its own In my rack / To get), and defaults for every
- * section (a section can change them in its own settings). Edits are undoable plan edits.
+ * section (a section can change them in its own settings). Edits are undoable plan edits. The top
+ * and bottom groups are tinted like the stack rows: green for In my rack, dashed amber for To get.
  */
 import { type ReactNode, useId } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_TEXT, haveNeedKey, NEED_TEXT, type HaveNeedKey } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { markCap } from '@/domain/build'
 import { resolveOptionValues } from '@/domain/recipe'
 import type { Frame, Option, OptionScope } from '@/domain/schema/catalog'
 import type { OptionValue } from '@/domain/schema/common'
+import { cn } from '@/lib/utils'
 import { usePlanStore } from '@/state/planStore'
 import { OptionField } from './OptionField'
 import { applyPlanOp, nowIso, sparesText, type SpareContext } from './planOps'
+import { HAVE_NEED_CARD_CLASSES } from './StackEditor'
 import type { OpenPlan } from './useOpenPlan'
 
 type Cap = 'top' | 'bottom'
@@ -36,9 +39,25 @@ export function optionChangeText(option: Option, value: OptionValue): string {
   return `${option.label}: ${choice?.label ?? String(value)}.`
 }
 
-function Group({ title, children, note }: { title: string; children: ReactNode; note?: string }) {
+function Group({
+  title,
+  children,
+  note,
+  tone,
+}: {
+  title: string
+  children: ReactNode
+  note?: string
+  /** For an assembly with its own In my rack / To get (top and bottom). */
+  tone?: HaveNeedKey
+}) {
   return (
-    <fieldset className="grid gap-3 rounded-lg border p-3">
+    <fieldset
+      className={cn(
+        'grid gap-3 rounded-lg border p-3',
+        tone === undefined ? null : HAVE_NEED_CARD_CLASSES[tone],
+      )}
+    >
       <legend className="px-1 text-sm font-medium">{title}</legend>
       {note === undefined ? null : <p className="-mt-1 text-xs text-muted-foreground">{note}</p>}
       {children}
@@ -112,7 +131,7 @@ export function FrameOptionsPanel({ open, spares, announce }: FrameOptionsPanelP
             const state = plan.frame.caps[cap]
             const values = resolveOptionValues(capOptions, plan.frame.options, state.options)
             return (
-              <Group key={cap} title={CAP_TITLES[cap]}>
+              <Group key={cap} title={CAP_TITLES[cap]} tone={haveNeedKey(state.have !== undefined)}>
                 <HaveNeedToggle
                   have={state.have !== undefined}
                   label={`${CAP_TITLES[cap]}: in my rack or to get`}

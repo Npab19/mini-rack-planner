@@ -1,4 +1,11 @@
-import { Check, ClipboardCopy, Eraser, ExternalLink } from 'lucide-react'
+import {
+  Check,
+  CircleCheck,
+  ClipboardCopy,
+  Eraser,
+  ExternalLink,
+  TriangleAlert,
+} from 'lucide-react'
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { copyText } from '@/lib/clipboard'
@@ -91,7 +98,12 @@ export function DiagnosticsSection() {
       title="Diagnostics"
       description="Recent errors in this browser, to help fix problems you report. They never include plan contents, names, notes or file names."
     >
-      <p>
+      <p className="flex items-start gap-1.5">
+        {latest === undefined ? (
+          <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-have" />
+        ) : (
+          <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-warning" />
+        )}
         {latest === undefined
           ? 'No problems recorded.'
           : `${plural(entries.length, 'problem')} recorded, the latest on ${formatDateTime(latest.at)}.`}
@@ -104,7 +116,7 @@ export function DiagnosticsSection() {
           onClick={() => void copyDiagnostics()}
         >
           {copyState === 'copied' ? (
-            <Check aria-hidden="true" />
+            <Check aria-hidden="true" className="text-have" />
           ) : (
             <ClipboardCopy aria-hidden="true" />
           )}

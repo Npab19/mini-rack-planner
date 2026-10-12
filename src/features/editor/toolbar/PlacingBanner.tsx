@@ -43,9 +43,9 @@ function PlacingBannerContent({ source }: { source: PlaceSource }) {
     <div
       id={PLACING_BANNER_ID}
       data-testid="placing-banner"
-      className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-dashed border-foreground/40 bg-muted/40 px-3 py-1.5 text-sm"
+      className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-dashed border-info-border bg-info-soft px-3 py-1.5 text-sm"
     >
-      <MousePointerClick aria-hidden className="size-4 shrink-0" />
+      <MousePointerClick aria-hidden className="size-4 shrink-0 text-info" />
       <p className="min-w-0 flex-1 basis-48">
         Placing <span className="font-semibold">{name}</span>
         {' – '}
@@ -53,12 +53,12 @@ function PlacingBannerContent({ source }: { source: PlaceSource }) {
           'tap a free spot on the rack, or Cancel.'
         ) : (
           <>
-            click a free spot on the rack, or press <Kbd className="text-foreground">Esc</Kbd>.
+            click a free spot on the rack, or press <Kbd>Esc</Kbd>.
             {/* A device from the tray goes in once; parts from the palette can go in a row. */}
             {source.equipmentId === undefined ? (
               <span className="text-muted-foreground">
                 {' '}
-                Hold <Kbd className="text-foreground">Shift</Kbd> to place several.
+                Hold <Kbd>Shift</Kbd> to place several.
               </span>
             ) : null}
           </>

@@ -14,8 +14,8 @@ import { Kbd } from '@/components/ui/kbd'
 import { setHelpOpen, useEditorShell } from './layout/shellStore'
 import { isApplePlatform } from './toolbar/platform'
 
-/** The kit's Kbd text is muted (about 4.3:1 on its tint in the light theme): keys read at AA here. */
-const KBD_CLASS = 'text-foreground'
+/** Keys as accent-tinted caps, so they stand out from the descriptions next to them. */
+const KBD_CLASS = 'border-primary/40 bg-accent text-accent-foreground'
 
 /** One way to press a shortcut: keys held together, e.g. ["Ctrl", "Shift", "Z"]. */
 type Combo = readonly string[]

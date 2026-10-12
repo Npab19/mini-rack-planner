@@ -1,8 +1,9 @@
 /**
  * "Set height": pick a height the frame's section steps can reach and the end that grows or
  * shrinks, then Apply (`setHeight`: only the planned run at that end is rebuilt, sections you have
- * never change). A preview says what will happen; errors show next to the form.
+ * never change). A preview (an info note) says what will happen; errors show next to the form.
  */
+import { Info } from 'lucide-react'
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -147,8 +148,12 @@ export function SetHeightForm({ open, ops, announce }: SetHeightFormProps) {
         </div>
       </div>
       {preview === undefined ? null : (
-        <p id={previewId} className="text-sm text-muted-foreground">
-          {preview}
+        <p
+          id={previewId}
+          className="flex items-start gap-1.5 rounded-md border border-info-border bg-info-soft px-2.5 py-1.5 text-sm"
+        >
+          <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
+          <span>{preview}</span>
         </p>
       )}
       {error === null ? null : (

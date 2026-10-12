@@ -17,7 +17,7 @@ export function AboutPage() {
         Something not working?{' '}
         <Link
           to="/settings#diagnostics"
-          className="rounded-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="rounded-sm font-medium text-primary underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           Settings &gt; Diagnostics
         </Link>{' '}

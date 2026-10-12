@@ -35,6 +35,10 @@ export const GROUP_TITLES: Record<BomTab, Record<BomLineKind, string>> = {
   leftovers: { print: 'Printed parts', hardware: 'Hardware', device: 'Equipment' },
 }
 
+/** Finish build turns To get into In my rack, so its buttons wear the solid In my rack colour. */
+export const FINISH_BUILD_CLASSES =
+  'bg-have text-have-foreground hover:bg-have/85 focus-visible:border-have-border focus-visible:ring-have/40'
+
 // ---------------------------------------------------------------------------------------------
 // Lines per tab
 
