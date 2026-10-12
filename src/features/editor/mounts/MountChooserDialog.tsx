@@ -11,10 +11,21 @@
  * Keyboard: focus starts on the first option's Place button, Tab moves through the options,
  * Escape closes. After a placement the result is announced in the editor's live region, the new
  * part is selected and focused on the rack (the arrow keys then move it).
+ *
+ * Colour repeats the words and icons: a role dot before each mount, "fits where you dropped it" in
+ * green, "not where you dropped it" in the warning tone and the nearest free spot as info.
  */
-import { CircleCheck, CircleSlash, MoveVertical, PackageSearch, Wrench } from 'lucide-react'
+import {
+  CircleCheck,
+  CircleSlash,
+  MoveVertical,
+  PackageSearch,
+  TriangleAlert,
+  Wrench,
+} from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { HAVE_TEXT } from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,8 +37,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { formatU } from '@/domain/geometry'
+import { catalogEntryRole, deviceRole, type PartRole } from '@/domain/partRole'
 import { deviceName } from '@/domain/schema/catalog'
 import type { Face } from '@/domain/schema/common'
+import { cn } from '@/lib/utils'
 import { usePlanLookup } from '@/state/derived'
 import { usePlanStore } from '@/state/planStore'
 import { useRecordingMode } from '@/state/uiStore'
@@ -171,7 +184,13 @@ function ChooserContent({
       finalFocus={finalFocus}
     >
       <DialogHeader>
-        <DialogTitle>Choose a mount for {name}</DialogTitle>
+        <DialogTitle>
+          Choose a mount for{' '}
+          {device === undefined ? null : (
+            <RoleDot role={deviceRole(device.category)} className="mr-1 mb-0.5 align-middle" />
+          )}
+          {name}
+        </DialogTitle>
         <DialogDescription>
           {device === undefined
             ? `Dropped at ${dropped}.`
@@ -189,9 +208,12 @@ function ChooserContent({
       ) : (
         <>
           {anyFree ? null : (
-            <p className="text-sm text-muted-foreground">
-              None of these has a free spot on the {FACE_TEXT[request.face]}. Free some space, or
-              add a section with the + handles beside the rack.
+            <p className="flex items-start gap-2 rounded-lg border border-warning-border bg-warning-soft p-2.5 text-sm">
+              <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
+              <span>
+                None of these has a free spot on the {FACE_TEXT[request.face]}. Free some space, or
+                add a section with the + handles beside the rack.
+              </span>
             </p>
           )}
           <ul aria-label={`Ways to mount ${name}`} className="grid gap-2">
@@ -199,6 +221,7 @@ function ChooserContent({
               <OptionRow
                 key={option.itemId}
                 option={option}
+                role={catalogEntryRole(lookup, option.itemId)}
                 frameName={frame?.name}
                 subject={name}
                 onChoose={choose}
@@ -236,9 +259,9 @@ function ChooserContent({
 
 function NothingTakesIt({ name, onNeedsAMount }: { name: string; onNeedsAMount: () => void }) {
   return (
-    <div className="grid gap-3 rounded-lg border border-dashed p-3">
+    <div className="grid gap-3 rounded-lg border border-info-border bg-info-soft p-3">
       <p className="flex items-start gap-2 text-sm">
-        <PackageSearch aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <PackageSearch aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
         <span>
           No mount in the catalog takes the {name} yet. “Needs a mount?” suggests a size and the
           settings for popular mount generators.
@@ -254,11 +277,14 @@ function NothingTakesIt({ name, onNeedsAMount }: { name: string; onNeedsAMount: 
 
 function OptionRow({
   option,
+  role,
   frameName,
   subject,
   onChoose,
 }: {
   option: ChooserOption
+  /** What the mount (or the ear-mounted device) is for: its dot. */
+  role: PartRole
   frameName: string | undefined
   /** The device's name. */
   subject: string
@@ -280,19 +306,25 @@ function OptionRow({
     <li
       data-testid={`mount-option-${option.itemId}`}
       data-fits={option.atDrop}
-      className="grid gap-2 rounded-lg border p-3"
+      className={cn(
+        'grid gap-2 rounded-lg border p-3',
+        option.atDrop && where !== undefined && 'border-have-border',
+      )}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="font-medium break-words">{title}</span>
+        <span className="font-medium break-words">
+          <RoleDot role={role} className="mr-1.5 mb-px align-middle" />
+          {title}
+        </span>
         <span className="text-xs text-muted-foreground">{formatU(option.heightSixths)}</span>
         {option.frameSpecific && frameName !== undefined ? (
-          <Badge variant="secondary" className="whitespace-normal">
+          <Badge variant="info" className="whitespace-normal">
             made for {frameName}
           </Badge>
         ) : null}
       </div>
       {option.atDrop && where !== undefined ? (
-        <p className="flex items-start gap-1.5 text-xs">
+        <p className="flex items-start gap-1.5 text-xs font-medium text-have">
           <CircleCheck aria-hidden className="mt-px size-3.5 shrink-0" />
           <span>
             Fits where you dropped it: {where}
@@ -302,13 +334,18 @@ function OptionRow({
       ) : (
         <div className="grid gap-1 text-xs">
           <p className="flex items-start gap-1.5">
-            <CircleSlash aria-hidden className="mt-px size-3.5 shrink-0" />
+            <CircleSlash aria-hidden className="mt-px size-3.5 shrink-0 text-warning" />
             <span>
               Not where you dropped it
               {option.dropReason === undefined ? '.' : `: ${option.dropReason}`}
             </span>
           </p>
-          <p className="flex items-start gap-1.5 text-muted-foreground">
+          <p
+            className={cn(
+              'flex items-start gap-1.5',
+              where === undefined ? 'text-muted-foreground' : 'font-medium text-info',
+            )}
+          >
             <MoveVertical aria-hidden className="mt-px size-3.5 shrink-0" />
             <span>
               {where === undefined

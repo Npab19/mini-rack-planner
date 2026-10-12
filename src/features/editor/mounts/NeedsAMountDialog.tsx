@@ -8,10 +8,15 @@
  *
  * Opened through `useMountDialogs.openNeedsAMount` (the equipment tray, the mount chooser);
  * rendered once by the editor (`MountDialogs`).
+ *
+ * Colour: the suggested size and the files note are info, warnings use the warning tone, each
+ * generator's settings sit in a code-like block on the muted background, and Copy turns green
+ * with a check (and the word "Copied") once done.
  */
-import { Check, Copy, ExternalLink, Ruler, TriangleAlert, Wrench } from 'lucide-react'
+import { Check, Copy, ExternalLink, FileBox, Ruler, TriangleAlert, Wrench } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { LiveRegion, useAnnouncer } from '@/components/common/LiveRegion'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -34,6 +39,7 @@ import {
   suggestedMountSixths,
   type GeneratorSuggestion,
 } from '@/domain/mountGenerator'
+import { deviceRole } from '@/domain/partRole'
 import { effectiveFrameSize } from '@/domain/recipe'
 import { deviceName, type Device, type Frame } from '@/domain/schema/catalog'
 import { useAddPart, type AddPartRequest, type AddPartTarget } from '@/features/custom/addPartStore'
@@ -49,7 +55,7 @@ import { useMountDialogs, type NeedsAMountRequest } from './mountDialogsStore'
 export const COPIED_MS = 2000
 
 const LINK_CLASS =
-  'inline-flex items-center gap-1 rounded-sm text-sm font-medium underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50'
+  'inline-flex items-center gap-1 rounded-sm text-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
 
 function requestKey(request: NeedsAMountRequest): string {
   return `${request.deviceId}:${request.equipmentId ?? ''}`
@@ -137,7 +143,12 @@ function NeedsAMountContent({
       className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
     >
       <DialogHeader>
-        <DialogTitle>Needs a mount?</DialogTitle>
+        <DialogTitle>
+          {device === undefined ? null : (
+            <RoleDot role={deviceRole(device.category)} className="mr-2 mb-0.5 align-middle" />
+          )}
+          Needs a mount?
+        </DialogTitle>
         <DialogDescription>
           {device === undefined
             ? `“${request.deviceId}” is not in the catalog, so its size is unknown.`
@@ -155,10 +166,10 @@ function NeedsAMountContent({
         <>
           <SizeNote device={device} frame={frame} heightSixths={details.heightSixths} />
           {details.warnings.length === 0 ? null : (
-            <ul className="grid gap-1 text-sm">
+            <ul className="grid gap-1 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm">
               {details.warnings.map((warning) => (
                 <li key={warning} className="flex items-start gap-2">
-                  <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+                  <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
                   <span>
                     <span className="sr-only">Warning: </span>
                     {warning}
@@ -186,9 +197,12 @@ function NeedsAMountContent({
               ))}
             </ul>
           </section>
-          <p className="text-xs text-muted-foreground">
-            When the model is printed, you can drop the 3MF or STL you downloaded on the part to see
-            it in 3D. Files are only read in your browser: they are never uploaded or shared.
+          <p className="flex items-start gap-2 rounded-lg border border-info-border bg-info-soft p-2.5 text-xs text-muted-foreground">
+            <FileBox aria-hidden className="mt-px size-4 shrink-0 text-info" />
+            <span>
+              When the model is printed, you can drop the 3MF or STL you downloaded on the part to
+              see it in 3D. Files are only read in your browser: they are never uploaded or shared.
+            </span>
           </p>
         </>
       )}
@@ -226,13 +240,15 @@ function SizeNote({
   return (
     <p
       data-testid="needs-a-mount-size"
-      className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-sm"
+      className="flex items-start gap-2 rounded-lg border border-info-border bg-info-soft p-3 text-sm"
     >
-      <Ruler aria-hidden className="mt-0.5 size-4 shrink-0" />
+      <Ruler aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
       <span>
-        <span className="font-medium">A {formatU(heightSixths)} mount would hold it:</span> it is{' '}
-        {Math.round(device.dims.h * 10) / 10} mm tall, plus {MOUNT_CLEARANCE_MM} mm of room, rounded
-        up to {steps}.
+        <span className="font-medium text-info">
+          A {formatU(heightSixths)} mount would hold it:
+        </span>{' '}
+        it is {Math.round(device.dims.h * 10) / 10} mm tall, plus {MOUNT_CLEARANCE_MM} mm of room,
+        rounded up to {steps}.
       </span>
     </p>
   )
@@ -294,7 +310,7 @@ function GeneratorCard({
       <dl
         aria-labelledby={headingId}
         data-testid={`generator-params-${suggestion.id}`}
-        className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-md bg-muted/40 p-2 text-xs"
+        className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-md border bg-muted p-2 text-xs"
       >
         {suggestion.params.map((param) => (
           <div key={param.name} className="contents">
@@ -318,9 +334,10 @@ function GeneratorCard({
           size="sm"
           variant="outline"
           data-testid={`generator-copy-${suggestion.id}`}
+          className={cn(copied && 'border-have-border text-have hover:text-have')}
           onClick={() => void copy()}
         >
-          {copied ? <Check aria-hidden /> : <Copy aria-hidden />}
+          {copied ? <Check aria-hidden /> : <Copy aria-hidden className="text-primary" />}
           <span>{copied ? 'Copied' : 'Copy settings'}</span>{' '}
           <span className="sr-only">
             {copied ? `the settings for ${suggestion.name}` : `for ${suggestion.name}`}
@@ -330,7 +347,7 @@ function GeneratorCard({
           href={suggestion.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={LINK_CLASS}
+          className={cn(LINK_CLASS, 'text-primary')}
           data-testid={`generator-open-${suggestion.id}`}
         >
           Open on MakerWorld
@@ -342,7 +359,7 @@ function GeneratorCard({
             href={suggestion.sourceCode.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(LINK_CLASS, 'text-muted-foreground')}
+            className={cn(LINK_CLASS, 'text-muted-foreground hover:text-foreground')}
           >
             Source code ({suggestion.sourceCode.license})
             <ExternalLink aria-hidden className="size-3.5" />

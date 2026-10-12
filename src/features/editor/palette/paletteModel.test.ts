@@ -179,3 +179,12 @@ describe('dragSubjectOf', () => {
     expect(dragSubjectOf(toPaletteRow(FEET, FRAME.id))).toBeNull()
   })
 })
+
+describe('row roles', () => {
+  it('colours devices by category and items by what they hold', () => {
+    expect(toPaletteRow(MINI_PC, FRAME.id).role).toBe('compute')
+    expect(toPaletteRow(SWITCH, FRAME.id).role).toBe('network')
+    expect(toPaletteRow(BLANK_1U, FRAME.id).role).toBe('neutral')
+    expect(toPaletteRow(FEET, FRAME.id).role).toBe('neutral')
+  })
+})

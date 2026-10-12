@@ -1,12 +1,14 @@
 /**
  * "Add a device": a search field over the catalog's devices (brand, model, type) with the matches
  * as a list of buttons below. Enter adds the best match; the arrow keys move between the field and
- * the matches; Escape goes back to the field.
+ * the matches; Escape goes back to the field. Each match has a role dot before its name.
  */
 import { Plus } from 'lucide-react'
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { RoleDot } from '@/components/common/PartRole'
 import { Input } from '@/components/ui/input'
 import { createCatalogSearch } from '@/catalog/search'
+import { deviceRole } from '@/domain/partRole'
 import { deviceName, type CatalogLookup, type Device } from '@/domain/schema/catalog'
 import { dimsText } from './equipmentView'
 
@@ -119,10 +121,16 @@ export function DevicePicker({
                 onClick={() => onAdd(device)}
                 className="flex w-full items-start gap-2 rounded-md border px-2 py-1.5 text-left outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
               >
-                <Plus aria-hidden className="mt-0.5 size-4 shrink-0" />
+                <Plus aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
                 <span className="min-w-0">
                   <span className="sr-only">Add</span>{' '}
-                  <span className="block font-medium break-words">{deviceName(device)}</span>{' '}
+                  <span className="block font-medium break-words">
+                    <RoleDot
+                      role={deviceRole(device.category)}
+                      className="mr-1.5 mb-px align-middle"
+                    />
+                    {deviceName(device)}
+                  </span>{' '}
                   <span className="block text-xs text-muted-foreground">
                     ({device.category}, {dimsText(device)})
                   </span>

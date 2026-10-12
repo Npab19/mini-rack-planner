@@ -2,12 +2,14 @@
  * A placement's slots and the devices in them: name, size, whether it fits (icon + reason, from
  * `fitDeviceInSlot` and the area slot's packing), how it sits (when the slot allows several
  * orientations: `setDeviceOrientation`, area slots re-pack), In my rack / To get, Remove, and
- * "Add device".
+ * "Add device". Device rows are In my rack / To get cards (as the stack editor's rows) with a role
+ * dot before the name; "fits" is green, a misfit destructive and an unknown device a warning.
  */
 import { CircleCheck, CircleX, TriangleAlert, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_TEXT, haveNeedKey, NEED_TEXT } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { markPlacementDevice } from '@/domain/build'
 import {
@@ -17,6 +19,7 @@ import {
   setDeviceOrientation,
   type OrientationChoice,
 } from '@/domain/devices'
+import { deviceRole } from '@/domain/partRole'
 import { fitDeviceInSlot, packAreaSlot, type PackItem } from '@/domain/placement'
 import { deviceName, type Slot } from '@/domain/schema/catalog'
 import type { Orientation } from '@/domain/schema/common'
@@ -26,6 +29,7 @@ import { dimsText } from '../palette/paletteModel'
 import { AddDevicePicker } from './AddDevicePicker'
 import { OrientationPicker, turnedText } from './OrientationPicker'
 import { applyPlanOp, sparesText, type SpareContext } from './planOps'
+import { HAVE_NEED_CARD_CLASSES } from './StackEditor'
 import type { OpenPlan } from './useOpenPlan'
 
 export function slotName(slot: Slot): string {
@@ -41,6 +45,13 @@ interface DeviceFit {
   ok: boolean
   text: string
 }
+
+/** Fits (green), does not fit (destructive), or unknown because it is not in the catalog. */
+const FIT_TONES = {
+  ok: 'text-have',
+  bad: 'text-destructive',
+  unknown: 'text-warning',
+} as const
 
 function deviceFit(
   placed: PlacedDevice,
@@ -199,13 +210,19 @@ function SlotSection({
                 data-testid={`inspector-device-${placed.id}`}
                 className={cn(
                   'grid gap-1.5 rounded-md border p-2',
-                  !placed.have && 'border-dashed border-foreground/30',
-                  highlightId === placed.id && 'ring-2 ring-ring/50',
+                  HAVE_NEED_CARD_CLASSES[haveNeedKey(placed.have)],
+                  highlightId === placed.id && 'ring-2 ring-primary',
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium break-words">{deviceLabel}</p>
+                    <p className="text-sm font-medium break-words">
+                      <RoleDot
+                        role={device === undefined ? 'neutral' : deviceRole(device.category)}
+                        className="mr-1.5 mb-px align-middle"
+                      />
+                      {deviceLabel}
+                    </p>
                     {device === undefined ? null : (
                       <p className="text-xs text-muted-foreground">{dimsText(device.dims)}</p>
                     )}
@@ -225,7 +242,7 @@ function SlotSection({
                 <p
                   className={cn(
                     'flex items-start gap-1.5 text-xs',
-                    fit.ok ? 'text-muted-foreground' : 'text-destructive',
+                    FIT_TONES[fit.ok ? 'ok' : device === undefined ? 'unknown' : 'bad'],
                   )}
                 >
                   <FitIcon aria-hidden className="mt-px size-3.5 shrink-0" />

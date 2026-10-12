@@ -9,12 +9,17 @@
  *   also takes those spares out again; the toolbar's Undo only brings the part back here.
  * - Discard: it leaves the plan (sold, given away, broken); Undo brings it back.
  * Every plan change is one undo step and is announced.
+ * Rows are owned parts: a solid green outline with the In my rack icon and a role dot before the
+ * name; the "kept as spare" note is green too, and a part that cannot go back gets an info note.
  */
 import { ArchiveRestore, CircleCheck, Info, PackagePlus, Trash2, Undo2, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { HaveIcon } from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/db/errors'
 import { listNames } from '@/domain/frame'
+import { catalogEntryRole, type PartRole } from '@/domain/partRole'
 import {
   discardRetired,
   keepAsSpare,
@@ -200,10 +205,10 @@ export function RemovedButOwnedSection({
       {showKept ? (
         <div
           data-testid="retired-kept"
-          className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 p-2"
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-have-border bg-have-soft p-2"
         >
           <p className="flex min-w-40 flex-1 items-center gap-1.5 text-sm">
-            <CircleCheck aria-hidden className="size-4 shrink-0" />
+            <CircleCheck aria-hidden className="size-4 shrink-0 text-have" />
             Kept {kept.name} as spare.
           </p>
           {canUndoKept ? (
@@ -224,6 +229,7 @@ export function RemovedButOwnedSection({
             <RetiredRow
               key={view.id}
               view={view}
+              role={view.itemId === undefined ? 'neutral' : catalogEntryRole(lookup, view.itemId)}
               readOnly={readOnly}
               onReuse={() => startReuse(view)}
               onKeep={() => askKeep(view)}
@@ -252,12 +258,15 @@ export function RemovedButOwnedSection({
 
 function RetiredRow({
   view,
+  role,
   readOnly,
   onReuse,
   onKeep,
   onDiscard,
 }: {
   view: RetiredView
+  /** What the part is for: its dot. */
+  role: PartRole
   readOnly: boolean
   onReuse: () => void
   onKeep: () => void
@@ -268,19 +277,25 @@ function RetiredRow({
     <li
       data-testid={`retired-row-${view.id}`}
       data-kind={view.kind}
-      className="grid gap-2 rounded-lg border bg-card p-2"
+      className="grid gap-2 rounded-lg border border-have-border bg-card p-2"
     >
       <div className="grid min-w-0 gap-0.5">
-        <p className="text-sm font-medium break-words">{title}</p>
-        <p className="text-xs text-muted-foreground">
-          {retiredKindText(view.kind)} · removed {removedOnText(view.at)}
+        <p className="text-sm font-medium break-words">
+          <RoleDot role={role} className="mr-1.5 mb-px align-middle" />
+          {title}
+        </p>
+        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+          <HaveIcon aria-hidden className="size-3.5 shrink-0 text-have" />
+          <span>
+            {retiredKindText(view.kind)} · removed {removedOnText(view.at)}
+          </span>
         </p>
         {view.devices.length === 0 ? null : (
           <p className="text-xs break-words">With the {listNames(view.devices)}</p>
         )}
         {view.reuseNote === undefined ? null : (
           <p className="flex items-start gap-1 text-xs text-muted-foreground">
-            <Info aria-hidden className="mt-px size-3.5 shrink-0" />
+            <Info aria-hidden className="mt-px size-3.5 shrink-0 text-info" />
             {view.reuseNote}
           </p>
         )}

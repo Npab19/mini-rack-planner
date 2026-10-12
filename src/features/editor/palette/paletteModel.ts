@@ -5,6 +5,7 @@
  */
 import { entryName, type CatalogSearch } from '@/catalog/search'
 import { formatU } from '@/domain/geometry'
+import { deviceRole, itemRole, type PartRole } from '@/domain/partRole'
 import type { CatalogEntry, CatalogKind, Device, Item } from '@/domain/schema/catalog'
 import { isCustomId, type Dims } from '@/domain/schema/common'
 import type { DragSubject } from '../rack/dragSubject'
@@ -45,6 +46,8 @@ export interface PaletteRow {
   frameSpecific: boolean
   /** Goes on the rails: an item, or a device with `rackmount`. */
   placeable: boolean
+  /** What it is for (its role dot): a device by its category, an item by what it holds. */
+  role: PartRole
 }
 
 export interface PaletteQuery {
@@ -138,6 +141,7 @@ export function toPaletteRow(entry: PaletteEntry, frameId: string | undefined): 
       sizeText: dimsText(entry.dims),
       frameSpecific: false,
       placeable: rackmount !== undefined,
+      role: deviceRole(entry.category),
     }
   }
   return {
@@ -146,6 +150,7 @@ export function toPaletteRow(entry: PaletteEntry, frameId: string | undefined): 
     ...(entry.kind === 'item' ? { heightText: formatU(entry.heightSixths) } : {}),
     frameSpecific: frameId !== undefined && (entry.compat?.frames ?? []).includes(frameId),
     placeable: entry.kind === 'item',
+    role: itemRole(entry),
   }
 }
 

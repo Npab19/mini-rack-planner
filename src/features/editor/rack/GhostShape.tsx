@@ -5,10 +5,15 @@
  * carry the meaning, so it never depends on colour. Hidden from assistive tech: results are
  * announced instead.
  *
+ * Colour is the second cue: fits is green (`have`) over a light tint of the part's role colour
+ * (`data-role`), cannot go there red (`destructive`), choose a mount blue (`info`). Outlines sit
+ * on a background halo so they stay visible over any part colour.
+ *
  * A device over a placement highlights the slot it would go in (`SlotGhostShape`) the same way.
  */
 import { CircleCheck, CircleDot, CircleX } from 'lucide-react'
 import { memo } from 'react'
+import type { PartRole } from '@/domain/partRole'
 import type { Face } from '@/domain/schema/common'
 import type { PlacementBay } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
@@ -28,10 +33,16 @@ export interface GhostView {
   text: string
   /** Click-to-place (and its keys), a palette or tray drop, or a part being moved. */
   origin: 'placing' | 'drop' | 'move'
+  /** What the part is for: tints a ghost that fits. */
+  role: PartRole
 }
 
 /** The click-to-place ghost (`useEditorState.ghost`) as a view. */
-export function placingGhostView(ghost: Ghost, bay: PlacementBay): GhostView {
+export function placingGhostView(
+  ghost: Ghost,
+  bay: PlacementBay,
+  role: PartRole = 'neutral',
+): GhostView {
   return {
     y: ghost.y,
     heightSixths: ghost.heightSixths,
@@ -40,10 +51,69 @@ export function placingGhostView(ghost: Ghost, bay: PlacementBay): GhostView {
     status: ghost.ok ? 'ok' : 'blocked',
     text: ghostText(ghost),
     origin: 'placing',
+    role,
   }
 }
 
 export const STATUS_ICON = { ok: CircleCheck, blocked: CircleX, choose: CircleDot } as const
+
+/** The ghost's outline and fill (blocked also gets the cross-hatch pattern). */
+const OUTLINE: Record<GhostStatus, string> = {
+  ok: 'fill-(--part-fill)/45 stroke-have-border',
+  blocked: 'stroke-destructive',
+  choose: 'fill-info-soft/70 stroke-info-border',
+}
+const CHIP_STROKE: Record<GhostStatus, string> = {
+  ok: 'stroke-have-border',
+  blocked: 'stroke-destructive',
+  choose: 'stroke-info-border',
+}
+const CHIP_ICON: Record<GhostStatus, string> = {
+  ok: 'text-have',
+  blocked: 'text-destructive',
+  choose: 'text-info',
+}
+const CHIP_TEXT: Record<GhostStatus, string> = {
+  ok: 'fill-foreground',
+  blocked: 'fill-destructive',
+  choose: 'fill-foreground',
+}
+
+/** A ghost's outline: a background halo under the status-coloured (dashed) stroke. */
+function GhostOutline({
+  box,
+  rx,
+  strokeWidth,
+  dash,
+  status,
+  hatch,
+}: {
+  box: Box
+  rx: number
+  strokeWidth: number
+  dash: string
+  status: GhostStatus
+  hatch: string
+}) {
+  return (
+    <>
+      <rect
+        {...box}
+        rx={rx}
+        strokeWidth={strokeWidth * 2.2}
+        className="fill-none stroke-background/80"
+      />
+      <rect
+        {...box}
+        rx={rx}
+        strokeWidth={strokeWidth}
+        strokeDasharray={dash}
+        fill={status === 'blocked' ? `url(#${hatch})` : undefined}
+        className={OUTLINE[status]}
+      />
+    </>
+  )
+}
 
 /**
  * The chip inside a ghost: icon and words on a background. Its height follows `box`, its width
@@ -61,7 +131,6 @@ function GhostChip({
   text: string
 }) {
   const Icon = STATUS_ICON[status]
-  const blocked = status === 'blocked'
   const fontSize = Math.max(3.5, Math.min(6.5, box.height * 0.42))
   const chipHeight = Math.min(box.height - 1, fontSize * 1.8)
   if (chipHeight <= 2) return null
@@ -77,7 +146,8 @@ function GhostChip({
         width={inner.width}
         height={chipHeight}
         rx={chipHeight / 2}
-        className="fill-background/95"
+        strokeWidth={0.5}
+        className={cn('fill-background/95', CHIP_STROKE[status])}
       />
       <Icon
         aria-hidden="true"
@@ -85,7 +155,7 @@ function GhostChip({
         y={chipY + (chipHeight - iconSize) / 2}
         width={iconSize}
         height={iconSize}
-        className={blocked ? 'text-destructive' : 'text-foreground'}
+        className={CHIP_ICON[status]}
       />
       {shown === null ? null : (
         <text
@@ -93,7 +163,7 @@ function GhostChip({
           y={chipY + chipHeight / 2}
           dominantBaseline="central"
           fontSize={fontSize}
-          className={cn('font-medium', blocked ? 'fill-destructive' : 'fill-foreground')}
+          className={cn('font-medium', CHIP_TEXT[status])}
         >
           {shown}
         </text>
@@ -127,16 +197,17 @@ export const GhostShape = memo(function GhostShape({
       data-ghost-status={ghost.status}
       data-ghost-origin={ghost.origin}
       data-ghost-bay={ghost.bay}
+      data-role={ghost.role}
       pointerEvents="none"
       aria-hidden="true"
     >
-      <rect
-        {...box}
+      <GhostOutline
+        box={box}
         rx={1.4}
         strokeWidth={1.2}
-        strokeDasharray={ghost.status === 'choose' ? '1.2 1.8' : '4 2'}
-        fill={blocked ? `url(#${patterns.invalid})` : undefined}
-        className={blocked ? 'stroke-destructive' : 'fill-foreground/10 stroke-foreground'}
+        dash={ghost.status === 'choose' ? '1.2 1.8' : '4 2'}
+        status={ghost.status}
+        hatch={patterns.invalid}
       />
       <GhostChip box={box} inner={inner} status={ghost.status} text={ghost.text} />
     </g>
@@ -151,11 +222,14 @@ export const SlotGhostShape = memo(function SlotGhostShape({
   uStart,
   placementId,
   slotId,
+  role = 'neutral',
   patterns,
 }: {
   box: Box
   status: GhostStatus
   text: string
+  /** The carried device's role: tints a slot it fits. */
+  role?: PartRole
   /** The holder's lowest U (for tests: `data-ghost-u-start`). */
   uStart: number
   placementId: string | undefined
@@ -173,16 +247,17 @@ export const SlotGhostShape = memo(function SlotGhostShape({
       data-ghost-u-start={uStart}
       data-target-placement-id={placementId}
       data-slot-id={slotId}
+      data-role={role}
       pointerEvents="none"
       aria-hidden="true"
     >
-      <rect
-        {...ring}
+      <GhostOutline
+        box={ring}
         rx={1.6}
         strokeWidth={1.3}
-        strokeDasharray="4 2"
-        fill={blocked ? `url(#${patterns.invalid})` : undefined}
-        className={blocked ? 'stroke-destructive' : 'fill-foreground/10 stroke-foreground'}
+        dash="4 2"
+        status={status}
+        hatch={patterns.invalid}
       />
       <GhostChip box={ring} status={status} text={text} />
     </g>

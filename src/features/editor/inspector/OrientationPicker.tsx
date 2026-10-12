@@ -3,7 +3,8 @@
  * allows. A radio group styled like a segmented control (icon + words), one option per allowed
  * orientation. Orientations that do not work (too big that way, no room left beside the others,
  * the part would hit something) are disabled, and the reasons are listed under the group and tied
- * to it with `aria-describedby`, so they are never only a greyed-out look.
+ * to it with `aria-describedby`, so they are never only a greyed-out look. The current way is
+ * bold, outlined in the primary colour and tinted with the accent; blocked ones are struck through.
  */
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
@@ -94,7 +95,7 @@ export function OrientationPicker({
               className={cn(
                 'inline-flex h-7 cursor-pointer items-center gap-1 rounded-md border border-transparent px-2 text-xs whitespace-nowrap text-muted-foreground outline-none select-none',
                 'focus-visible:ring-3 focus-visible:ring-ring/50',
-                'data-checked:border-foreground/60 data-checked:bg-muted data-checked:font-semibold data-checked:text-foreground',
+                'data-checked:border-primary data-checked:bg-accent data-checked:font-semibold data-checked:text-accent-foreground',
                 'data-disabled:cursor-not-allowed data-disabled:line-through data-disabled:opacity-60',
               )}
             >

@@ -14,6 +14,11 @@
  *
  * Announcements go to the shell's live region (on small screens the shell closes this sheet once
  * placing starts). Inside a sheet, the sheet's title stands in for the panel heading.
+ *
+ * Colour repeats the words: rows are In my rack (soft green, solid outline) or To get (soft amber,
+ * dashed outline) cards with a role dot before the name; the space summary is amber while the rack
+ * is short of space and green once it fits; Fit it for me reports in green (placed) or in the
+ * warning tone (left over); "Needs a mount?" and the placing note are info.
  */
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
@@ -24,6 +29,7 @@ import {
   CircleDashed,
   Crosshair,
   GripVertical,
+  Info,
   Ruler,
   Trash2,
   TriangleAlert,
@@ -32,8 +38,9 @@ import {
   X,
 } from 'lucide-react'
 import { useId, useMemo, useRef, useState, type Ref } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import { HAVE_NEED_CLASSES, HAVE_TEXT, haveNeedKey, NEED_TEXT } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
+import { RoleDot } from '@/components/common/PartRole'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { markEquipment } from '@/domain/build'
@@ -48,6 +55,7 @@ import {
 } from '@/domain/devices'
 import type { StackEnd } from '@/domain/frame'
 import { formatU } from '@/domain/geometry'
+import { deviceRole, type PartRole } from '@/domain/partRole'
 import { deviceName, type CatalogLookup, type Device, type Frame } from '@/domain/schema/catalog'
 import type { PlanEquipment, Plan } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
@@ -57,6 +65,7 @@ import { useRecordingMode, useUiStore } from '@/state/uiStore'
 import { useEditorState, type PlaceSource } from '../editorState'
 import { applyPlanOp, sparesText, useSpareContext } from '../inspector/planOps'
 import { setHeightRequest } from '../inspector/sectionOps'
+import { HAVE_NEED_CARD_CLASSES } from '../inspector/StackEditor'
 import { announce } from '../layout/announcer'
 import { closeSheetThen, focusRackDrawing } from '../layout/shellStore'
 import { useMountDialogs } from '../mounts/mountDialogsStore'
@@ -77,6 +86,24 @@ import { useTrayDragSupport, type TrayDraggableComponent } from './trayDrag'
 const SUGGESTIONS_PER_DEVICE = 3
 
 const PLACE_BUTTON_CLASS = 'h-auto min-h-7 py-1 text-left whitespace-normal'
+
+/** The space summary: amber while the rack is short of space, green once everything fits. */
+const SUMMARY_TONES = {
+  short: HAVE_NEED_CLASSES.need,
+  fits: HAVE_NEED_CLASSES.have,
+  idle: 'border bg-background',
+} as const
+
+/** Fit it for me's report: green when everything went in, the warning tone when some did not. */
+const FIT_NOTE_TONES = {
+  done: 'border-have-border bg-have-soft',
+  partial: 'border-warning-border bg-warning-soft',
+  none: 'bg-background',
+} as const
+
+/** A segmented-control option (top / bottom): the chosen one in the accent tint. */
+const SEGMENT_OPTION_CLASS =
+  'data-checked:border-primary data-checked:bg-accent data-checked:font-semibold data-checked:text-accent-foreground'
 
 interface PlaceOption {
   source: PlaceSource
@@ -133,15 +160,25 @@ interface LastFit {
 function RowTitle({
   entry,
   name,
+  role,
   DragHandle,
   readOnly,
 }: {
   entry: PlanEquipment
   name: string
+  role: PartRole
   DragHandle: TrayDraggableComponent | null
   readOnly: boolean
 }) {
-  if (DragHandle === null) return <p className="font-medium break-words">{name}</p>
+  const dot = <RoleDot role={role} className="mr-1.5 mb-px align-middle" />
+  if (DragHandle === null) {
+    return (
+      <p className="font-medium break-words">
+        {dot}
+        {name}
+      </p>
+    )
+  }
   return (
     <DragHandle subject={{ equipmentId: entry.id, deviceId: entry.deviceId }} disabled={readOnly}>
       {({ ref, isDragging }) => (
@@ -159,6 +196,7 @@ function RowTitle({
             <GripVertical aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
           )}
           <p className="font-medium break-words">
+            {dot}
             {name}
             {isDragging ? (
               <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -210,6 +248,7 @@ function EquipmentRow({
   onNeedsAMount: (entry: PlanEquipment) => void
 }) {
   const name = device === undefined ? entry.deviceId : deviceName(device)
+  const role = device === undefined ? 'neutral' : deviceRole(device.category)
   const placingHere = placing?.equipmentId === entry.id ? placing : undefined
   const placingOption =
     placingHere === undefined
@@ -229,15 +268,21 @@ function EquipmentRow({
       tabIndex={-1}
       className={cn(
         'grid gap-2 rounded-lg border p-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-        entry.have ? 'border-solid' : 'border-dashed border-foreground/40',
-        selected && 'bg-muted/60 ring-2 ring-foreground/30',
+        HAVE_NEED_CARD_CLASSES[haveNeedKey(entry.have)],
+        selected && 'ring-2 ring-primary',
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <RowTitle entry={entry} name={name} DragHandle={dragSupport} readOnly={readOnly} />
+          <RowTitle
+            entry={entry}
+            name={name}
+            role={role}
+            DragHandle={dragSupport}
+            readOnly={readOnly}
+          />
           {selected ? (
-            <p className="text-xs font-medium">
+            <p className="text-xs font-medium text-primary">
               <span className="sr-only">, </span>Selected
             </p>
           ) : null}
@@ -282,13 +327,16 @@ function EquipmentRow({
           data-testid={`equipment-left-over-${entry.id}`}
           className="flex items-start gap-1.5 text-xs"
         >
-          <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+          <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0 text-warning" />
           <span>Fit it for me left it here: {leftOver}</span>
         </p>
       )}
       {device === undefined ? null : options.length === 0 ? (
-        <div className="grid gap-1.5">
-          <p className="text-xs text-muted-foreground">No mount in the catalog takes it yet.</p>
+        <div className="grid gap-1.5 rounded-md border border-info-border bg-info-soft p-2">
+          <p className="flex items-start gap-1.5 text-xs">
+            <Info aria-hidden className="mt-px size-3.5 shrink-0 text-info" />
+            No mount in the catalog takes it yet.
+          </p>
           <Button
             size="sm"
             variant="outline"
@@ -296,7 +344,7 @@ function EquipmentRow({
             data-testid={`equipment-needs-mount-${entry.id}`}
             onClick={() => onNeedsAMount(entry)}
           >
-            <Wrench aria-hidden />
+            <Wrench aria-hidden className="text-info" />
             Needs a mount?
           </Button>
         </div>
@@ -319,7 +367,7 @@ function EquipmentRow({
                   <span className="font-normal">({formatU(option.heightSixths)})</span>
                 </span>
                 {option.frameSpecific && frame !== undefined ? (
-                  <Badge variant="secondary" className="whitespace-normal">
+                  <Badge variant="info" className="whitespace-normal">
                     for {frame.name}
                   </Badge>
                 ) : null}
@@ -329,7 +377,7 @@ function EquipmentRow({
         </ul>
       )}
       {placingOption === undefined ? null : (
-        <div className="flex flex-wrap items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5 text-xs">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-info-border bg-info-soft px-2 py-1.5 text-xs">
           <p className="min-w-40 flex-1">
             Placing {name} {placingOption.where}: choose a spot in the rack.
           </p>
@@ -384,7 +432,7 @@ function EndChoice({
                 'inline-flex h-6 cursor-pointer items-center gap-1 rounded-md border border-transparent px-2 text-xs whitespace-nowrap text-muted-foreground outline-none select-none',
                 'focus-visible:ring-3 focus-visible:ring-ring/50',
                 'data-disabled:cursor-not-allowed data-disabled:opacity-60',
-                'data-checked:border-foreground/60 data-checked:bg-muted data-checked:font-semibold data-checked:text-foreground',
+                SEGMENT_OPTION_CLASS,
               )}
             >
               <Icon aria-hidden className="size-3.5" />
@@ -398,18 +446,23 @@ function EndChoice({
 }
 
 function FitResultNote({ report, noteRef }: { report: FitReport; noteRef: Ref<HTMLDivElement> }) {
+  const tone: keyof typeof FIT_NOTE_TONES =
+    report.leftOver.length > 0 ? 'partial' : report.placed > 0 ? 'done' : 'none'
   return (
     <div
       ref={noteRef}
       tabIndex={-1}
       data-testid="equipment-fit-result"
-      className="grid gap-1 rounded-md border bg-background p-2 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className={cn(
+        'grid gap-1 rounded-md border p-2 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+        FIT_NOTE_TONES[tone],
+      )}
     >
       <p className="flex items-start gap-1.5 font-medium">
         {report.placed > 0 ? (
-          <CircleCheck aria-hidden className="mt-px size-3.5 shrink-0" />
+          <CircleCheck aria-hidden className="mt-px size-3.5 shrink-0 text-have" />
         ) : (
-          <CircleDashed aria-hidden className="mt-px size-3.5 shrink-0" />
+          <CircleDashed aria-hidden className="mt-px size-3.5 shrink-0 text-muted-foreground" />
         )}
         <span>{report.headline}</span>
       </p>
@@ -417,7 +470,7 @@ function FitResultNote({ report, noteRef }: { report: FitReport; noteRef: Ref<HT
         <ul aria-label="Still waiting" className="grid gap-0.5">
           {report.leftOver.map((entry) => (
             <li key={entry.equipmentId} className="flex items-start gap-1.5">
-              <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+              <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0 text-warning" />
               <span>
                 <span className="font-medium">{entry.name}</span>: {entry.reason}
               </span>
@@ -577,6 +630,8 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
   }
 
   const trayEmpty = plan.equipment.length === 0
+  const summaryTone: keyof typeof SUMMARY_TONES =
+    summary === undefined || trayEmpty ? 'idle' : summary.shortfallSixths > 0 ? 'short' : 'fits'
 
   return (
     <section
@@ -594,7 +649,13 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
         </p>
       ) : (
         <div className="grid gap-2 rounded-lg border bg-muted/30 p-3">
-          <p data-testid="equipment-summary" className="flex items-start gap-2 font-medium">
+          <p
+            data-testid="equipment-summary"
+            className={cn(
+              'flex w-fit max-w-full items-start gap-2 rounded-md px-2 py-1 font-medium',
+              SUMMARY_TONES[summaryTone],
+            )}
+          >
             <Ruler aria-hidden className="mt-0.5 size-4 shrink-0" />
             {summaryText(summary, trayEmpty)}
           </p>

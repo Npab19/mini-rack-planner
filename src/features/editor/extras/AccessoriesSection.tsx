@@ -5,10 +5,18 @@
  * dashed while some are still to get); Remove takes a line out, and the ones you own are kept
  * under "Removed but owned". Add picks an accessory and how many; in Recording mode they are In
  * my rack. Every change is one undo step (`domain/extras.ts`); the BOM lists their parts.
+ * Rows are In my rack / To get cards (as the stack editor's rows) with a role dot before the
+ * name, and the status line in the same green or amber.
  */
 import { Plus, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { HaveIcon, NeedIcon } from '@/components/common/HaveNeed'
+import {
+  HAVE_NEED_TEXT_CLASSES,
+  HaveIcon,
+  haveNeedKey,
+  NeedIcon,
+} from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,10 +29,12 @@ import {
   setExtraQty,
   type ExtraOpResult,
 } from '@/domain/extras'
+import { catalogEntryRole } from '@/domain/partRole'
 import type { Plan, PlanExtra } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
 import { OpenPageLink } from '../inspector/EntryFacts'
 import { NativeSelect } from '../inspector/NativeSelect'
+import { HAVE_NEED_CARD_CLASSES } from '../inspector/StackEditor'
 import {
   applyPlanOp,
   nowIso,
@@ -204,19 +214,21 @@ function AccessoryRow({
   const contents = item === undefined ? undefined : contentsText(item, lookup)
   const status = haveStatus(extra)
   const StatusIcon = status.allHave ? HaveIcon : NeedIcon
+  const tone = haveNeedKey(status.allHave)
   return (
     <li
       data-testid={`extra-row-${extra.id}`}
       data-have={status.allHave}
-      className={cn(
-        'rounded-lg border bg-card p-2',
-        !status.allHave && 'border-dashed border-foreground/30',
-      )}
+      className={cn('rounded-lg border p-2', HAVE_NEED_CARD_CLASSES[tone])}
     >
       <div role="group" aria-labelledby={nameId} className="grid gap-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p id={nameId} className="text-sm font-medium break-words">
+              <RoleDot
+                role={catalogEntryRole(lookup, extra.itemId)}
+                className="mr-1.5 mb-px align-middle"
+              />
               {name}
             </p>
             {contents === undefined ? null : (
@@ -261,7 +273,13 @@ function AccessoryRow({
             testId={`extra-have-${extra.id}`}
           />
         </div>
-        <p className="flex items-center gap-1.5 text-xs" data-testid={`extra-status-${extra.id}`}>
+        <p
+          className={cn(
+            'flex items-center gap-1.5 text-xs font-medium',
+            HAVE_NEED_TEXT_CLASSES[tone],
+          )}
+          data-testid={`extra-status-${extra.id}`}
+        >
           <StatusIcon aria-hidden className="size-3.5 shrink-0" />
           {status.text}
         </p>
