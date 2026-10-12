@@ -17,8 +17,10 @@ import {
 import {
   categoryLabel,
   dimsText,
+  dragSubjectOf,
   paletteRows,
   tabCategories,
+  toPaletteRow,
   type PaletteQuery,
 } from './paletteModel'
 
@@ -152,5 +154,28 @@ describe('categories', () => {
   it('formats sizes in millimetres', () => {
     expect(dimsText({ w: 179, d: 183, h: 34.5 })).toBe('179 × 183 × 34.5 mm')
     expect(dimsText({ w: 100.04, d: 50, h: 20 })).toBe('100 × 50 × 20 mm')
+  })
+})
+
+describe('dragSubjectOf', () => {
+  it('drags mounts and devices (the user’s own too), never accessories', () => {
+    expect(dragSubjectOf(toPaletteRow(BLANK_1U, FRAME.id))).toEqual({
+      kind: 'item',
+      itemId: 'blank-1u',
+    })
+    expect(dragSubjectOf(toPaletteRow(MY_SHELF, FRAME.id))).toEqual({
+      kind: 'item',
+      itemId: 'custom:my-shelf',
+    })
+    // A device without ears too: onto a slot, or empty space asks for a mount.
+    expect(dragSubjectOf(toPaletteRow(MINI_PC, FRAME.id))).toEqual({
+      kind: 'device',
+      deviceId: 'test-mini-pc',
+    })
+    expect(dragSubjectOf(toPaletteRow(SWITCH, FRAME.id))).toEqual({
+      kind: 'device',
+      deviceId: 'test-switch',
+    })
+    expect(dragSubjectOf(toPaletteRow(FEET, FRAME.id))).toBeNull()
   })
 })

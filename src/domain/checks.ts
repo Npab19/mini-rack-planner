@@ -324,7 +324,8 @@ function checkDeadZones(ctx: Context, frame: Frame, placed: Placed): void {
   const { y } = placed.placement
   const top = y + Math.max(placed.box.y1 - placed.box.y0, 1)
   for (const joint of stackJoints(ctx.plan, frame)) {
-    if (!(joint.deadY0 < top && y < joint.deadY1)) continue
+    // A joint without a dead zone (deadY0 === deadY1) can be crossed, as `canPlace` allows.
+    if (!(joint.deadY0 < joint.deadY1 && joint.deadY0 < top && y < joint.deadY1)) continue
     report(
       ctx,
       'warning',

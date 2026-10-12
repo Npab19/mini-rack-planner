@@ -127,6 +127,21 @@ export async function recordMyRack(page: Page): Promise<void> {
 /** Middle of the panel area, in the drawing's millimetres (254 mm panels, 0 = left edge). */
 const PANEL_MIDDLE_MM = 127
 
+type Rect = { x: number; y: number; width: number; height: number }
+
+/**
+ * The element's box in viewport px, measured by the page itself: WebKit's `boundingBox()` puts
+ * SVG `<text>` near the top of the drawing, which would aim the pointer above the rack.
+ */
+async function clientRect(locator: Locator): Promise<Rect> {
+  return locator.evaluate((element) => {
+    const { x, y, width, height } = (
+      element as { getBoundingClientRect: () => Rect }
+    ).getBoundingClientRect()
+    return { x, y, width, height }
+  })
+}
+
 /**
  * Where to point so a part `heightU` tall lands with its bottom at `uStart`: parts are centred on
  * the pointer, so the middle of the U's it covers, across the middle of the panel.
@@ -141,14 +156,12 @@ export async function rackPoint(
   const top = svg.locator(`[data-u-label="${uStart + heightU - 1}"]`)
   await bottom.scrollIntoViewIfNeeded()
   const [box, bottomBox, topBox, viewBox] = await Promise.all([
-    svg.boundingBox(),
-    bottom.boundingBox(),
-    top.boundingBox(),
+    clientRect(svg),
+    clientRect(bottom),
+    clientRect(top),
     svg.getAttribute('viewBox'),
   ])
-  if (box === null || bottomBox === null || topBox === null || viewBox === null) {
-    throw new Error('The rack drawing is not on screen.')
-  }
+  if (viewBox === null) throw new Error('The rack drawing has no viewBox.')
   const [minX = 0, , width = 1] = viewBox.split(' ').map(Number)
   const scale = box.width / width
   const middle = (b: { y: number; height: number }) => b.y + b.height / 2
@@ -212,11 +225,29 @@ export async function pressUntilFocused(
   throw new Error(`${key} never reached ${target.toString()}`)
 }
 
-/** Arrow keys through a radio group until `radio` is the chosen one. */
+/**
+ * Arrow keys through a radio group until `radio` is the chosen one. Waits for focus to reach the
+ * group and for every press to move the choice, so a slow browser neither misses nor overshoots.
+ */
 export async function arrowUntilChecked(page: Page, radio: Locator, max = 40): Promise<void> {
+  const group = radio.locator('xpath=ancestor::*[@role="radiogroup"][1]')
+  const chosenIndex = () =>
+    group
+      .getByRole('radio')
+      .evaluateAll((radios) =>
+        radios.findIndex(
+          (item) =>
+            (item as { getAttribute: (name: string) => string | null }).getAttribute(
+              'aria-checked',
+            ) === 'true',
+        ),
+      )
+  await expect.poll(() => hasFocus(group, true)).toBe(true)
   for (let presses = 0; presses <= max; presses += 1) {
     if ((await radio.getAttribute('aria-checked')) === 'true') return
+    const before = await chosenIndex()
     await page.keyboard.press('ArrowDown')
+    await expect.poll(chosenIndex).not.toBe(before)
   }
   throw new Error(`The arrow keys never chose ${radio.toString()}`)
 }

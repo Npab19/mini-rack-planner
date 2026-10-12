@@ -55,6 +55,13 @@ export interface PlanConflict {
 /** A plan operation: a domain stack op (`StackOpResult`) or any function returning a new plan. */
 export type PlanOp = (plan: Plan) => StackOpResult | { plan: Plan }
 
+/**
+ * Runs on the result of every applied `applyOp`, inside the same undo step. The editor uses it to
+ * copy the user's own parts a plan starts using into `plan.custom`, so exports and share links
+ * stay complete (see EditorPage). Returns the plan unchanged when there is nothing to add.
+ */
+export type PlanOpFinisher = (plan: Plan) => Plan
+
 export interface ApplyOpResult {
   /** The plan was replaced (one undo step). False when blocked, failed or nothing is open. */
   applied: boolean
@@ -96,6 +103,8 @@ export interface PlanActions {
   edit: (recipe: (draft: Draft<Plan>) => void) => boolean
   /** Runs a plan operation; conflicts and errors are returned without touching the plan. */
   applyOp: (op: PlanOp) => ApplyOpResult
+  /** Sets (or with null clears) what every applied `applyOp` result goes through. */
+  setOpFinisher: (finisher: PlanOpFinisher | null) => void
   /** Starts a gesture: edits until `endGesture` become a single undo step. */
   beginGesture: () => void
   endGesture: () => void
@@ -212,6 +221,8 @@ export function createPlanStore(overrides: Partial<PlanStoreDeps> = {}) {
   let gestureStart: Plan | undefined
   /** Bumped by load/unload/reload so a slower earlier call never overwrites a later one. */
   let session = 0
+  /** See `PlanOpFinisher`. */
+  let opFinisher: PlanOpFinisher | null = null
 
   const store = create<PlanStoreState>()(
     temporal(
@@ -438,8 +449,23 @@ export function createPlanStore(overrides: Partial<PlanStoreDeps> = {}) {
           const error = 'error' in result ? result.error : undefined
           if (error !== undefined) return { applied: false, conflicts, error }
           if (conflicts.length > 0) return { applied: false, conflicts }
-          if (result.plan !== before.plan) set({ plan: result.plan })
+          if (result.plan !== before.plan) set({ plan: finished(result.plan) })
           return { applied: true, conflicts: [] }
+        }
+
+        /** The op's plan through the finisher; a failing finisher leaves the op's plan as it is. */
+        function finished(plan: Plan): Plan {
+          if (opFinisher === null) return plan
+          try {
+            return opFinisher(plan)
+          } catch (error) {
+            console.error(error)
+            return plan
+          }
+        }
+
+        function setOpFinisher(finisher: PlanOpFinisher | null): void {
+          opFinisher = finisher
         }
 
         function beginGesture(): void {
@@ -546,6 +572,7 @@ export function createPlanStore(overrides: Partial<PlanStoreDeps> = {}) {
           unload,
           edit,
           applyOp,
+          setOpFinisher,
           beginGesture,
           endGesture,
           cancelGesture,

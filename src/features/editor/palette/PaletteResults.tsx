@@ -2,14 +2,29 @@
  * The palette's result rows. Keyboard: the list is one tab stop (the active row's controls);
  * ↑/↓ move between rows, Home/End jump, Enter on a row's main button runs it (Place for mounts
  * and ear-mounted gear, else Add), ↑ on the first row returns to the search box.
+ *
+ * Pointer (M3b): inside the editor's `RackDndProvider` (lg and up) a row can also be dragged onto
+ * the rack by its name or its card (its buttons and links stay buttons and links): mounts, panels
+ * and ear-mounted gear land where the ghost says, a device drops into a slot or asks for a mount.
+ * Accessories (no rack space) and read-only plans are not draggable. Dragging never replaces a
+ * button: Place, Add at U… and Add to Equipment to fit do the same from the keyboard or a tap.
  */
-import { MousePointerClick, PackagePlus, Plus } from 'lucide-react'
-import { useId, useImperativeHandle, useRef, useState, type KeyboardEvent, type Ref } from 'react'
+import { GripVertical, MousePointerClick, PackagePlus, Plus } from 'lucide-react'
+import {
+  useId,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type Ref,
+} from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { OpenPageLink, UnverifiedBadge } from '../inspector/EntryFacts'
-import { categoryLabel, type PaletteRow } from './paletteModel'
+import { useRackDragSource } from '../rack/dragSources'
+import { categoryLabel, dragSubjectOf, type PaletteRow } from './paletteModel'
 
 export interface PaletteRowActions {
   place: (row: PaletteRow) => void
@@ -71,17 +86,34 @@ function RowItem({
   const tabIndex = active ? 0 : -1
   const main = mainAction(row)
   const shared = { size: 'sm', tabIndex, 'aria-describedby': factsId } as const
+  const subject = useMemo(
+    () => (readOnly ? null : dragSubjectOf({ kind: row.kind, id: row.id })),
+    [readOnly, row.kind, row.id],
+  )
+  const { setElement, draggable, dragging } = useRackDragSource(subject)
   return (
     <li
+      ref={setElement}
       data-testid={`palette-item-${row.id}`}
       data-row-index={index}
+      data-rack-drag-source={draggable ? 'palette' : undefined}
+      data-dragging={dragging || undefined}
       onFocus={onActivate}
       className={cn(
         'rounded-lg border bg-card p-2 transition-colors focus-within:border-ring',
         active && 'bg-muted/40',
+        draggable && 'cursor-grab select-none active:cursor-grabbing',
+        dragging && 'border-dashed opacity-50',
       )}
     >
       <div className="flex flex-wrap items-start gap-x-2 gap-y-1.5">
+        {draggable ? (
+          <GripVertical
+            aria-hidden
+            data-drag-grip=""
+            className="mt-0.5 -mr-1 size-4 shrink-0 text-muted-foreground"
+          />
+        ) : null}
         <div className="min-w-0 flex-1 basis-36">
           <p className="text-sm leading-snug font-medium break-words">{row.name}</p>
           <p id={factsId} className="text-xs text-muted-foreground">

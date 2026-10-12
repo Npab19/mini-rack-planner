@@ -1,12 +1,15 @@
 /**
- * The inspector's persistent Rack tab: the frame's facts, the section stack editor, Set height and
- * the frame's options (rack, top, bottom, section defaults). Shown whenever nothing is selected.
+ * The inspector's persistent Rack tab: the frame's facts, the section stack editor, Set height,
+ * the frame's options (rack, top, bottom, section defaults), the plan's accessories (things that
+ * take no rack space) and what was removed but is still owned. Shown whenever nothing is selected.
  */
 import { TriangleAlert } from 'lucide-react'
 import { useId } from 'react'
 import { effectiveFrameSize } from '@/domain/recipe'
 import type { Frame } from '@/domain/schema/catalog'
 import type { Plan } from '@/domain/schema/plan'
+import { AccessoriesSection } from '../extras/AccessoriesSection'
+import { RemovedButOwnedSection } from '../retired/RemovedButOwnedSection'
 import { FactList, OpenPageLink, sourceFacts, VerifiedFact, type Fact } from './EntryFacts'
 import { FrameOptionsPanel } from './FrameOptionsPanel'
 import type { SpareContext } from './planOps'
@@ -63,15 +66,24 @@ function FrameFacts({ frame, plan }: { frame: Frame; plan: Plan }) {
 
 export function RackTab({ open, ops, spares, announce, onPick }: RackTabProps) {
   const { frame } = open
+  const planParts = (
+    <>
+      <AccessoriesSection open={open} spares={spares} announce={announce} />
+      <RemovedButOwnedSection open={open} spares={spares} announce={announce} onPick={onPick} />
+    </>
+  )
   if (frame === undefined) {
     return (
-      <p className="flex items-start gap-2 rounded-lg border border-dashed p-3 text-sm">
-        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
-        <span>
-          This plan uses the frame “{open.plan.frame.frameId}”, which is not in your catalog, so its
-          stack cannot be edited here.
-        </span>
-      </p>
+      <div className="grid gap-5">
+        <p className="flex items-start gap-2 rounded-lg border border-dashed p-3 text-sm">
+          <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+          <span>
+            This plan uses the frame “{open.plan.frame.frameId}”, which is not in your catalog, so
+            its stack cannot be edited here.
+          </span>
+        </p>
+        {planParts}
+      </div>
     )
   }
   const withFrame = { ...open, frame }
@@ -81,6 +93,7 @@ export function RackTab({ open, ops, spares, announce, onPick }: RackTabProps) {
       <StackEditor open={withFrame} ops={ops} spares={spares} announce={announce} onPick={onPick} />
       <SetHeightForm open={withFrame} ops={ops} announce={announce} />
       <FrameOptionsPanel open={withFrame} spares={spares} announce={announce} />
+      {planParts}
     </div>
   )
 }

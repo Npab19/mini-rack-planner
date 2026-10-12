@@ -5,6 +5,7 @@ import {
   assignDevice,
   assignEquipment,
   DEFAULT_MOUNT_SUGGESTIONS,
+  deviceOrientationChoices,
   equipmentUSummary,
   estimateDeviceSixths,
   estimateSixthsFromHeight,
@@ -13,11 +14,12 @@ import {
   placeEquipmentOnMount,
   removeDevice,
   removeEquipment,
+  setDeviceOrientation,
   slotForDevice,
   smallestStackU,
   type DeviceOpResult,
 } from './devices'
-import { canPlace, occupiedBox } from './placement'
+import { canPlace, DEVICE_GAP_MM, fitsSlot, occupiedBox, orientedDims } from './placement'
 import type { CatalogLookup, Device, Frame, SectionType } from './schema/catalog'
 import type { PlacedDevice, Placement, Plan } from './schema/plan'
 import { RANGE_FRAME } from './__fixtures__/frameFixtures'
@@ -988,5 +990,246 @@ describe('placeEquipmentOnMount', () => {
     const check = canPlace(plan, CATALOG, KWS_FRAME, { ...placement })
     expect(check.ok).toBe(true)
     expect(result.plan.equipment).toHaveLength(plan.equipment.length - 1)
+  })
+})
+
+// ---------------------------------------------------------------------------------------------
+// How a device sits in its slot (M3b)
+
+describe('setDeviceOrientation / deviceOrientationChoices', () => {
+  const PI_ZERO = 'pi-zero-usb'
+  const [cradleEntry] = parseEntries([
+    {
+      kind: 'item',
+      id: 'tall-cradle',
+      name: 'Tall cradle',
+      category: 'mount',
+      verified: { by: 'fixture', date: '2026-10-11', method: 'page' },
+      heightSixths: 6,
+      depthMm: 120,
+      mount: { front: 4, holeOffsetsMm: [6.35, 38.1] },
+      slots: [
+        {
+          id: 'cradle',
+          kind: 'fixed',
+          maxW: 200,
+          maxD: 200,
+          maxH: 120,
+          orientations: ['flat', 'on-side', 'upright'],
+          layout: { xMm: 10, yMm: 3, zMm: 0 },
+        },
+      ],
+    },
+  ])
+  const TURNS = editorCatalog(cradleEntry === undefined ? [] : [cradleEntry])
+  const piIn = (slotId: string, id = 'dv-pi'): PlacedDevice => ({
+    id,
+    deviceId: PI.id,
+    slotId,
+    orientation: 'flat',
+    have: true,
+  })
+  /** The tall cradle at `y` with a Pi lying flat in it, and `others` around it. */
+  const cradleAt = (y: number, others: KwsPlanSpec['placements'] = []) =>
+    rack({
+      placements: [
+        placementAt(TURNS, 'pl-cradle', 'tall-cradle', y, { devices: [piIn('cradle')] }),
+        ...others,
+      ],
+    })
+  const shelfWith = (devices: PlacedDevice[]) =>
+    rack({ placements: [placementAt(TURNS, 'pl-shelf', EDITOR_IDS.shelf2u, 0, { devices })] })
+  const deck = (plan: Plan) =>
+    placementOf(plan, 'pl-shelf').devices.map(({ id, xMm, orientation }) => ({
+      id,
+      xMm,
+      orientation,
+    }))
+  const placed = (id: string, deviceId: string, xMm: number, rotated = false): PlacedDevice => ({
+    id,
+    deviceId,
+    slotId: 'deck',
+    xMm,
+    orientation: rotated ? 'flat-rotated' : 'flat',
+    have: false,
+  })
+
+  it('stands a device on its side in a fixed slot', () => {
+    const plan = cradleAt(0)
+    const result = setDeviceOrientation(plan, TURNS, 'pl-cradle', 'dv-pi', 'on-side')
+    expect(result.placementId).toBe('pl-cradle')
+    expect(result.deviceEntryId).toBe('dv-pi')
+    const next = applied(result)
+    expect(placementOf(next, 'pl-cradle').devices).toEqual([
+      { ...piIn('cradle'), orientation: 'on-side' },
+    ])
+    // The cradle now reaches up to the Pi: 3 + 85 + 5 mm, 13 sixths.
+    expect(occupiedBox(next, TURNS, placementOf(next, 'pl-cradle'), KWS_FRAME).y1).toBe(13)
+  })
+
+  it('changes nothing for the orientation it has now', () => {
+    const plan = cradleAt(0)
+    const result = setDeviceOrientation(plan, TURNS, 'pl-cradle', 'dv-pi', 'flat')
+    expect(result.plan).toBe(plan)
+    expect(result.error).toBeUndefined()
+  })
+
+  it('refuses when the taller device would hit a part above or leave the rack', () => {
+    const blank = placementAt(TURNS, 'pl-blank', EDITOR_IDS.blank1u, 6)
+    const plan = cradleAt(0, [blank])
+    expect(setDeviceOrientation(plan, TURNS, 'pl-cradle', 'dv-pi', 'on-side')).toEqual({
+      plan,
+      conflicts: [],
+      error:
+        'With the Raspberry Pi 5 on its side, Tall cradle would not fit where it is: it overlaps 1U blank (U2).',
+    })
+    const top = cradleAt(48)
+    expect(setDeviceOrientation(top, TURNS, 'pl-cradle', 'dv-pi', 'upright').error).toBe(
+      'With the Raspberry Pi 5 standing upright, Tall cradle would not fit where it is: it would reach above U9, the top of the rack.',
+    )
+  })
+
+  it('is not blocked by an overlap the part already had', () => {
+    const plan = cradleAt(0, [placementAt(TURNS, 'pl-under', EDITOR_IDS.blank1u, 0)])
+    const next = applied(setDeviceOrientation(plan, TURNS, 'pl-cradle', 'dv-pi', 'upright'))
+    expect(placementOf(next, 'pl-cradle').devices[0]?.orientation).toBe('upright')
+  })
+
+  it('re-packs an area slot left to right', () => {
+    const plan = shelfWith([placed('dv-a', PI.id, 0), placed('dv-b', PI.id, 90)])
+    const next = applied(setDeviceOrientation(plan, TURNS, 'pl-shelf', 'dv-a', 'flat-rotated'))
+    expect(deck(next)).toEqual([
+      { id: 'dv-a', xMm: 0, orientation: 'flat-rotated' },
+      { id: 'dv-b', xMm: 61, orientation: 'flat' },
+    ])
+  })
+
+  it('refuses orientations the slot does not allow or the device does not fit', () => {
+    const plan = shelfWith([placed('dv-a', PI.id, 0)])
+    const cases: Array<[Parameters<typeof setDeviceOrientation>[4], string]> = [
+      ['upright', 'Slot "deck" of 2U shelf does not take the Raspberry Pi 5 standing upright.'],
+      [
+        'on-side',
+        'The Raspberry Pi 5 on its side (17 × 56 × 85 mm) does not fit slot "deck" (215 × 240 × 80 mm).',
+      ],
+    ]
+    for (const [orientation, error] of cases) {
+      expect(setDeviceOrientation(plan, TURNS, 'pl-shelf', 'dv-a', orientation)).toEqual({
+        plan,
+        conflicts: [],
+        error,
+      })
+    }
+  })
+
+  it('refuses when the devices no longer fit side by side', () => {
+    const full = shelfWith([
+      placed('dv-a', PI.id, 0),
+      placed('dv-b', PI.id, 90),
+      placed('dv-z', PI_ZERO, 180, true),
+    ])
+    expect(setDeviceOrientation(full, TURNS, 'pl-shelf', 'dv-z', 'flat').error).toBe(
+      'No room left in slot "deck" of 2U shelf for the Fixture USB-C powered board lying flat: 35 mm of 215 mm is free (it needs 65 mm).',
+    )
+    const first = shelfWith([
+      placed('dv-z', PI_ZERO, 0, true),
+      placed('dv-a', PI.id, 35),
+      placed('dv-b', PI.id, 125),
+    ])
+    expect(setDeviceOrientation(first, TURNS, 'pl-shelf', 'dv-z', 'flat').error).toBe(
+      'With the Fixture USB-C powered board lying flat, the Raspberry Pi 5 would no longer fit in slot "deck" of 2U shelf.',
+    )
+  })
+
+  it('explains unknown placements, devices and slots', () => {
+    const plan = shelfWith([
+      placed('dv-a', PI.id, 0),
+      { id: 'dv-ghost', deviceId: 'ghost-device', slotId: 'deck', have: false },
+      { id: 'dv-lost', deviceId: PI.id, slotId: 'gone', have: false },
+    ])
+    const cases: Array<[string, string, string]> = [
+      ['pl-nope', 'dv-a', 'There is no placement "pl-nope" here.'],
+      ['pl-shelf', 'dv-nope', '2U shelf holds no device "dv-nope".'],
+      ['pl-shelf', 'dv-ghost', '"ghost-device" is not in the catalog, so it cannot be turned.'],
+      ['pl-shelf', 'dv-lost', '2U shelf has no slot "gone".'],
+    ]
+    for (const [placementId, deviceEntryId, error] of cases) {
+      expect(setDeviceOrientation(plan, TURNS, placementId, deviceEntryId, 'flat')).toEqual({
+        plan,
+        conflicts: [],
+        error,
+      })
+      expect(deviceOrientationChoices(plan, TURNS, placementId, deviceEntryId)).toEqual([])
+    }
+  })
+
+  it('lists every orientation the slot allows with whether it works, and never mutates', () => {
+    const shelf = shelfWith([placed('dv-a', PI.id, 0)])
+    const copy = structuredClone(shelf)
+    expect(deviceOrientationChoices(shelf, TURNS, 'pl-shelf', 'dv-a')).toEqual([
+      { orientation: 'flat', current: true, ok: true },
+      { orientation: 'flat-rotated', current: false, ok: true },
+      {
+        orientation: 'on-side',
+        current: false,
+        ok: false,
+        reason:
+          'The Raspberry Pi 5 on its side (17 × 56 × 85 mm) does not fit slot "deck" (215 × 240 × 80 mm).',
+      },
+    ])
+    setDeviceOrientation(shelf, TURNS, 'pl-shelf', 'dv-a', 'flat-rotated')
+    expect(shelf).toEqual(copy)
+
+    const blocked = cradleAt(0, [placementAt(TURNS, 'pl-blank', EDITOR_IDS.blank1u, 6)])
+    expect(
+      deviceOrientationChoices(blocked, TURNS, 'pl-cradle', 'dv-pi').map(({ orientation, ok }) => [
+        orientation,
+        ok,
+      ]),
+    ).toEqual([
+      ['flat', true],
+      ['on-side', false],
+      ['upright', false],
+    ])
+  })
+
+  test.prop([
+    fc.array(
+      fc.record({
+        entry: fc.constantFrom('dv-a', 'dv-b', 'dv-z'),
+        orientation: fc.constantFrom('flat' as const, 'flat-rotated' as const, 'on-side' as const),
+      }),
+      { maxLength: 6 },
+    ),
+  ])('keeps the deck packed: inside the slot, side by side, in allowed orientations', (turns) => {
+    let plan = shelfWith([
+      placed('dv-a', PI.id, 0),
+      placed('dv-b', PI_ZERO, 90),
+      placed('dv-z', PI_ZERO, 160, true),
+    ])
+    const slot = TURNS.item(EDITOR_IDS.shelf2u)?.slots[0]
+    if (slot === undefined) throw new Error('No deck')
+    for (const turn of turns) {
+      const result = setDeviceOrientation(plan, TURNS, 'pl-shelf', turn.entry, turn.orientation)
+      if (result.error !== undefined) {
+        expect(result.plan).toBe(plan)
+        continue
+      }
+      plan = result.plan
+      const boxes = placementOf(plan, 'pl-shelf')
+        .devices.map((entry) => {
+          const orientation = entry.orientation ?? 'flat'
+          const size = orientedDims(device(TURNS, entry.deviceId).dims, orientation)
+          expect(slot.orientations).toContain(orientation)
+          expect(fitsSlot(size, slot)).toBe(true)
+          return { x: entry.xMm ?? 0, w: size.w }
+        })
+        .toSorted((a, b) => a.x - b.x)
+      for (const [index, box] of boxes.entries()) {
+        const next = boxes[index + 1]
+        if (next !== undefined) expect(box.x + box.w + DEVICE_GAP_MM).toBeLessThanOrEqual(next.x)
+        else expect(box.x + box.w).toBeLessThanOrEqual(slot.maxW)
+      }
+    }
   })
 })
