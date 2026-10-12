@@ -453,6 +453,12 @@ describe('runChecks', () => {
       expect(at(18)).toEqual(['warning:dead-zone'])
       expect(at(24)).toEqual([])
     })
+
+    it('lets a part cross a joint without a dead zone, as placing allows', () => {
+      // The KWS frame declares no dead zone: a 1U part across the 3U/3U joint is fine.
+      const crossing = codes(check({ sections: [3, 3], placements: [tiny('pl-1', 15)] }))
+      expect(crossing).not.toContain('warning:dead-zone')
+    })
   })
 
   describe('printer bed', () => {

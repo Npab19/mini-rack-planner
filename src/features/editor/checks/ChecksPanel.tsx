@@ -23,6 +23,7 @@ import { usePlanLookup } from '@/state/derived'
 import { usePlanStore } from '@/state/planStore'
 import { useUiStore } from '@/state/uiStore'
 import { announce } from '../layout/announcer'
+import { focusEquipmentEntry } from '../equipment/focusEquipment'
 import { selectInEditor } from '../selection'
 import { useEditorIssues } from './useEditorIssues'
 import {
@@ -203,8 +204,10 @@ export function ChecksPanel() {
   function select(issue: Issue): void {
     const targetId = issue.targetId
     if (targetId === undefined) return
-    // The rack turns to its face and scrolls it into view; the inspector shows it.
+    // The rack turns to its face and scrolls it into view; the inspector shows it. A device
+    // waiting in Equipment to fit has no place on the rack: its tray row takes focus instead.
     selectInEditor([targetId])
+    focusEquipmentEntry(targetId)
     const name = plan === null ? undefined : targetName(plan, lookup, frame, targetId)
     announce(name === undefined ? 'Selected.' : `Selected ${name}.`)
   }

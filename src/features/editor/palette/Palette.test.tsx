@@ -1,11 +1,12 @@
 import 'fake-indexeddb/auto'
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resetDbForTests } from '@/db/db'
 import { stopLibrarySync } from '@/state/catalogStore'
 import { resetDbStatusForTests } from '@/state/dbStatus'
 import { usePlanStore } from '@/state/planStore'
 import { useUiStore } from '@/state/uiStore'
+import { useAddPart } from '@/features/custom/addPartStore'
 import { useEditorState } from '../editorState'
 import { buildPlan, currentPlan, openPlan, ZETA } from '../inspector/__fixtures__/editorPlans'
 import { clearAnnouncement } from '../layout/announcer'
@@ -161,9 +162,73 @@ describe('Palette', () => {
     expect(await screen.findByText('No parts match “no such part”.')).toBeInTheDocument()
     expect(
       screen.getByText(
-        'Can’t find it? Adding your own parts (by hand, from a MakerWorld link or from a model file) is coming soon.',
+        'Can’t find it? Add it yourself: by hand, from a MakerWorld link or from a model file.',
       ),
     ).toBeInTheDocument()
+  })
+
+  it('opens Add a part for this plan from the results and from no results', async () => {
+    await openPlan(buildPlan([{ typeId: 's3', have: true }]))
+    render(<PaletteInShell />)
+    fireEvent.change(screen.getByTestId('palette-search'), { target: { value: 'zeta' } })
+    await waitFor(() => expect(row(ZETA.pcMount)).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Add a part from a link or file' }))
+    expect(useAddPart.getState().request).toEqual({
+      kind: 'wizard',
+      addToOpenPlan: true,
+      placeAfterSave: true,
+    })
+    act(() => useAddPart.getState().close())
+
+    // No results: the search text names the new part.
+    fireEvent.change(screen.getByTestId('palette-search'), { target: { value: 'no such part' } })
+    expect(await screen.findByText('No parts match “no such part”.')).toBeInTheDocument()
+    expect(screen.getAllByRole('group', { name: 'Add your own part' })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Create a custom part' }))
+    expect(useAddPart.getState().request).toEqual({
+      kind: 'item',
+      prefill: { name: 'no such part' },
+      addToOpenPlan: true,
+      placeAfterSave: true,
+    })
+    act(() => useAddPart.getState().close())
+
+    // A pasted link starts the wizard from it.
+    const link = 'https://makerworld.com/en/models/1945283-tiny-mount'
+    fireEvent.change(screen.getByTestId('palette-search'), { target: { value: link } })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Add a part from a link or file' })).toBeEnabled(),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Add a part from a link or file' }))
+    expect(useAddPart.getState().request).toMatchObject({ kind: 'wizard', url: link })
+    act(() => useAddPart.getState().close())
+  })
+
+  it('creates a device from the Devices tab', async () => {
+    await openPlan(buildPlan([{ typeId: 's3', have: true }]))
+    render(<PaletteInShell />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Devices' }))
+    fireEvent.change(screen.getByTestId('palette-search'), { target: { value: 'Big NAS' } })
+    expect(await screen.findByText('No parts match “Big NAS”.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create a custom part' }))
+    expect(useAddPart.getState().request).toMatchObject({
+      kind: 'device',
+      prefill: { model: 'Big NAS' },
+      placeAfterSave: true,
+    })
+    act(() => useAddPart.getState().close())
+  })
+
+  it('keeps its rows plain outside the editor’s drag provider', async () => {
+    await openPlan(buildPlan([{ typeId: 's3', have: true }]))
+    render(<PaletteInShell />)
+    fireEvent.change(screen.getByTestId('palette-search'), { target: { value: 'zeta' } })
+    await waitFor(() => expect(row(ZETA.pcMount)).toBeInTheDocument())
+    const mount = row(ZETA.pcMount)
+    expect(mount).not.toHaveAttribute('data-rack-drag-source')
+    expect(mount).not.toHaveAttribute('role')
+    expect(mount).not.toHaveAttribute('tabindex')
+    expect(mount.querySelector('[data-drag-grip]')).toBeNull()
   })
 
   it('Add at U… asks the rack for its dialog when the rack offers one', async () => {

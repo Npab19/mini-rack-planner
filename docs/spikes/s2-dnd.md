@@ -1,5 +1,13 @@
 # Spike S2: drag and drop onto the to-scale SVG rack
 
+> **Since M3b (issue #12):** the spike page (`/dev/spike-dnd`, `src/features/dev/SpikeDndPage.tsx`
+> and `src/features/dev/spike-dnd/**`) and `scripts/spikes/dnd-check.ts` are removed. The
+> editor's own drag and drop lives in `src/features/editor/rack/` (`RackDndProvider`,
+> `useRackDnd`, `dndConfig.ts`). Its end-to-end checks replace the spike check: on every dnd-kit
+> upgrade, re-run `e2e/editor.dnd.spec.ts` (palette drops at 50/100/200 %, pointer moves, device
+> to slot, drop on empty space, tray rows) and `e2e/editor.touch.mobile.spec.ts` (tap-to-place,
+> long-press move, pinch, swipe). The paths and commands below describe the spike as it was.
+
 **Decision: keep `@dnd-kit/react` 0.5.0, but only for palette → rack drops, behind `useRackDnd`.** Placed items move with plain Pointer Events and `setPointerCapture`. Keyboard moves and tap-to-place are our own code. The target U always comes from the pointer through `svg.getScreenCTM().inverse()` and pure snapping, never from dnd-kit collision shapes. All 93 checks pass at 50/100/200 % zoom with two different pan/zoom techniques, on touch, on the dev server and on a production build under the production CSP. The recommended contract is in [The `useRackDnd` contract for M3b](#the-userackdnd-contract-for-m3b).
 
 - Date: 2026-10-11.
@@ -200,7 +208,7 @@ Design notes from building it (not measured):
 **Risks of A, and how they are contained:**
 
 - 0.x API churn. All dnd-kit specifics sit in two files: the config constants and `useRackDnd`'s `providerProps`.
-- The internals we rely on are `event.to`, `event.nativeEvent`, `Feedback` option names and the overlay's always-mounted wrapper. Re-run `scripts/spikes/dnd-check.ts` on every dnd-kit bump.
+- The internals we rely on are `event.to`, `event.nativeEvent`, `Feedback` option names and the overlay's always-mounted wrapper. Re-run `scripts/spikes/dnd-check.ts` on every dnd-kit bump (since M3b: `e2e/editor.dnd.spec.ts` and `e2e/editor.touch.mobile.spec.ts`).
 
 **Why B is only the fallback:** placed items already use the Pointer Events path. Doing palette drags the same way would mean re-implementing the overlay positioning and the touch activation for no measured gain. If dnd-kit 0.x breaks, the palette can switch to that path without changing the `useRackDnd` contract.
 

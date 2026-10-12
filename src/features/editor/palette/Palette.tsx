@@ -8,6 +8,11 @@
  *   way the new part is selected, so the inspector shows it.
  * - Devices go to "Equipment to fit"; ear-mounted gear (`rackmount`) can be placed directly.
  * - In Recording mode, what is added is marked In my rack.
+ * - Rows can be dragged onto the rack too (inside the editor's `RackDndProvider`, lg and up; see
+ *   `PaletteResults`).
+ * - Under the results, and in their place when nothing matches, `CustomPartActions` adds your own
+ *   part ("Add a part from a link or file" / "Create a custom part", through `useAddPart`): it is
+ *   saved to My parts, copied into this plan and then placed.
  * Keyboard: ↓ from the search box enters the results (see `PaletteResults`). Announcements go to
  * the shell's live region: below lg the palette is a sheet that closes as placing starts.
  */
@@ -23,6 +28,7 @@ import { ID_PREFIX, newId } from '@/domain/ids'
 import type { Plan } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
 import { useEditorState, type PlaceSource } from '../editorState'
+import { CustomPartActions } from '../inspector/CustomPartActions'
 import { applyPlanOp, sparesText, useSpareContext } from '../inspector/planOps'
 import { announce } from '../layout/announcer'
 import { focusRackDrawing } from '../layout/shellStore'
@@ -64,7 +70,40 @@ export function withExtraAdded(plan: Plan, itemId: string, owned: boolean): Plan
   return { ...plan, extras: [...plan.extras, extra] }
 }
 
-function EmptyResults({ query, tab }: { query: string; tab: PaletteTab }) {
+/**
+ * The ways to add your own part (`CustomPartActions`): from a link or file (the wizard), or by
+ * hand. The search text names the new part, or is the link to start from. What is saved joins
+ * this plan and goes on to be placed: mounts, panels and ear-mounted gear start click-to-place,
+ * other devices wait in Equipment to fit.
+ */
+function OwnPartActions({
+  query,
+  tab,
+  readOnly,
+}: {
+  query: string
+  tab: PaletteTab
+  readOnly: boolean
+}) {
+  return (
+    <CustomPartActions
+      query={query}
+      kind={tab === 'devices' ? 'device' : 'item'}
+      placeAfterSave
+      disabled={readOnly}
+    />
+  )
+}
+
+function EmptyResults({
+  query,
+  tab,
+  readOnly,
+}: {
+  query: string
+  tab: PaletteTab
+  readOnly: boolean
+}) {
   return (
     <div className="grid gap-1.5 rounded-lg border border-dashed p-3 text-sm">
       <p className="font-medium">
@@ -75,9 +114,9 @@ function EmptyResults({ query, tab }: { query: string; tab: PaletteTab }) {
           : `No parts match “${query.trim()}”.`}
       </p>
       <p className="text-muted-foreground">
-        Can’t find it? Adding your own parts (by hand, from a MakerWorld link or from a model file)
-        is coming soon.
+        Can’t find it? Add it yourself: by hand, from a MakerWorld link or from a model file.
       </p>
+      <OwnPartActions query={query} tab={tab} readOnly={readOnly} />
     </div>
   )
 }
@@ -275,7 +314,7 @@ export function Palette() {
                   {readOnly ? ' · read-only plan: parts cannot be added' : ''}
                 </p>
                 {rows.length === 0 ? (
-                  <EmptyResults query={deferredQuery} tab={tab} />
+                  <EmptyResults query={deferredQuery} tab={tab} readOnly={readOnly} />
                 ) : (
                   <PaletteResults
                     ref={resultsRef}
@@ -286,10 +325,15 @@ export function Palette() {
                     onExitTop={() => searchRef.current?.focus()}
                   />
                 )}
-                {rows.length > 0 && deferredQuery.trim() !== '' ? (
-                  <p className="text-xs text-muted-foreground">
-                    Can’t find it? Adding your own parts is coming soon.
-                  </p>
+                {rows.length > 0 ? (
+                  <div className="grid gap-1.5 pt-1">
+                    <p className="text-xs text-muted-foreground">
+                      {tab === 'mine'
+                        ? 'Add another part of your own: from a MakerWorld link, a model file or by hand.'
+                        : 'Can’t find it? Add it from a MakerWorld link, a model file or by hand.'}
+                    </p>
+                    <OwnPartActions query={deferredQuery} tab={tab} readOnly={readOnly} />
+                  </div>
                 ) : null}
               </>
             )}

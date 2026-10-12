@@ -321,11 +321,26 @@ export function checkMove(
   placement: Placement,
   y: number,
 ): SpotCheck {
+  return checkMoveTo(plan, catalog, frame, placement, y, placement.bay)
+}
+
+/**
+ * Whether a placement can move to `y`, in `bay` (a half-width part dragged to the other half);
+ * it never blocks itself and its devices come along.
+ */
+export function checkMoveTo(
+  plan: Plan,
+  catalog: CatalogLookup,
+  frame: Frame,
+  placement: Placement,
+  y: number,
+  bay: PlacementBay,
+): SpotCheck {
   const check = canPlace(plan, catalog, frame, {
     itemId: placement.itemId,
     y,
     face: placement.face,
-    bay: placement.bay,
+    bay,
     ignorePlacementId: placement.id,
   })
   return { ok: check.ok, reasons: check.reasons.map((reason) => reason.message) }

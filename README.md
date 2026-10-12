@@ -9,12 +9,14 @@ The first supported frame is the KWS Rack v2 from MakerWorld; a generic 10" rack
 frames follow. The app is a static site: run it from one Docker image or on Azure Static Web
 Apps (Free).
 
-> **Status:** v0.1 is ready. The foundations (M0), the rack and BOM engine (M1), persistence
-> with the app shell (M2) and the minimal editor (M3a) are built: record the rack you have, plan
-> an extension, and get the shopping list of what to print and buy. Drag and drop, pointer moves,
-> touch gestures and custom parts come next (M3b). See [Features](#features-by-milestone),
-> [docs/status/m0-m1.md](docs/status/m0-m1.md), [docs/status/m2.md](docs/status/m2.md) and
-> [docs/status/m3a.md](docs/status/m3a.md).
+> **Status:** v0.1 is out and the full editor (M3b) is built. The foundations (M0), the rack and
+> BOM engine (M1), persistence with the app shell (M2), the minimal editor (M3a) and the full
+> editor (M3b) are in: record the rack you have, plan an extension by drag and drop or with the
+> keyboard, let _Fit it for me_ place your equipment, add your own devices, mounts and frames,
+> and get the shopping list of what to print and buy. Sharing and comparing ideas come next (M4).
+> See [Features](#features-by-milestone), [docs/status/m0-m1.md](docs/status/m0-m1.md),
+> [docs/status/m2.md](docs/status/m2.md), [docs/status/m3a.md](docs/status/m3a.md) and
+> [docs/status/m3b.md](docs/status/m3b.md).
 
 ## A first plan (v0.1)
 
@@ -27,8 +29,15 @@ Apps (Free).
 4. Open the **BOM**: the _Shopping list_ says what to print and buy, with the sum behind every
    line (_Why_). Tick _Got it_ as parts arrive, **Finish build** when it is built, or export a CSV.
 
-Everything works with the keyboard too (`?` lists the keys; `F6` moves between panels), and on a
-phone the panels open as sheets.
+On a computer you can also drag parts from **Parts**, or devices from **Equipment to fit**, onto
+the rack, and drag placed parts to move them; a device dropped on empty space asks which mount to
+use. **Fit it for me** places everything waiting in Equipment to fit and grows the rack if needed.
+A part the catalog lacks can be added under **My parts** (or from the Parts panel); it travels
+with every plan that uses it.
+
+Everything works with the keyboard too (`?` lists the keys; `F6` moves between panels). On a
+phone the panels open as sheets: tap **Place**, then tap the rack; long-press a part to move it
+and pinch to zoom.
 
 ## Privacy: everything stays in your browser
 
@@ -51,7 +60,7 @@ phone the panels open as sheets.
 | M1 Domain and BOM           | Rack and BOM engine, KWS Rack v2 catalog entry, `npm run bom -- <plan.json>`             | Built              |
 | M2 Persistence              | Plans saved in the browser, new-plan wizard, JSON import/export, settings, diagnostics   | Built              |
 | M3a Minimal editor (v0.1)   | 2D rack editor, Have/Need, BOM drawer, shopping list, CSV                                | Built (v0.1 ready) |
-| M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Planned            |
+| M3b Full editor             | Drag and drop, touch, _Fit it for me_, custom devices and parts                          | Built              |
 | M4 Share and compare (v0.2) | Share links, read-only viewer, compare ideas, Markdown/SVG/PNG export                    | Planned            |
 | M5 File import helpers      | Add a part from a MakerWorld 3MF/ZIP or a plain STL: print rows, U and depth suggestions | Planned            |
 | M6 3D view                  | Lazy-loaded 3D view of the plan with accurate proxies                                    | Planned            |

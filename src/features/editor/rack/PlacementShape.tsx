@@ -41,6 +41,8 @@ export interface PlacementShapeProps {
   roving: boolean
   /** Focused and selected: the arrow keys move it. */
   moving: boolean
+  /** Being moved with the pointer: drawn faded where it is while the ghost shows where it goes. */
+  dragging?: boolean
   /** Id of the keyboard help text. */
   helpId: string
   register: (id: string, node: SVGGElement | null) => void
@@ -67,6 +69,7 @@ export const PlacementShape = memo(function PlacementShape({
   selectedDeviceId,
   roving,
   moving,
+  dragging = false,
   helpId,
   register,
 }: PlacementShapeProps) {
@@ -95,12 +98,13 @@ export const PlacementShape = memo(function PlacementShape({
       data-face={view.face}
       data-known={view.known}
       data-selected={selected || undefined}
+      data-dragging={dragging || undefined}
       role="button"
       tabIndex={roving ? 0 : -1}
       aria-label={placementAriaLabel(view)}
       aria-pressed={selected}
       aria-describedby={helpId}
-      className="cursor-pointer outline-none"
+      className={cn('cursor-pointer outline-none', dragging && 'opacity-40')}
     >
       <rect
         {...box}

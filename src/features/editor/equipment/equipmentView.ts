@@ -1,11 +1,15 @@
 /**
  * What the "Equipment to fit" tray says, as plain functions: the rack-space summary ("Needs ~10U ·
- * rack 9U, 2U free → add 3U"), how much space each device needs and why, its size, and how far the
- * rack can grow.
+ * rack 9U, 2U free → add 3U"), how much space each device needs and why, its size, how far the
+ * rack can grow, and what "Fit it for me" did.
  */
+import { HAVE_TEXT } from '@/components/common/HaveNeed'
 import type { DeviceUEstimate, EquipmentUSummary } from '@/domain/devices'
+import type { FitItForMeResult } from '@/domain/fit'
+import type { StackEnd } from '@/domain/frame'
 import { formatU, sixthsToU, uToSixths } from '@/domain/geometry'
-import type { CatalogLookup, Device, Frame } from '@/domain/schema/catalog'
+import { deviceName, type CatalogLookup, type Device, type Frame } from '@/domain/schema/catalog'
+import type { Plan } from '@/domain/schema/plan'
 
 /** "Needs ~10U · rack 9U, 2U free → add 3U"; "Rack 9U · 7U used, 2U free" with an empty tray. */
 export function summaryText(summary: EquipmentUSummary, trayEmpty: boolean): string {
@@ -73,4 +77,68 @@ export function growPlan(summary: EquipmentUSummary, frame: Frame): GrowPlan | u
     }
   }
   return { targetU, addText }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Fit it for me
+
+/** "1 device", "3 devices". */
+function devices(count: number): string {
+  return `${count} ${count === 1 ? 'device' : 'devices'}`
+}
+
+/** The tray entry's device name in `plan` (the plan before the fit), else its id. */
+export function equipmentName(plan: Plan, catalog: CatalogLookup, equipmentId: string): string {
+  const entry = plan.equipment.find((candidate) => candidate.id === equipmentId)
+  if (entry === undefined) return equipmentId
+  const device = catalog.device(entry.deviceId)
+  return device === undefined ? entry.deviceId : deviceName(device)
+}
+
+export interface FitReport {
+  /** How many tray devices got a place. */
+  placed: number
+  /** One line: what was placed and added ("Placed 4 devices and added 3U at the top."). */
+  headline: string
+  /** Each tray device left behind, with why. */
+  leftOver: Array<{ equipmentId: string; name: string; reason: string }>
+  /** Everything to announce: the headline, then each device left behind. */
+  announcement: string
+}
+
+/**
+ * What "Fit it for me" did, in words. `before` is the plan it ran on (for the devices' names);
+ * `owned` says the new sections and mounts were marked In my rack (Recording mode).
+ */
+export function fitReport(
+  result: Pick<FitItForMeResult, 'placed' | 'unplaced' | 'addedU'>,
+  before: Plan,
+  catalog: CatalogLookup,
+  at: StackEnd,
+  owned = false,
+): FitReport {
+  const placed = result.placed.length
+  const added =
+    result.addedU > 0
+      ? ` and added ${formatU(uToSixths(result.addedU))} ${at === 'top' ? 'at the top' : 'at the bottom'}`
+      : ''
+  const marked = owned && placed > 0 ? `, marked ${HAVE_TEXT}` : ''
+  const headline =
+    placed === 0
+      ? result.unplaced.length === 0
+        ? 'Nothing is waiting to be placed.'
+        : `None of the ${devices(result.unplaced.length)} could be placed.`
+      : result.unplaced.length === 0
+        ? `Placed ${placed === 1 ? 'the device' : `all ${devices(placed)}`}${added}${marked}.`
+        : `Placed ${devices(placed)} of ${placed + result.unplaced.length}${added}${marked}.`
+  const leftOver = result.unplaced.map(({ equipmentId, reason }) => ({
+    equipmentId,
+    name: equipmentName(before, catalog, equipmentId),
+    reason,
+  }))
+  const announcement = [
+    headline,
+    ...leftOver.map(({ name, reason }) => `${name} is still waiting: ${reason}`),
+  ].join(' ')
+  return { placed, headline, leftOver, announcement }
 }

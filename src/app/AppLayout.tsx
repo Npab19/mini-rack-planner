@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { AddPartHost } from '@/features/custom/AddPartHost'
 import { useTheme, type ThemePreference } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
@@ -147,6 +148,9 @@ export function AppLayout() {
           </ErrorBoundary>
         </main>
         <Toaster position="bottom-right" />
+        {/* "Add a part" for every page (My parts, the editor's palette, "Needs a mount?"). The host
+            builds no schema at load; the dialog itself loads on the first request. */}
+        <AddPartHost />
       </div>
     </TooltipProvider>
   )

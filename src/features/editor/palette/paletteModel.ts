@@ -7,6 +7,7 @@ import { entryName, type CatalogSearch } from '@/catalog/search'
 import { formatU } from '@/domain/geometry'
 import type { CatalogEntry, CatalogKind, Device, Item } from '@/domain/schema/catalog'
 import { isCustomId, type Dims } from '@/domain/schema/common'
+import type { DragSubject } from '../rack/dragSubject'
 
 export type PaletteTab = 'mounts' | 'devices' | 'mine'
 
@@ -173,4 +174,14 @@ export function tabCategories(entries: readonly CatalogEntry[], tab: PaletteTab)
     if (isPaletteEntry(entry) && inTab(entry, tab)) categories.add(entry.category)
   }
   return [...categories].toSorted((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
+}
+
+/**
+ * What dragging a row onto the rack carries: mounts, panels and devices (catalog or the user's
+ * own); accessories take no rack space, so they are not dragged.
+ */
+export function dragSubjectOf(row: Pick<PaletteRow, 'kind' | 'id'>): DragSubject | null {
+  if (row.kind === 'item') return { kind: 'item', itemId: row.id }
+  if (row.kind === 'device') return { kind: 'device', deviceId: row.id }
+  return null
 }

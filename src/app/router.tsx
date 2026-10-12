@@ -21,16 +21,13 @@ function AppLoading() {
   )
 }
 
-/** Spike/dev pages: present in dev, or in builds made with VITE_SPIKES=1 (used by the CSP spike). */
+/**
+ * Spike/dev pages: present in dev, or in builds made with VITE_SPIKES=1 (used by the CSP spike).
+ * The S2 drag-and-drop spike page was retired in M3b (e2e/editor.dnd.spec.ts replaces its check).
+ */
 const devRoutes =
   import.meta.env.DEV || import.meta.env.VITE_SPIKES === '1'
     ? [
-        {
-          path: 'dev/spike-dnd',
-          lazy: async () => ({
-            Component: (await import('@/features/dev/SpikeDndPage')).SpikeDndPage,
-          }),
-        },
         {
           path: 'dev/spike-worker',
           lazy: async () => ({

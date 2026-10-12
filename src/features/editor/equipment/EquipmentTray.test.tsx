@@ -10,7 +10,12 @@ import { canUndo, usePlanStore } from '@/state/planStore'
 import { useUiStore } from '@/state/uiStore'
 import { useEditorState } from '../editorState'
 import { clearAnnouncement, useEditorAnnouncer } from '../layout/announcer'
+import { panelDomId, resetEditorShell, useEditorShell } from '../layout/shellStore'
+import { useMountDialogs } from '../mounts/mountDialogsStore'
+import { selectInEditor } from '../selection'
 import { EquipmentTray } from './EquipmentTray'
+import { focusEquipmentEntry } from './focusEquipment'
+import { TrayDragContext, type TrayDragSubject, type TrayDraggableComponent } from './trayDrag'
 
 vi.mock(import('@/state/catalogStore'), async (importOriginal) => {
   const actual = await importOriginal()
@@ -79,7 +84,9 @@ beforeEach(async () => {
   await resetDbForTests()
   clearAnnouncement()
   useEditorState.getState().reset()
-  useUiStore.setState({ recordingMode: {} })
+  useUiStore.setState({ recordingMode: {}, selection: [] })
+  resetEditorShell()
+  useMountDialogs.getState().close()
 })
 
 afterEach(async () => {
@@ -238,5 +245,202 @@ describe('EquipmentTray devices', () => {
     expect(row).toHaveTextContent('Not in the catalog: its size and mounts are unknown.')
     fireEvent.click(within(row).getByRole('button', { name: 'Remove mystery-box from the tray' }))
     expect(trayEntries()).toEqual([])
+  })
+})
+
+/** Kind and Have of each section, bottom to top. */
+function stack(): Array<[string, boolean]> {
+  return (usePlanStore.getState().plan?.frame.sections ?? []).map((section) => [
+    section.typeId,
+    section.have !== undefined,
+  ])
+}
+
+/** The placements the fit added: [mount, y, device in it]. */
+function added(): Array<[string, number, string | undefined]> {
+  return (usePlanStore.getState().plan?.placements ?? [])
+    .filter((placement) => placement.itemId !== 'blank-1u')
+    .map((placement) => [placement.itemId, placement.y, placement.devices[0]?.deviceId])
+}
+
+describe('EquipmentTray: Fit it for me', () => {
+  it('adds only the space it needs and places everything, in one undo step', async () => {
+    await open(userPlan())
+    render(<EquipmentTray />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Fit it for me' }))
+
+    expect(stack()).toEqual([
+      ['s3', true],
+      ['s6', true],
+      ['s3', false],
+    ])
+    // The 2U shelf for the Pi first (largest first) in the 2U that was free, the M720q above it.
+    expect(added()).toEqual([
+      ['shelf-2u', 42, 'rpi-5'],
+      ['lenovo-tiny-mount', 54, 'lenovo-m720q'],
+    ])
+    expect(trayEntries()).toEqual([])
+    expect(said()).toBe('Placed all 2 devices and added 3U at the top.')
+    const note = screen.getByTestId('equipment-fit-result')
+    expect(note).toHaveTextContent('Placed all 2 devices and added 3U at the top.')
+    // The new parts are selected, and with the tray empty the report takes focus.
+    const newIds = (usePlanStore.getState().plan?.placements ?? []).slice(7).map((p) => p.id)
+    expect([...useUiStore.getState().selection].toSorted()).toEqual(newIds.toSorted())
+    await waitFor(() => expect(note).toHaveFocus())
+
+    act(() => usePlanStore.getState().undo())
+    expect(stack()).toHaveLength(2)
+    expect(trayEntries().map((entry) => entry.id)).toEqual(['eq-pc', 'eq-pi'])
+    // The report goes once the plan changes.
+    expect(screen.queryByTestId('equipment-fit-result')).toBeNull()
+  })
+
+  it('puts new sections at the bottom when asked', async () => {
+    await open(userPlan())
+    render(<EquipmentTray />)
+    const group = await screen.findByRole('radiogroup', { name: 'New sections go at the' })
+    expect(within(group).getByRole('radio', { name: 'top' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+    fireEvent.click(within(group).getByRole('radio', { name: 'bottom' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Fit it for me' }))
+    expect(stack()).toEqual([
+      ['s3', false],
+      ['s3', true],
+      ['s6', true],
+    ])
+    // The blanks moved up with their sections; the devices took the new bottom section.
+    expect(usePlanStore.getState().plan?.placements[0]?.y).toBe(18)
+    expect(added()).toEqual([
+      ['shelf-2u', 0, 'rpi-5'],
+      ['lenovo-tiny-mount', 12, 'lenovo-m720q'],
+    ])
+    expect(said()).toBe('Placed all 2 devices and added 3U at the bottom.')
+  })
+
+  it('marks what it builds In my rack while recording; devices keep their own mark', async () => {
+    const planId = await open(userPlan())
+    act(() => useUiStore.getState().setRecordingMode(planId, true))
+    render(<EquipmentTray />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Fit it for me' }))
+    expect(stack()).toEqual([
+      ['s3', true],
+      ['s6', true],
+      ['s3', true],
+    ])
+    const mounts = (usePlanStore.getState().plan?.placements ?? []).slice(7)
+    expect(mounts.map((placement) => placement.have !== undefined)).toEqual([true, true])
+    expect(mounts.map((placement) => placement.devices[0]?.have)).toEqual([false, false])
+    expect(said()).toBe('Placed all 2 devices and added 3U at the top, marked In my rack.')
+  })
+
+  it('leaves what it cannot place in the tray, with the reason on its row', async () => {
+    await open(
+      userPlan([
+        { id: 'eq-x', deviceId: 'mystery-box', have: false },
+        { id: 'eq-pc', deviceId: 'lenovo-m720q', have: false },
+        { id: 'eq-nas', deviceId: 'nas-2bay', have: false },
+      ]),
+    )
+    render(<EquipmentTray />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Fit it for me' }))
+    expect(added()).toEqual([['lenovo-tiny-mount', 42, 'lenovo-m720q']])
+    expect(trayEntries().map((entry) => entry.id)).toEqual(['eq-x', 'eq-nas'])
+    const note = screen.getByTestId('equipment-fit-result')
+    expect(note).toHaveTextContent('Placed 1 device of 3.')
+    expect(note).toHaveTextContent(
+      'Fixture 2-bay NAS: No mount in the catalog takes the Fixture 2-bay NAS yet.',
+    )
+    expect(screen.getByTestId('equipment-left-over-eq-x')).toHaveTextContent(
+      'Fit it for me left it here: "mystery-box" is not in the catalog, so its size is unknown.',
+    )
+    expect(said()).toBe(
+      'Placed 1 device of 3. mystery-box is still waiting: "mystery-box" is not in the catalog, so its size is unknown. Fixture 2-bay NAS is still waiting: No mount in the catalog takes the Fixture 2-bay NAS yet.',
+    )
+    // The button stays while devices are still waiting.
+    expect(screen.getByRole('button', { name: 'Fit it for me' })).toBeInTheDocument()
+  })
+})
+
+describe('EquipmentTray: Needs a mount? and checks', () => {
+  it('offers “Needs a mount?” for a device no catalog mount takes', async () => {
+    await open(userPlan([{ id: 'eq-nas', deviceId: 'nas-2bay', have: true }]))
+    render(<EquipmentTray />)
+    const row = await screen.findByTestId('equipment-item-eq-nas')
+    expect(row).toHaveTextContent('No mount in the catalog takes it yet.')
+    fireEvent.click(within(row).getByRole('button', { name: 'Needs a mount?' }))
+    expect(useMountDialogs.getState().needsAMount).toEqual({
+      deviceId: 'nas-2bay',
+      equipmentId: 'eq-nas',
+    })
+  })
+
+  it('shows a tray entry chosen from a check as selected and focuses it', async () => {
+    await open(userPlan([{ id: 'eq-x', deviceId: 'mystery-box', have: true }]))
+    render(
+      <div id={panelDomId('equipment')}>
+        <EquipmentTray />
+      </div>,
+    )
+    const row = await screen.findByTestId('equipment-item-eq-x')
+    expect(row).toHaveAttribute('data-equipment-id', 'eq-x')
+    act(() => selectInEditor(['eq-x']))
+    expect(row).toHaveAttribute('aria-current', 'true')
+    expect(row).toHaveTextContent('Selected')
+    expect(focusEquipmentEntry('eq-x')).toBe(true)
+    expect(row).toHaveFocus()
+    // Ids that are not tray entries are left to the rest of the editor.
+    expect(focusEquipmentEntry('pl-blank-1')).toBe(false)
+  })
+
+  it('opens the tray sheet first when the tray is not on screen', async () => {
+    await open(userPlan([{ id: 'eq-x', deviceId: 'mystery-box', have: true }]))
+    expect(focusEquipmentEntry('eq-x')).toBe(true)
+    expect(useEditorShell.getState()).toMatchObject({ sheet: 'equipment', sheetOpen: true })
+    // The sheet shows the tray: its row takes focus once it is there.
+    render(
+      <div id={panelDomId('equipment')}>
+        <EquipmentTray />
+      </div>,
+    )
+    const row = await screen.findByTestId('equipment-item-eq-x')
+    await waitFor(() => expect(row).toHaveFocus())
+  })
+})
+
+describe('EquipmentTray: dragging onto the rack', () => {
+  it('turns each name into a grab handle when the rack provides drags', async () => {
+    const subjects: TrayDragSubject[] = []
+    const handles = new Map<string, HTMLElement | null>()
+    const FakeDraggable: TrayDraggableComponent = ({ subject, disabled, children }) => {
+      subjects.push(subject)
+      return children({
+        ref: (element) => {
+          handles.set(subject.equipmentId, element)
+        },
+        isDragging: subject.equipmentId === 'eq-pi' && !disabled,
+      })
+    }
+    await open(userPlan())
+    render(
+      <TrayDragContext value={FakeDraggable}>
+        <EquipmentTray />
+      </TrayDragContext>,
+    )
+    const handle = await screen.findByTestId('equipment-drag-eq-pc')
+    expect(handle).toHaveTextContent('Lenovo ThinkCentre M720q Tiny')
+    expect(handles.get('eq-pc')).toBe(handle)
+    expect(subjects).toContainEqual({ equipmentId: 'eq-pc', deviceId: 'lenovo-m720q' })
+    const dragged = screen.getByTestId('equipment-drag-eq-pi')
+    expect(dragged).toHaveAttribute('data-dragging', 'true')
+    expect(dragged).toHaveTextContent('(drop it on the rack)')
+  })
+
+  it('keeps plain names without it', async () => {
+    await open(userPlan())
+    render(<EquipmentTray />)
+    await screen.findByTestId('equipment-item-eq-pc')
+    expect(screen.queryByTestId('equipment-drag-eq-pc')).toBeNull()
   })
 })

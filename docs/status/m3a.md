@@ -157,6 +157,10 @@ Every test also fails on console errors, uncaught exceptions and CSP violations.
 
 ## Known gaps for M3b
 
+> **Update (M3b):** pointer editing, Fit it for me, Needs a mount?, custom parts, area-slot
+> orientations, extras and retired parts, and checks on tray entries are now covered; see
+> [m3b.md](m3b.md). The wizard's "Fit my equipment" goal is still to come.
+
 - **Pointer editing**: no drag from the palette (dnd-kit), no dragging placed parts, no long-press
   or pinch on touch, no drop-on-empty mount chooser; keyboard moves, Move to U… and Add at U… cover
   it for now.

@@ -1,5 +1,6 @@
 /**
- * JSON backups: plans (as stored), the custom parts library and, optionally, settings and
+ * JSON backups: plans (as stored, plus any of your own parts they use but do not carry yet), the
+ * custom parts library and, optionally, settings and
  * inventory. Model files are never included (import-only policy): re-dropping the same files
  * relinks them by SHA-256.
  *
@@ -15,6 +16,7 @@
  */
 import { z } from 'zod'
 import { canonicalJson } from '@/catalog/revision'
+import { embedUsedCustomEntries } from '@/domain/customParts'
 import { ID_PREFIX, newId } from '@/domain/ids'
 import {
   CURRENT_PLAN_SCHEMA,
@@ -105,6 +107,22 @@ function appInfo(): BackupFile['app'] {
   }
 }
 
+/**
+ * The plan with the parts of your own it uses but does not carry yet (made before M3b copied them
+ * in on every edit), so a single exported plan opens complete elsewhere. Plans that need nothing,
+ * and plans this version cannot read, are exported as stored.
+ */
+function withOwnParts(document: PlanDocument, library: readonly CatalogEntry[]): PlanDocument {
+  if (library.length === 0) return document
+  try {
+    const { plan } = migratePlan(document)
+    const embedded = embedUsedCustomEntries(plan, library)
+    return embedded === plan ? document : embedded
+  } catch {
+    return document
+  }
+}
+
 /** A consistent snapshot (one read transaction) as a backup document. */
 export async function exportBackup(options: ExportOptions): Promise<BackupFile> {
   const includeLibrary = options.includeLibrary ?? options.planIds === undefined
@@ -112,11 +130,13 @@ export async function exportBackup(options: ExportOptions): Promise<BackupFile> 
   const snapshot = await withRetry((db) =>
     db.transaction('r', [db.plans, db.library, db.settings, db.inventory], async () => ({
       plans: await db.plans.orderBy('updatedAt').toArray(),
-      library: includeLibrary ? await db.library.orderBy('updatedAt').toArray() : [],
+      // Also read when not exported: plans take along the parts they use (`withOwnParts`).
+      library: await db.library.orderBy('updatedAt').toArray(),
       settings: options.includeSettings ? await db.settings.get(SETTINGS_KEY) : undefined,
       inventory: options.includeSettings ? await db.inventory.toArray() : [],
     })),
   )
+  const library = readLibraryRows(snapshot.library.toReversed()).entries
   // Newest first, like the Plans page.
   const file: BackupFile = {
     format: BACKUP_FORMAT,
@@ -126,8 +146,8 @@ export async function exportBackup(options: ExportOptions): Promise<BackupFile> 
     plans: snapshot.plans
       .toReversed()
       .filter((row) => wanted?.has(row.id) ?? true)
-      .map((row) => row.plan),
-    library: readLibraryRows(snapshot.library.toReversed()).entries,
+      .map((row) => withOwnParts(row.plan, library)),
+    library: includeLibrary ? library : [],
   }
   if (options.includeSettings) {
     file.settings = parseSettings(snapshot.settings?.value)

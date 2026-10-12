@@ -4,10 +4,13 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadBundledCatalog } from '@/catalog/loader'
 import { getDb, resetDbForTests } from '@/db/db'
+import { putLibraryEntry } from '@/db/libraryRepo'
 import { createPlan, getPlan, listPlanSummaries, savePlan } from '@/db/plansRepo'
+import { newCustomDevice } from '@/domain/customParts'
+import { addEquipment } from '@/domain/devices'
 import type { Plan } from '@/domain/schema/plan'
 import { buildSamplePlan } from '@/features/plans/sample'
-import { stopLibrarySync } from '@/state/catalogStore'
+import { stopLibrarySync, useCatalogStore } from '@/state/catalogStore'
 import { resetDbStatusForTests } from '@/state/dbStatus'
 import { usePlanStore } from '@/state/planStore'
 import { useUiStore } from '@/state/uiStore'
@@ -575,6 +578,47 @@ describe('EditorPage: desktop layout (lg and up)', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/'))
     expect(useEditorState.getState().placing).toBeNull()
     expect(useEditorState.getState().inspectorTab).toBe('selection')
+  })
+  it('copies a part of your own into the plan when an edit starts using it', async () => {
+    const device = await putLibraryEntry(
+      newCustomDevice(
+        {
+          brand: 'Zeta',
+          model: 'Box 9',
+          category: 'mini-pc',
+          widthMm: 150,
+          depthMm: 150,
+          heightMm: 40,
+          power: 'brick',
+          today: '2026-10-11',
+        },
+        new Set(),
+      ),
+    )
+    const plan = await storedSample()
+    const router = renderEditor(plan.id)
+    await nameInput()
+    await waitFor(() =>
+      expect(useCatalogStore.getState().library.map((entry) => entry.id)).toContain(device.id),
+    )
+    const applied = usePlanStore
+      .getState()
+      .applyOp((current) => ({ plan: addEquipment(current, device.id, false) }))
+    expect(applied.applied).toBe(true)
+    expect(usePlanStore.getState().plan?.custom.devices).toEqual([device])
+    // One undo step takes back the device and its copy.
+    act(() => usePlanStore.getState().undo())
+    expect(usePlanStore.getState().plan?.custom.devices).toEqual([])
+
+    // Leaving the editor stops it: plan edits elsewhere are left as they are.
+    fireEvent.click(screen.getByRole('link', { name: 'Your racks' }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'))
+    await waitFor(() => expect(usePlanStore.getState().planId).toBeNull())
+    await act(() => usePlanStore.getState().load(plan.id))
+    usePlanStore
+      .getState()
+      .applyOp((current) => ({ plan: addEquipment(current, device.id, false) }))
+    expect(usePlanStore.getState().plan?.custom.devices).toEqual([])
   })
 })
 

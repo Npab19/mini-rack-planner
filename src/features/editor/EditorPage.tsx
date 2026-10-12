@@ -4,6 +4,11 @@
  * (columns from lg up, sheets below; see layout/EditorLayout.tsx). The shell owns the global
  * shortcuts, the keyboard help, the live region for its own announcements and the guard that asks
  * before leaving with edits another tab kept from being saved.
+ *
+ * M3b: the panels sit inside `RackDndProvider` (palette and tray rows drag onto the rack), the
+ * mount dialogs (chooser, "Needs a mount?") are rendered here once per plan, and every plan edit
+ * copies the user's own parts it starts using into the plan (`embedUsedCustomEntries`), so the
+ * plan exports, imports and shares complete. The "Add a part" dialog lives in the app shell.
  */
 import { ArrowLeft, CircleDot, CopyPlus, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
@@ -20,6 +25,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { errorMessage } from '@/db/errors'
+import { embedUsedCustomEntries } from '@/domain/customParts'
+import { useCatalogStore } from '@/state/catalogStore'
 import { hasStrandedEdits, usePlanStore } from '@/state/planStore'
 import { useRecordingMode, useUiStore } from '@/state/uiStore'
 import { useEditorState } from './editorState'
@@ -29,6 +36,8 @@ import { EditorLayout } from './layout/EditorLayout'
 import { EditorLiveRegion } from './layout/EditorLiveRegion'
 import { resetEditorShell } from './layout/shellStore'
 import { useIsDesktop } from './layout/useMediaQuery'
+import { MountDialogs } from './mounts/MountDialogs'
+import { RackDndProvider } from './rack/RackDndProvider'
 import { createEditorActions, EditorActionsProvider } from './toolbar/editorActions'
 import { EditorToolbar } from './toolbar/EditorToolbar'
 import { PlacingBanner } from './toolbar/PlacingBanner'
@@ -175,6 +184,15 @@ function ReadyEditor({ planId }: { planId: string }) {
     headingRef.current?.focus({ preventScroll: true })
   }, [])
 
+  // Parts from the user's library that an edit starts using are copied into the plan in the same
+  // undo step: a plan carries its own parts, so it exports and shares complete.
+  useEffect(() => {
+    usePlanStore
+      .getState()
+      .setOpFinisher((plan) => embedUsedCustomEntries(plan, useCatalogStore.getState().library))
+    return () => usePlanStore.getState().setOpFinisher(null)
+  }, [])
+
   // Sheets, the keyboard help and announcements belong to this plan's session.
   useEffect(
     () => () => {
@@ -197,8 +215,12 @@ function ReadyEditor({ planId }: { planId: string }) {
         <EditorToolbar desktop={desktop} headingRef={headingRef} />
         <PlacingBanner />
         {recording ? <RecordingBanner onDone={doneRecording} /> : null}
-        <EditorLayout desktop={desktop} />
+        {/* Palette and tray rows drag onto the rack (lg and up). */}
+        <RackDndProvider>
+          <EditorLayout desktop={desktop} />
+        </RackDndProvider>
       </div>
+      <MountDialogs />
       <KeyboardHelp />
       <EditorLiveRegion />
       <StrandedEditsGuard />

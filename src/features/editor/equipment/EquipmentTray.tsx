@@ -1,13 +1,37 @@
 /**
- * "Equipment to fit" (M3a): devices the plan needs room for that are not placed yet. Shows how
- * much rack space they need against what is free ("Needs ~10U · rack 9U, 2U free → add 3U") with
- * a one-step way to grow the rack, and for each device its size, Have / To get, the space it takes
- * and up to three mounts to place it on (click-to-place in the rack view). Announcements go to the
- * shell's live region (on small screens the shell closes this sheet once placing starts). Inside a
- * sheet, the sheet's title stands in for the panel heading.
+ * "Equipment to fit" (M3a, M3b): devices the plan needs room for that are not placed yet. Shows
+ * how much rack space they need against what is free ("Needs ~10U · rack 9U, 2U free → add 3U"),
+ * and for each device its size, Have / To get, the space it takes and up to three mounts to place
+ * it on (click-to-place in the rack view), or "Needs a mount?" when no catalog mount takes it.
+ *
+ * - "Fit it for me" places everything in one undo step, adding sections at the top or the bottom
+ *   only when needed (`runFitItForMe`); what it could not place stays here with the reason.
+ * - "Add 3U at top / at the bottom" only grows the rack by the shortfall.
+ * - Rows can be dragged onto the rack when the rack's drag and drop provides `TrayDragContext`
+ *   (the drop opens the mount chooser); placing never needs a drag.
+ * - Each row carries `data-equipment-id` and shows when it is selected, so a check on a tray
+ *   entry can select and focus it (`focusEquipmentEntry`).
+ *
+ * Announcements go to the shell's live region (on small screens the shell closes this sheet once
+ * placing starts). Inside a sheet, the sheet's title stands in for the panel heading.
  */
-import { ArrowDownToLine, ArrowUpToLine, Crosshair, Ruler, Trash2, X } from 'lucide-react'
-import { useId, useMemo } from 'react'
+import { Radio } from '@base-ui/react/radio'
+import { RadioGroup } from '@base-ui/react/radio-group'
+import {
+  ArrowDownToLine,
+  ArrowUpToLine,
+  CircleCheck,
+  CircleDashed,
+  Crosshair,
+  GripVertical,
+  Ruler,
+  Trash2,
+  TriangleAlert,
+  WandSparkles,
+  Wrench,
+  X,
+} from 'lucide-react'
+import { useId, useMemo, useRef, useState, type Ref } from 'react'
 import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { Badge } from '@/components/ui/badge'
@@ -29,14 +53,25 @@ import type { PlanEquipment, Plan } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
 import { usePlanLookup } from '@/state/derived'
 import { usePlanStore } from '@/state/planStore'
-import { useRecordingMode } from '@/state/uiStore'
+import { useRecordingMode, useUiStore } from '@/state/uiStore'
 import { useEditorState, type PlaceSource } from '../editorState'
 import { applyPlanOp, sparesText, useSpareContext } from '../inspector/planOps'
 import { setHeightRequest } from '../inspector/sectionOps'
 import { announce } from '../layout/announcer'
-import { focusRackDrawing } from '../layout/shellStore'
+import { closeSheetThen, focusRackDrawing } from '../layout/shellStore'
+import { useMountDialogs } from '../mounts/mountDialogsStore'
+import { selectInEditor } from '../selection'
 import { DevicePicker } from './DevicePicker'
-import { dimsText, estimateText, growPlan, summaryText, trayNeedText } from './equipmentView'
+import {
+  dimsText,
+  estimateText,
+  growPlan,
+  summaryText,
+  trayNeedText,
+  type FitReport,
+} from './equipmentView'
+import { runFitItForMe } from './fitActions'
+import { useTrayDragSupport, type TrayDraggableComponent } from './trayDrag'
 
 /** Mounts offered per device. */
 const SUGGESTIONS_PER_DEVICE = 3
@@ -85,6 +120,58 @@ function placeOptions(
   return options
 }
 
+/** What "Fit it for me" last did, shown while the plan is still the one it left. */
+interface LastFit {
+  plan: Plan | null
+  report: FitReport
+}
+
+// ---------------------------------------------------------------------------------------------
+// Rows
+
+/** The device's name, as a grab handle when the rack's drag and drop is available. */
+function RowTitle({
+  entry,
+  name,
+  DragHandle,
+  readOnly,
+}: {
+  entry: PlanEquipment
+  name: string
+  DragHandle: TrayDraggableComponent | null
+  readOnly: boolean
+}) {
+  if (DragHandle === null) return <p className="font-medium break-words">{name}</p>
+  return (
+    <DragHandle subject={{ equipmentId: entry.id, deviceId: entry.deviceId }} disabled={readOnly}>
+      {({ ref, isDragging }) => (
+        <div
+          ref={ref}
+          data-testid={`equipment-drag-${entry.id}`}
+          data-dragging={isDragging || undefined}
+          title={readOnly ? undefined : 'Drag onto the rack'}
+          className={cn(
+            'flex items-start gap-1 rounded-sm select-none',
+            !readOnly && 'cursor-grab active:cursor-grabbing',
+          )}
+        >
+          {readOnly ? null : (
+            <GripVertical aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          )}
+          <p className="font-medium break-words">
+            {name}
+            {isDragging ? (
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                (drop it on the rack)
+              </span>
+            ) : null}
+          </p>
+        </div>
+      )}
+    </DragHandle>
+  )
+}
+
 function EquipmentRow({
   entry,
   device,
@@ -94,10 +181,14 @@ function EquipmentRow({
   catalog,
   placing,
   readOnly,
+  selected,
+  leftOver,
+  dragSupport,
   onHave,
   onRemove,
   onPlace,
   onCancelPlace,
+  onNeedsAMount,
 }: {
   entry: PlanEquipment
   device: Device | undefined
@@ -107,10 +198,16 @@ function EquipmentRow({
   catalog: CatalogLookup
   placing: PlaceSource | null
   readOnly: boolean
+  selected: boolean
+  /** Why "Fit it for me" left it here, while its report is shown. */
+  leftOver: string | undefined
+  /** The rack's draggable wrapper, when rows can be dragged onto the rack. */
+  dragSupport: TrayDraggableComponent | null
   onHave: (entry: PlanEquipment, name: string, have: boolean) => void
   onRemove: (entry: PlanEquipment, name: string) => void
   onPlace: (option: PlaceOption, name: string) => void
   onCancelPlace: () => void
+  onNeedsAMount: (entry: PlanEquipment) => void
 }) {
   const name = device === undefined ? entry.deviceId : deviceName(device)
   const placingHere = placing?.equipmentId === entry.id ? placing : undefined
@@ -125,15 +222,25 @@ function EquipmentRow({
   return (
     <li
       data-testid={`equipment-item-${entry.id}`}
+      data-equipment-id={entry.id}
       data-have={entry.have}
+      data-selected={selected || undefined}
+      aria-current={selected || undefined}
+      tabIndex={-1}
       className={cn(
-        'grid gap-2 rounded-lg border p-3',
+        'grid gap-2 rounded-lg border p-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
         entry.have ? 'border-solid' : 'border-dashed border-foreground/40',
+        selected && 'bg-muted/60 ring-2 ring-foreground/30',
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-medium break-words">{name}</p>
+          <RowTitle entry={entry} name={name} DragHandle={dragSupport} readOnly={readOnly} />
+          {selected ? (
+            <p className="text-xs font-medium">
+              <span className="sr-only">, </span>Selected
+            </p>
+          ) : null}
           {device === undefined ? (
             <p className="text-xs text-muted-foreground">
               Not in the catalog: its size and mounts are unknown.
@@ -170,11 +277,29 @@ function EquipmentRow({
         disabled={readOnly}
         onChange={(have) => onHave(entry, name, have)}
       />
-      {device === undefined ? null : options.length === 0 ? (
-        <p className="text-xs text-muted-foreground">
-          No mount in the catalog takes it yet. A mount of about{' '}
-          {estimate === undefined ? 'its height' : formatU(estimate.sixths)} would hold it.
+      {leftOver === undefined ? null : (
+        <p
+          data-testid={`equipment-left-over-${entry.id}`}
+          className="flex items-start gap-1.5 text-xs"
+        >
+          <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+          <span>Fit it for me left it here: {leftOver}</span>
         </p>
+      )}
+      {device === undefined ? null : options.length === 0 ? (
+        <div className="grid gap-1.5">
+          <p className="text-xs text-muted-foreground">No mount in the catalog takes it yet.</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className={cn(PLACE_BUTTON_CLASS, 'w-fit')}
+            data-testid={`equipment-needs-mount-${entry.id}`}
+            onClick={() => onNeedsAMount(entry)}
+          >
+            <Wrench aria-hidden />
+            Needs a mount?
+          </Button>
+        </div>
       ) : (
         <ul aria-label={`Ways to place ${name}`} className="flex flex-wrap gap-1.5">
           {options.map((option) => (
@@ -218,6 +343,95 @@ function EquipmentRow({
   )
 }
 
+// ---------------------------------------------------------------------------------------------
+// Fit it for me
+
+const END_TEXT: Record<StackEnd, string> = { top: 'top', bottom: 'bottom' }
+
+/** Top / Bottom: where new sections go. Words and icons carry the choice, never colour alone. */
+function EndChoice({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: StackEnd
+  disabled: boolean
+  onChange: (at: StackEnd) => void
+}) {
+  const labelId = useId()
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <span id={labelId} className="text-xs text-muted-foreground">
+        New sections go at the
+      </span>
+      <RadioGroup
+        value={value}
+        onValueChange={(next) => {
+          if (next === 'top' || next === 'bottom') onChange(next)
+        }}
+        aria-labelledby={labelId}
+        disabled={disabled}
+        className="inline-flex w-fit shrink-0 rounded-lg border bg-background p-0.5"
+      >
+        {(['top', 'bottom'] as const).map((end) => {
+          const Icon = end === 'top' ? ArrowUpToLine : ArrowDownToLine
+          return (
+            <Radio.Root
+              key={end}
+              value={end}
+              data-testid={`equipment-fit-at-${end}`}
+              className={cn(
+                'inline-flex h-6 cursor-pointer items-center gap-1 rounded-md border border-transparent px-2 text-xs whitespace-nowrap text-muted-foreground outline-none select-none',
+                'focus-visible:ring-3 focus-visible:ring-ring/50',
+                'data-disabled:cursor-not-allowed data-disabled:opacity-60',
+                'data-checked:border-foreground/60 data-checked:bg-muted data-checked:font-semibold data-checked:text-foreground',
+              )}
+            >
+              <Icon aria-hidden className="size-3.5" />
+              {END_TEXT[end]}
+            </Radio.Root>
+          )
+        })}
+      </RadioGroup>
+    </div>
+  )
+}
+
+function FitResultNote({ report, noteRef }: { report: FitReport; noteRef: Ref<HTMLDivElement> }) {
+  return (
+    <div
+      ref={noteRef}
+      tabIndex={-1}
+      data-testid="equipment-fit-result"
+      className="grid gap-1 rounded-md border bg-background p-2 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <p className="flex items-start gap-1.5 font-medium">
+        {report.placed > 0 ? (
+          <CircleCheck aria-hidden className="mt-px size-3.5 shrink-0" />
+        ) : (
+          <CircleDashed aria-hidden className="mt-px size-3.5 shrink-0" />
+        )}
+        <span>{report.headline}</span>
+      </p>
+      {report.leftOver.length === 0 ? null : (
+        <ul aria-label="Still waiting" className="grid gap-0.5">
+          {report.leftOver.map((entry) => (
+            <li key={entry.equipmentId} className="flex items-start gap-1.5">
+              <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+              <span>
+                <span className="font-medium">{entry.name}</span>: {entry.reason}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------------------------
+// The panel
+
 export function EquipmentTray() {
   const headingId = useId()
   const plan = usePlanStore((state) => state.plan)
@@ -241,6 +455,11 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
   const lookup = usePlanLookup()
   const spares = useSpareContext()
   const placing = useEditorState((state) => state.placing)
+  const selection = useUiStore((state) => state.selection)
+  const dragSupport = useTrayDragSupport()
+  const [fitAt, setFitAt] = useState<StackEnd>('top')
+  const [lastFit, setLastFit] = useState<LastFit | null>(null)
+  const fitNoteRef = useRef<HTMLDivElement>(null)
 
   const frame = lookup.frame(plan.frame.frameId)
   const summary = useMemo(
@@ -263,6 +482,12 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
     return byDevice
   }, [plan.equipment, lookup, frame])
   const grow = summary === undefined || frame === undefined ? undefined : growPlan(summary, frame)
+  // The last fit's report, while nothing has changed since.
+  const report = lastFit !== null && lastFit.plan === plan ? lastFit.report : undefined
+  const leftOver = useMemo(
+    () => new Map(report?.leftOver.map((entry) => [entry.equipmentId, entry.reason]) ?? []),
+    [report],
+  )
 
   function setHave(entry: PlanEquipment, name: string, have: boolean): void {
     // Marking it In my rack uses up a spare ticked as Got it, like everywhere else.
@@ -313,6 +538,15 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
     announce('Placing cancelled.')
   }
 
+  function needsAMount(entry: PlanEquipment): void {
+    // Below lg the tray is a sheet: it closes first, so the dialog gets focus to itself.
+    closeSheetThen(() =>
+      useMountDialogs
+        .getState()
+        .openNeedsAMount({ deviceId: entry.deviceId, equipmentId: entry.id }),
+    )
+  }
+
   function growRack(at: StackEnd): void {
     if (grow === undefined || frame === undefined || grow.blocked !== undefined) return
     // The Rack tab's Set height: in Recording mode the new sections are In my rack.
@@ -327,6 +561,22 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
       announce(`Could not add ${grow.addText} ${where}: ${why}`)
     }
   }
+
+  function fit(): void {
+    if (useEditorState.getState().placing?.equipmentId !== undefined) {
+      useEditorState.getState().cancelPlacing()
+    }
+    const outcome = runFitItForMe(lookup, fitAt, spares)
+    setLastFit({ plan: outcome.plan, report: outcome.report })
+    announce(outcome.report.announcement)
+    if (outcome.placementIds.length > 0) selectInEditor(outcome.placementIds)
+    // With the tray now empty the button is gone: the report takes focus instead.
+    if (outcome.applied && (outcome.plan?.equipment.length ?? 0) === 0) {
+      setTimeout(() => fitNoteRef.current?.focus(), 0)
+    }
+  }
+
+  const trayEmpty = plan.equipment.length === 0
 
   return (
     <section
@@ -346,17 +596,34 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
         <div className="grid gap-2 rounded-lg border bg-muted/30 p-3">
           <p data-testid="equipment-summary" className="flex items-start gap-2 font-medium">
             <Ruler aria-hidden className="mt-0.5 size-4 shrink-0" />
-            {summaryText(summary, plan.equipment.length === 0)}
+            {summaryText(summary, trayEmpty)}
           </p>
           {trayNeedText(summary) === undefined ? null : (
             <p className="text-xs text-muted-foreground">{trayNeedText(summary)}</p>
           )}
+          {trayEmpty ? null : (
+            <div className="grid gap-2 border-t pt-2">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <Button size="sm" data-testid="equipment-fit" disabled={readOnly} onClick={fit}>
+                  <WandSparkles aria-hidden />
+                  Fit it for me
+                </Button>
+                <EndChoice value={fitAt} disabled={readOnly} onChange={setFitAt} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Places every device on its best mount, adding sections only when the free space is
+                not enough. One step to undo.
+              </p>
+            </div>
+          )}
+          {report === undefined ? null : <FitResultNote report={report} noteRef={fitNoteRef} />}
           {grow === undefined ? null : grow.blocked !== undefined ? (
             <p className="text-xs text-muted-foreground">{grow.blocked}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
+                variant="outline"
                 data-testid="equipment-grow-top"
                 disabled={readOnly}
                 onClick={() => growRack('top')}
@@ -381,7 +648,7 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
 
       <DevicePicker lookup={lookup} disabled={readOnly} onAdd={add} />
 
-      {plan.equipment.length === 0 ? (
+      {trayEmpty ? (
         <p className="rounded-lg border border-dashed p-3 text-muted-foreground">
           Nothing waiting to be placed. Add the devices you want in the rack: the planner suggests
           mounts and works out how much space they need.
@@ -410,10 +677,14 @@ function TrayContent({ headingId, plan }: { headingId: string; plan: Plan }) {
                 catalog={lookup}
                 placing={placing}
                 readOnly={readOnly}
+                selected={selection.includes(entry.id)}
+                leftOver={leftOver.get(entry.id)}
+                dragSupport={dragSupport}
                 onHave={setHave}
                 onRemove={remove}
                 onPlace={place}
                 onCancelPlace={cancelPlace}
+                onNeedsAMount={needsAMount}
               />
             )
           })}

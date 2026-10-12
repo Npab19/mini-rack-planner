@@ -1,6 +1,8 @@
 /**
  * A placement's slots and the devices in them: name, size, whether it fits (icon + reason, from
- * `fitDeviceInSlot` and the area slot's packing), In my rack / To get, Remove, and "Add device".
+ * `fitDeviceInSlot` and the area slot's packing), how it sits (when the slot allows several
+ * orientations: `setDeviceOrientation`, area slots re-pack), In my rack / To get, Remove, and
+ * "Add device".
  */
 import { CircleCheck, CircleX, TriangleAlert, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef } from 'react'
@@ -8,7 +10,13 @@ import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
 import { Button } from '@/components/ui/button'
 import { markPlacementDevice } from '@/domain/build'
-import { removeDevice } from '@/domain/devices'
+import {
+  deviceOrientationChoices,
+  ORIENTATION_PHRASES,
+  removeDevice,
+  setDeviceOrientation,
+  type OrientationChoice,
+} from '@/domain/devices'
 import { fitDeviceInSlot, packAreaSlot, type PackItem } from '@/domain/placement'
 import { deviceName, type Slot } from '@/domain/schema/catalog'
 import type { Orientation } from '@/domain/schema/common'
@@ -16,15 +24,9 @@ import type { PlacedDevice, Placement } from '@/domain/schema/plan'
 import { cn } from '@/lib/utils'
 import { dimsText } from '../palette/paletteModel'
 import { AddDevicePicker } from './AddDevicePicker'
+import { OrientationPicker, turnedText } from './OrientationPicker'
 import { applyPlanOp, sparesText, type SpareContext } from './planOps'
 import type { OpenPlan } from './useOpenPlan'
-
-const ORIENTATION_TEXT: Record<Orientation, string> = {
-  flat: 'lying flat',
-  'flat-rotated': 'turned 90°',
-  'on-side': 'on its side',
-  upright: 'standing upright',
-}
 
 export function slotName(slot: Slot): string {
   return slot.label ?? `Slot “${slot.id}”`
@@ -61,7 +63,7 @@ function deviceFit(
   const orientation = placed.orientation ?? fit.orientation
   return {
     ok: true,
-    text: `Fits${orientation === undefined ? '' : `, ${ORIENTATION_TEXT[orientation]}`}`,
+    text: `Fits${orientation === undefined ? '' : `, ${ORIENTATION_PHRASES[orientation]}`}`,
   }
 }
 
@@ -83,12 +85,22 @@ function SlotSection({
   const headingId = useId()
   const headingRef = useRef<HTMLHeadingElement>(null)
   const focusHeading = useRef(false)
-  const { lookup, readOnly } = open
+  const { plan, lookup, readOnly } = open
   const name = slotName(slot)
   const inSlot = useMemo(
     () => placement.devices.filter((placed) => placed.slotId === slot.id),
     [placement.devices, slot.id],
   )
+  // How each device can sit, when the slot allows more than one way (the whole plan matters: a
+  // taller device must not make the part hit its neighbours).
+  const orientations = useMemo(() => {
+    const byEntry = new Map<string, OrientationChoice[]>()
+    if (slot.orientations.length < 2) return byEntry
+    for (const placed of inSlot) {
+      byEntry.set(placed.id, deviceOrientationChoices(plan, lookup, placement.id, placed.id))
+    }
+    return byEntry
+  }, [plan, lookup, placement.id, inSlot, slot.orientations.length])
   const overflow = useMemo(() => {
     if (slot.kind !== 'area') return new Set<string>()
     const items: PackItem[] = []
@@ -115,7 +127,7 @@ function SlotSection({
 
   function markDevice(placed: PlacedDevice, deviceLabel: string, have: boolean): void {
     const outcome = applyPlanOp(
-      (plan) => ({ plan: markPlacementDevice(plan, placement.id, placed.id, have) }),
+      (current) => ({ plan: markPlacementDevice(current, placement.id, placed.id, have) }),
       spares,
     )
     announce(
@@ -125,9 +137,21 @@ function SlotSection({
     )
   }
 
+  function turn(placed: PlacedDevice, deviceLabel: string, orientation: Orientation): void {
+    const outcome = applyPlanOp(
+      (current) => setDeviceOrientation(current, lookup, placement.id, placed.id, orientation),
+      spares,
+    )
+    announce(
+      outcome.applied
+        ? turnedText(deviceLabel, orientation)
+        : (outcome.error ?? `The ${deviceLabel} could not be turned.`),
+    )
+  }
+
   function remove(placed: PlacedDevice, deviceLabel: string): void {
     const outcome = applyPlanOp(
-      (plan) => ({ plan: removeDevice(plan, placement.id, placed.id) }),
+      (current) => ({ plan: removeDevice(current, placement.id, placed.id) }),
       spares,
     )
     if (!outcome.applied) {
@@ -168,6 +192,7 @@ function SlotSection({
               device === undefined ? `unknown device “${placed.deviceId}”` : deviceName(device)
             const fit = deviceFit(placed, slot, open, overflow)
             const FitIcon = fit.ok ? CircleCheck : device === undefined ? TriangleAlert : CircleX
+            const ways = orientations.get(placed.id) ?? []
             return (
               <li
                 key={placed.id}
@@ -206,6 +231,15 @@ function SlotSection({
                   <FitIcon aria-hidden className="mt-px size-3.5 shrink-0" />
                   {fit.text}
                 </p>
+                {ways.length < 2 ? null : (
+                  <OrientationPicker
+                    choices={ways}
+                    deviceLabel={deviceLabel}
+                    onChange={(orientation) => turn(placed, deviceLabel, orientation)}
+                    disabled={readOnly}
+                    testId={`inspector-orientation-${placed.id}`}
+                  />
+                )}
                 <HaveNeedToggle
                   have={placed.have}
                   label={`${deviceLabel}: in my rack or to get`}
