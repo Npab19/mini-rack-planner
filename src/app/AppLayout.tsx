@@ -100,9 +100,10 @@ export function AppLayout() {
   return (
     <TooltipProvider>
       <div className="flex min-h-dvh flex-col bg-background text-foreground">
-        {/* The slim accent line on top is the app's brand mark; it follows the chosen accent. */}
-        <header className="sticky top-0 z-40 border-t-2 border-b border-t-primary bg-background/90 backdrop-blur">
-          <div className="mx-auto flex h-12 max-w-screen-2xl items-center gap-2 px-3 sm:gap-4 sm:px-4">
+        {/* The slim accent line on top is the app's brand mark; it follows the chosen accent. The
+            header is exactly 3rem, borders included: the editor fills the rest of the window. */}
+        <header className="sticky top-0 z-40 h-12 border-t-2 border-b border-t-primary bg-background/90 backdrop-blur">
+          <div className="mx-auto flex h-full max-w-screen-2xl items-center gap-2 px-3 sm:gap-4 sm:px-4">
             <NavLink
               to="/"
               className={cn(
