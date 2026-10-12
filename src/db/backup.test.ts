@@ -72,6 +72,25 @@ describe('exportBackup', () => {
     expect(one.settings).toBeUndefined()
     expect(one.inventory).toBeUndefined()
   })
+  it('exports a plan with the parts of your own it uses, even without the library', async () => {
+    await putLibraryEntry(NAS_PART)
+    const stored = await createPlan({
+      ...makePlan({ sections: USER_SECTIONS }),
+      equipment: [{ id: 'eq-nas', deviceId: NAS_PART.id, have: false }],
+    })
+    const one = await exportBackup({ planIds: [stored.id], includeSettings: false })
+    expect(one.library).toEqual([])
+    const [exported] = one.plans as Plan[]
+    expect(exported?.custom.devices).toEqual([NAS_PART])
+    expect(exported?.equipment).toEqual(stored.equipment)
+
+    // Imported elsewhere as a copy, it still knows the device.
+    await resetDbForTests()
+    const result = await importBackup(viaJson(one), 'copy')
+    const copy = (await getPlan(result.planIds[0] ?? '')).plan
+    expect(copy.custom.devices.map((device) => device.id)).toEqual([NAS_PART.id])
+    expect(copy.equipment.map((entry) => entry.deviceId)).toEqual([NAS_PART.id])
+  })
 })
 
 describe('importBackup', () => {

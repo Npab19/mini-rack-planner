@@ -204,6 +204,37 @@ describe('editing and history', () => {
     // Nothing happened, so the redo branch survives.
     expect(canRedo(store)).toBe(true)
   })
+  it('runs every applied op through the op finisher, in the same undo step', async () => {
+    const plan = await storedPlan()
+    const store = makeStore()
+    await store.getState().load(plan.id)
+    const before = store.getState().plan
+    const finisher = vi.fn((current: Plan) => ({ ...current, notes: 'finished' }))
+    store.getState().setOpFinisher(finisher)
+
+    const failed = store.getState().applyOp((current) => insertSection(current, FRAME, 9, 's3'))
+    expect(failed.applied).toBe(false)
+    expect(finisher).not.toHaveBeenCalled()
+
+    store.getState().applyOp((current) => ({ plan: { ...current, name: 'Renamed' } }))
+    expect(store.getState().plan).toMatchObject({ name: 'Renamed', notes: 'finished' })
+    expect(pastSteps(store)).toBe(1)
+    store.getState().undo()
+    expect(store.getState().plan).toBe(before)
+
+    // A failing finisher keeps the op's own result; a cleared one is not called.
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    store.getState().setOpFinisher(() => {
+      throw new Error('broken finisher')
+    })
+    store.getState().applyOp((current) => ({ plan: { ...current, name: 'Again' } }))
+    expect(store.getState().plan?.name).toBe('Again')
+    store.getState().setOpFinisher(null)
+    finisher.mockClear()
+    store.getState().applyOp((current) => ({ plan: { ...current, name: 'Plain' } }))
+    expect(finisher).not.toHaveBeenCalled()
+    expect(store.getState().plan?.notes).not.toBe('finished')
+  })
 })
 
 describe('autosave', () => {

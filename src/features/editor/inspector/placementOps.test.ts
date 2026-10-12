@@ -117,4 +117,13 @@ describe('resolveSelection', () => {
     // A placement and one of its devices are one thing.
     expect(resolveSelection(plan, ['pc', 'dev'])).toMatchObject({ kind: 'placement' })
   })
+
+  it('leaves out tray entries (a check can select one): the Rack tab shows instead', () => {
+    const withTray = { ...plan, equipment: [{ id: 'eq-1', deviceId: MINI_PC.id, have: false }] }
+    expect(resolveSelection(withTray, ['eq-1'])).toEqual({ kind: 'none' })
+    expect(resolveSelection(withTray, ['eq-1', 'blank'])).toMatchObject({
+      kind: 'placement',
+      placement: { id: 'blank' },
+    })
+  })
 })

@@ -24,10 +24,13 @@
  * undo are the shell's global shortcuts. A selection made elsewhere (checks, inspector lists) is
  * scrolled into view.
  *
- * Zoom is `uiStore.zoom` (the toolbar's buttons, Ctrl/Cmd + wheel here); the shell's rack viewport
- * scrolls (pan). Standalone (no shell), the view scrolls itself.
+ * Pointer gestures (M3b, `useRackDnd`): parts dragged from the palette or the tray land where the
+ * ghost says (inside `RackDndProvider`); placed parts move with the mouse after 4 px or with a
+ * 250 ms long-press on touch (one undo step, Escape puts them back); dragging the background or
+ * swiping pans; two fingers pinch-zoom. Zoom is `uiStore.zoom` and pan the scroll position of the
+ * shell's rack viewport (standalone, the view scrolls itself); `useRackView` owns both.
  */
-import { CircleCheck, CircleX, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -61,7 +64,6 @@ import { useRackViewport } from '../layout/rackViewport'
 import { closeSheetThen, focusPanel } from '../layout/shellStore'
 import { placementForId, selectInEditor } from '../selection'
 import { useAddAtURequest } from '../toolbar/addAtURequest'
-import { useFitRequest } from '../toolbar/fitRequest'
 import { AddAtUDialog } from './AddAtUDialog'
 import {
   duplicatePlacementNearby,
@@ -70,7 +72,10 @@ import {
   READ_ONLY_MESSAGE,
   removePlacement,
 } from './commit'
-import { GhostShape } from './GhostShape'
+import { DragGhostLayer, DragStatus, GhostStatusPill, SlotZones } from './DragLayers'
+import { useFaceDroppable } from './dragSources'
+import { useRackDrag } from './dragStore'
+import { GhostShape, placingGhostView } from './GhostShape'
 import { InsertHandles } from './InsertHandles'
 import { ghostText, positionText } from './labels'
 import {
@@ -90,7 +95,7 @@ import { centredStart, clientToRack } from './pointer'
 import { RackContentsList } from './RackContentsList'
 import { RackDefs, useRackPatterns } from './RackDefs'
 import { JointPlates, RackFrame, SectionBand } from './RackFrame'
-import { basePxPerMm, bayAtX, fitZoom, rackLayout, viewBoxOf } from './rackLayout'
+import { bayAtX, rackLayout, viewBoxOf } from './rackLayout'
 import {
   contentsGroups,
   focusOrder,
@@ -104,12 +109,8 @@ import {
   type PlacementView,
   type SectionChoice,
 } from './rackModel'
-import { useElementSize } from './useElementSize'
-
-/** Space around the drawing inside the scroll container (px, both sides together). */
-const VIEWPORT_PADDING_PX = 16
-/** Ctrl + wheel: zoom factor per wheel pixel (exponential, so in and out are symmetric). */
-const WHEEL_ZOOM_RATE = 0.0015
+import { useRackDnd } from './useRackDnd'
+import { useRackView } from './useRackView'
 
 const KEYBOARD_HELP =
   'Enter selects. Arrow keys go to the item above or below; on the selected item they move it, Shift moves 5 steps. Escape clears the selection. Delete removes it, Control+D duplicates it.'
@@ -156,15 +157,6 @@ interface EvalCache extends Evaluated {
   catalog: CatalogLookup
   source: string
   key: string
-}
-
-interface ZoomAnchor {
-  /** Pointer position in the scroll container (px). */
-  x: number
-  y: number
-  left: number
-  top: number
-  from: number
 }
 
 function sameGhost(a: Ghost | null, b: Ghost): boolean {
@@ -227,7 +219,6 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
   const planId = usePlanStore((state) => state.planId)
   const readOnly = usePlanStore((state) => state.readOnly)
   const face = useUiStore((state) => state.face)
-  const zoom = useUiStore((state) => state.zoom)
   const selection = useUiStore((state) => state.selection)
   const placing = useEditorState((state) => state.placing)
   const ghost = useEditorState((state) => state.ghost)
@@ -270,74 +261,14 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
     [frame, innerWidthMm, topSixths, contentLow, contentHigh],
   )
 
-  // ---- The scroll container: the shell's rack viewport, else our own (standalone)
+  // ---- The scroll container (the shell's rack viewport, else our own) and the camera: zoom,
+  // pan, Fit, Ctrl/Cmd + wheel and pinch (see useRackView)
   const shellViewport = useRackViewport()
   const [ownScroller, setOwnScroller] = useState<HTMLDivElement | null>(null)
   const scroller = shellViewport ?? ownScroller
-  // Scroll positions are written through a ref (never through a value held in state).
-  const scrollerRef = useRef<HTMLElement | null>(null)
-  useLayoutEffect(() => {
-    scrollerRef.current = scroller
-  }, [scroller])
-  const viewport = useElementSize(scroller)
   const svgRef = useRef<SVGSVGElement>(null)
-  const basePx = basePxPerMm(viewport.width - VIEWPORT_PADDING_PX, layout)
-  const pxPerMm = basePx * zoom
-  const zoomAnchor = useRef<ZoomAnchor | null>(null)
-
-  useEffect(() => {
-    if (scroller === null) return
-    const element = scroller
-    function onWheel(event: WheelEvent): void {
-      if (!(event.ctrlKey || event.metaKey)) return
-      event.preventDefault()
-      const ui = useUiStore.getState()
-      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 400 : 1
-      const rect = element.getBoundingClientRect()
-      zoomAnchor.current = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-        left: element.scrollLeft,
-        top: element.scrollTop,
-        from: ui.zoom,
-      }
-      ui.setZoom(ui.zoom * Math.exp(-event.deltaY * unit * WHEEL_ZOOM_RATE))
-    }
-    element.addEventListener('wheel', onWheel, { passive: false })
-    return () => element.removeEventListener('wheel', onWheel)
-  }, [scroller])
-
-  // Keep the point under the pointer still while Ctrl + wheel zooms.
-  useLayoutEffect(() => {
-    const anchor = zoomAnchor.current
-    const element = scrollerRef.current
-    zoomAnchor.current = null
-    if (anchor === null || element === null || anchor.from === zoom) return
-    const ratio = zoom / anchor.from
-    element.scrollLeft = (anchor.left + anchor.x) * ratio - anchor.x
-    element.scrollTop = (anchor.top + anchor.y) * ratio - anchor.y
-  }, [zoom])
-
-  /** Zooms so the whole drawing height fits the viewport (the shell announces the result). */
-  const fitToView = useCallback(() => {
-    const element = scrollerRef.current
-    const width = (element?.clientWidth ?? 0) - VIEWPORT_PADDING_PX
-    const height = (element?.clientHeight ?? 0) - VIEWPORT_PADDING_PX
-    useUiStore.getState().setZoom(fitZoom(height, layout, basePxPerMm(width, layout)))
-    if (element !== null) {
-      element.scrollTop = 0
-      element.scrollLeft = 0
-    }
-  }, [layout])
-  useFitRequest(fitToView)
-
-  // A rack taller than the view starts fitted (once per plan this view shows).
-  const autoFitted = useRef<string | null>(null)
-  useEffect(() => {
-    if (planId === null || autoFitted.current === planId || viewport.height <= 0) return
-    autoFitted.current = planId
-    if (layout.height * pxPerMm > viewport.height - VIEWPORT_PADDING_PX) fitToView()
-  }, [planId, viewport.height, layout, pxPerMm, fitToView])
+  const camera = useRackView({ scroller, svgRef, layout, planId })
+  const { zoom, pxPerMm } = camera
 
   // ---- Focus (roving tabindex over the placements on this face)
   const nodes = useRef(new Map<string, SVGGElement>())
@@ -642,6 +573,29 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
     [announce],
   )
 
+  // ---- Pointer gestures: palette and tray drops, moving parts, panning, pinching (useRackDnd)
+  const placedByGesture = useCallback((placementId: string) => {
+    showSelection([placementId])
+    setActiveId(placementId)
+  }, [])
+  const dnd = useRackDnd({
+    svgRef,
+    scroller,
+    layout,
+    face,
+    views: faceViews,
+    catalog,
+    frame,
+    readOnly,
+    spares,
+    camera,
+    announce,
+    onPlaced: placedByGesture,
+  })
+  useFaceDroppable(scroller, face)
+  const dropOver = useRackDrag((state) => state.over)
+  const draggingId = useRackDrag((state) => state.movingId)
+
   // A selection made elsewhere (checks, the inspector's lists, a new part) comes into view. The
   // nearest edge only: a part already on screen stays where it is.
   const primaryId = selection[0]
@@ -865,6 +819,10 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
 
   // ---- Rendering
   const shownGhost = ghost !== null && ghost.face === face ? ghost : null
+  const placingGhost = useMemo(
+    () => (shownGhost === null ? null : placingGhostView(shownGhost, ghostBay)),
+    [shownGhost, ghostBay],
+  )
   const focused = keyboardFocusId === null ? undefined : viewById.get(keyboardFocusId)
   const focusRingView = focused?.face === face ? focused : undefined
   const widthPx = layout.width * pxPerMm
@@ -881,10 +839,15 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
       <div
         ref={setOwnScroller}
         data-testid="rack-scroll"
+        data-drop-target={dropOver || undefined}
         className={cn(
-          'relative p-2',
+          // The rack pans and pinch-zooms itself, so the browser must not take touch gestures
+          // over it (or long-press menus): it would cancel them halfway (spike S2, pitfall 10).
+          'relative touch-none p-2 select-none [-webkit-touch-callout:none]',
           standalone && 'min-h-0 flex-1 overflow-auto overscroll-contain',
+          dropOver && 'rounded-md ring-2 ring-ring/60 ring-inset',
         )}
+        {...dnd.faceProps}
       >
         {sections.length === 0 ? (
           <EmptyStack frame={frame} readOnly={readOnly} onInsert={insert} gaps={gaps} />
@@ -932,6 +895,7 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
                     }
                     roving={view.id === rovingId}
                     moving={view.id === movingId}
+                    dragging={view.id === draggingId}
                     helpId={helpId}
                     register={register}
                   />
@@ -950,12 +914,14 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
                 ))}
               </g>
               <JointPlates joints={joints} layout={layout} />
+              <SlotZones views={faceViews} layout={layout} catalog={catalog} />
               {focusRingView === undefined ? null : (
                 <PlacementFocusRing view={focusRingView} layout={layout} />
               )}
-              {shownGhost === null ? null : (
-                <GhostShape ghost={shownGhost} bay={ghostBay} layout={layout} patterns={patterns} />
+              {placingGhost === null ? null : (
+                <GhostShape ghost={placingGhost} layout={layout} patterns={patterns} />
               )}
+              <DragGhostLayer face={face} layout={layout} patterns={patterns} />
             </svg>
             {readOnly ? null : (
               <InsertHandles
@@ -969,7 +935,10 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
             )}
           </div>
         )}
-        {placing === null || shownGhost === null ? null : <GhostStatus ghost={shownGhost} />}
+        {placing === null || shownGhost === null ? null : (
+          <GhostStatusPill status={shownGhost.ok ? 'ok' : 'blocked'} text={ghostText(shownGhost)} />
+        )}
+        <DragStatus face={face} />
       </div>
       <RackContentsList
         groups={groups}
@@ -994,27 +963,6 @@ function RackPanel({ plan, catalog, frame }: { plan: Plan; catalog: CatalogLooku
         focusAfterPlacing={focusAddedPart}
       />
     </section>
-  )
-}
-
-/**
- * The ghost's verdict in full (the drawing has room for a shortened one), pinned to the bottom of
- * the view while placing. Not announced: a click or Enter says the result.
- */
-function GhostStatus({ ghost }: { ghost: Ghost }) {
-  const Icon = ghost.ok ? CircleCheck : CircleX
-  return (
-    <p
-      aria-hidden="true"
-      data-testid="rack-ghost-status"
-      className={cn(
-        'pointer-events-none sticky bottom-2 z-10 mx-auto mt-2 flex w-fit max-w-full items-center gap-1.5 rounded-full border bg-background/95 px-3 py-1 text-sm shadow-sm',
-        ghost.ok ? 'text-foreground' : 'border-destructive/40 text-destructive',
-      )}
-    >
-      <Icon className="size-4 shrink-0" />
-      <span>{ghostText(ghost)}</span>
-    </p>
   )
 }
 

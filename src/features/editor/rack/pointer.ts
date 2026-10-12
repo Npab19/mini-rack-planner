@@ -60,6 +60,20 @@ export function clientToSvg(
   return Number.isFinite(point.x) && Number.isFinite(point.y) ? point : null
 }
 
+/** The screen CTM with its own entries too (DOMMatrix has both), for the forward mapping. */
+export interface ScreenMatrixSource {
+  getScreenCTM(): (MatrixLike & { inverse(): MatrixLike }) | null
+}
+
+/** SVG user units -> client px through `getScreenCTM()`; null when it cannot map. */
+export function svgToClient(source: ScreenMatrixSource, x: number, y: number): Point | null {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const ctm = source.getScreenCTM()
+  if (ctm === null) return null
+  const point = applyMatrix(ctm, x, y)
+  return Number.isFinite(point.x) && Number.isFinite(point.y) ? point : null
+}
+
 export interface RackPoint {
   /** X in the drawing (0 = left edge of the panel area as seen by the viewer). */
   xMm: number

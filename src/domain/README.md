@@ -109,5 +109,11 @@ plan and share link in `fixtures/compat/v<n>/` and fails when `PlanSchema` no lo
 | `bom.ts`, `checks.ts`, `power.ts` | `ComputeBom`, `RunChecks`, `PowerSummary`                                   |
 | `share.ts`, `assembly.ts`         | share links (`ShareMode`), `Assemble` -> `PartInstance[]`                   |
 | `build.ts`                        | Have/Need marks (placements, devices, caps, extras, sections), Finish build |
-| `devices.ts`                      | devices in slots, the equipment tray, mount suggestions, U estimates        |
+| `devices.ts`                      | devices in slots, the equipment tray, mount suggestions, U estimates,       |
+|                                   | orientations (`deviceOrientationChoices`, `setDeviceOrientation`)           |
+| `fit.ts`                          | "Fit it for me" (`fitItForMe`), device spots for the mount chooser          |
+| `mountGenerator.ts`               | "Needs a mount?": suggested mount height, parametric generator settings     |
+| `customParts.ts`                  | custom device/item/frame inputs and editors, `embedUsedCustomEntries`       |
+| `extras.ts`                       | accessories (non-U extras): add, quantities, remove                         |
+| `retired.ts`                      | removed-but-owned parts: reuse, keep as spare, discard                      |
 | `partRole.ts`                     | part roles (compute, storage, network, power, neutral) for colour hints     |

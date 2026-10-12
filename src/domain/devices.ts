@@ -7,13 +7,15 @@
  * - Devices in a placement's slots: `assignDevice` / `assignEquipment` (fit-checked; area slots
  *   re-pack), `removeDevice`, and `placeEquipmentOnMount` (a new placement that takes a tray
  *   device, or the device itself when it is ear-mounted gear).
+ * - How a device sits in its slot (M3b): `deviceOrientationChoices` and `setDeviceOrientation`
+ *   (fit-checked; area slots re-pack; the placement must still fit where it is).
  *
  * Pure: inputs are never mutated. Edits that cannot run return the input plan with a user-facing
  * `error` (the `StackOpResult` contract); plain `Plan` edits return the same plan for unknown ids.
  * Catalog lookups get the plan's own entries layered on (`withCustomEntries`, idempotent).
  */
 import type { StackOpResult } from './api'
-import { placementName, totalHeightSixths } from './frame'
+import { listNames, placementName, totalHeightSixths } from './frame'
 import { formatU, mmToSixthsCeil, phaseOf, SIXTHS_PER_U, U_MM, uNumberAt } from './geometry'
 import { ID_PREFIX, KEBAB_PATTERN, newId } from './ids'
 import {
@@ -27,9 +29,11 @@ import {
   packAreaSlot,
   resolvePlaceable,
   SHELF_HEADROOM_MM,
+  slotAccepts,
   type PackItem,
   type PackResult,
   type PlaceReason,
+  type PlaceReasonCode,
 } from './placement'
 import {
   deviceName,
@@ -41,7 +45,7 @@ import {
   type SectionType,
   type Slot,
 } from './schema/catalog'
-import { CUSTOM_ID_PREFIX, type Face, type Orientation } from './schema/common'
+import { CUSTOM_ID_PREFIX, type Dims, type Face, type Orientation } from './schema/common'
 import type { PlacedDevice, Placement, PlacementBay, Plan } from './schema/plan'
 
 /** How many mounts `mountSuggestions` returns by default. */
@@ -703,5 +707,273 @@ function mapPlacement(
     placements: plan.placements.map((placement) =>
       placement.id === placementId ? update(placement) : placement,
     ),
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// How a device sits in its slot (M3b)
+
+/**
+ * How a device sits, as messages say it: "lying flat", "turned 90°", "on its side", "standing
+ * upright" (`orientedDims` says what each one means in rack axes).
+ */
+export const ORIENTATION_PHRASES: Readonly<Record<Orientation, string>> = {
+  flat: 'lying flat',
+  'flat-rotated': 'turned 90°',
+  'on-side': 'on its side',
+  upright: 'standing upright',
+}
+
+/** One way a device can sit in its slot, answered as `setDeviceOrientation` would. */
+export interface OrientationChoice {
+  orientation: Orientation
+  /** How it sits now: its stored orientation, else the first allowed one it fits in. */
+  current: boolean
+  /** It can sit this way (always true for the current orientation). */
+  ok: boolean
+  /** Why it cannot, in plain language. */
+  reason?: string
+}
+
+/** A device entry to turn, resolved once for several orientations. */
+interface TurnTarget {
+  lookup: CatalogLookup
+  index: number
+  placement: Placement
+  entry: PlacedDevice
+  device: Device
+  slot: Slot
+  /** The placement's name in messages. */
+  holder: string
+  current: Orientation | undefined
+}
+
+/** Space problems that depend on the devices a placement holds (a taller or deeper shelf). */
+const SPACE_REASONS: ReadonlySet<PlaceReasonCode> = new Set(['overlap', 'out-of-rack'])
+
+function turnTarget(
+  plan: Plan,
+  catalog: CatalogLookup,
+  placementId: string,
+  deviceEntryId: string,
+): TurnTarget | string {
+  const lookup = withCustomEntries(catalog, plan.custom)
+  const index = plan.placements.findIndex((placement) => placement.id === placementId)
+  const placement = plan.placements[index]
+  if (placement === undefined) return `There is no placement "${placementId}" here.`
+  const holder = placementName(placement, lookup)
+  const entry = placement.devices.find((placed) => placed.id === deviceEntryId)
+  if (entry === undefined) return `${holder} holds no device "${deviceEntryId}".`
+  const device = lookup.device(entry.deviceId)
+  if (device === undefined) {
+    return `"${entry.deviceId}" is not in the catalog, so it cannot be turned.`
+  }
+  const slot = resolvePlaceable(lookup, placement.itemId)?.slots.find(
+    (candidate) => candidate.id === entry.slotId,
+  )
+  if (slot === undefined) return `${holder} has no slot "${entry.slotId}".`
+  const current = entry.orientation ?? fitDeviceInSlot(device, slot).orientation
+  return { lookup, index, placement, entry, device, slot, holder, current }
+}
+
+function sizeText(size: Dims): string {
+  const mm = (value: number) => Math.round(value * 10) / 10
+  return `${mm(size.w)} × ${mm(size.d)} × ${mm(size.h)} mm`
+}
+
+function slotLimitsText(slot: Slot): string {
+  return `${slot.maxW} × ${slot.maxD}${slot.maxH === undefined ? '' : ` × ${slot.maxH}`} mm`
+}
+
+/**
+ * The placement with the device turned, or why it cannot be: the slot must allow the orientation
+ * and take the device, and the device must fit the slot that way. A fixed slot just stores the
+ * orientation; an area slot re-packs (`repackedWith`).
+ */
+function turnedPlacement(target: TurnTarget, orientation: Orientation): Placement | string {
+  const { placement, entry, device, slot, holder } = target
+  const name = deviceName(device)
+  const phrase = ORIENTATION_PHRASES[orientation]
+  if (!slot.orientations.includes(orientation)) {
+    return `${slotName(slot)} of ${holder} does not take the ${name} ${phrase}.`
+  }
+  if (!slotAccepts(slot, device)) return `${slotName(slot)} is not made for the ${name}.`
+  const size = orientedDims(device.dims, orientation)
+  if (!fitsSlot(size, slot)) {
+    return `The ${name} ${phrase} (${sizeText(size)}) does not fit ${slotName(slot)} (${slotLimitsText(slot)}).`
+  }
+  if (slot.kind === 'fixed') {
+    const devices = placement.devices.map((placed) =>
+      placed.id === entry.id ? { ...placed, orientation } : placed,
+    )
+    return { ...placement, devices }
+  }
+  return repackedWith(target, orientation)
+}
+
+/**
+ * The area slot re-packed left to right (plan order, stored orientations kept) with the device in
+ * its new orientation. Refused when the device then finds no room, or when a device that fitted
+ * before no longer does; devices that did not fit before keep their place in the list.
+ */
+function repackedWith(target: TurnTarget, orientation: Orientation): Placement | string {
+  const { lookup, placement, entry, device, slot, holder } = target
+  const inSlot = placement.devices.filter((placed) => placed.slotId === slot.id)
+  const items = (turned: boolean): PackItem[] =>
+    inSlot.flatMap((placed) => {
+      const own = placed.id === entry.id
+      // Unknown devices cannot be measured: they keep their spot, as `assignDevice` packs.
+      const other = own ? device : lookup.device(placed.deviceId)
+      if (other === undefined) return []
+      const wanted = own && turned ? orientation : placed.orientation
+      return [
+        { id: placed.id, device: other, ...(wanted === undefined ? {} : { orientation: wanted }) },
+      ]
+    })
+  const before = packAreaSlot(items(false), slot)
+  const after = packAreaSlot(items(true), slot)
+  const name = deviceName(device)
+  const phrase = ORIENTATION_PHRASES[orientation]
+  if (after.overflowIds.includes(entry.id)) {
+    const others = packAreaSlot(
+      items(false).filter((item) => item.id !== entry.id),
+      slot,
+    )
+    const free = freeWidthMm(others, slot, lookup)
+    const needs = orientedDims(device.dims, orientation).w
+    return `No room left in ${slotName(slot)} of ${holder} for the ${name} ${phrase}: ${formatMm(free)} of ${formatMm(slot.maxW)} is free (it needs ${formatMm(needs)}).`
+  }
+  const pushedOut = after.overflowIds.filter((id) => !before.overflowIds.includes(id))
+  if (pushedOut.length > 0) {
+    const names = pushedOut.map((id) => {
+      const placed = inSlot.find((candidate) => candidate.id === id)
+      const other = placed === undefined ? undefined : lookup.device(placed.deviceId)
+      return other === undefined ? `"${placed?.deviceId ?? id}"` : `the ${deviceName(other)}`
+    })
+    return `With the ${name} ${phrase}, ${listNames(names)} would no longer fit in ${slotName(slot)} of ${holder}.`
+  }
+  const positions = new Map(after.positions.map((position) => [position.id, position]))
+  const devices = placement.devices.map((placed) => {
+    const position = positions.get(placed.id)
+    return position === undefined
+      ? placed
+      : { ...placed, xMm: position.xMm, orientation: position.orientation }
+  })
+  return { ...placement, devices }
+}
+
+/** Overlaps and out-of-rack reasons for the placement at its own spot, holding `devices`. */
+function spaceReasons(
+  plan: Plan,
+  target: TurnTarget,
+  frame: Frame,
+  devices: readonly PlacedDevice[],
+): PlaceReason[] {
+  const { placement } = target
+  const check = canPlace(plan, target.lookup, frame, {
+    itemId: placement.itemId,
+    y: placement.y,
+    face: placement.face,
+    bay: placement.bay,
+    ignorePlacementId: placement.id,
+    devices,
+  })
+  return check.reasons.filter((reason) => SPACE_REASONS.has(reason.code))
+}
+
+/** Reasons in `after` that `before` did not have; an overlap is new when it hits another part. */
+function newReasons(before: readonly PlaceReason[], after: readonly PlaceReason[]): PlaceReason[] {
+  return after.filter((reason) => {
+    const old = before.find((candidate) => candidate.code === reason.code)
+    if (old === undefined) return true
+    const known = new Set(old.placementIds ?? [])
+    return (reason.placementIds ?? []).some((id) => !known.has(id))
+  })
+}
+
+function lowerFirst(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1)
+}
+
+/**
+ * The placement with the device turned, or why not. A taller (or deeper) device must not make the
+ * placement collide with others or reach out of the rack where it did not already (`before`: the
+ * space reasons it has now). Without the frame in the catalog only the slot is checked.
+ */
+function turnOutcome(
+  plan: Plan,
+  target: TurnTarget,
+  frame: Frame | undefined,
+  before: readonly PlaceReason[],
+  orientation: Orientation,
+): Placement | string {
+  const turned = turnedPlacement(target, orientation)
+  if (typeof turned === 'string' || frame === undefined) return turned
+  const blocked = newReasons(before, spaceReasons(plan, target, frame, turned.devices))
+  if (blocked.length === 0) return turned
+  const why = blocked.map((reason) => lowerFirst(reason.message)).join(' ')
+  return `With the ${deviceName(target.device)} ${ORIENTATION_PHRASES[orientation]}, ${target.holder} would not fit where it is: ${why}`
+}
+
+/**
+ * Every orientation the device's slot allows, in the slot's order, with whether the device can
+ * sit that way (`setDeviceOrientation`'s answer, without applying it). Empty when the placement,
+ * the device entry, its catalog device or its slot is unknown.
+ */
+export function deviceOrientationChoices(
+  plan: Plan,
+  catalog: CatalogLookup,
+  placementId: string,
+  deviceEntryId: string,
+): OrientationChoice[] {
+  const target = turnTarget(plan, catalog, placementId, deviceEntryId)
+  if (typeof target === 'string') return []
+  const frame = target.lookup.frame(plan.frame.frameId)
+  let before: PlaceReason[] | undefined
+  return target.slot.orientations.map((orientation): OrientationChoice => {
+    if (orientation === target.current) return { orientation, current: true, ok: true }
+    before ??=
+      frame === undefined ? [] : spaceReasons(plan, target, frame, target.placement.devices)
+    const outcome = turnOutcome(plan, target, frame, before, orientation)
+    return typeof outcome === 'string'
+      ? { orientation, current: false, ok: false, reason: upperFirst(outcome) }
+      : { orientation, current: false, ok: true }
+  })
+}
+
+function upperFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+/**
+ * Turns a device in its slot (flat, turned 90°, on its side, standing upright):
+ * - the slot must allow the orientation and the device must fit the slot that way;
+ * - a fixed slot stores it; an area slot re-packs left to right (other devices keep their stored
+ *   orientations) and refuses when the devices no longer fit side by side;
+ * - the placement must still fit where it is: a device that stands taller (or reaches deeper)
+ *   must not make it overlap other parts or reach out of the rack.
+ * The current orientation changes nothing (the same plan). On failure the plan is unchanged and
+ * `error` says why in plain language.
+ */
+export function setDeviceOrientation(
+  plan: Plan,
+  catalog: CatalogLookup,
+  placementId: string,
+  deviceEntryId: string,
+  orientation: Orientation,
+): DeviceOpResult {
+  const target = turnTarget(plan, catalog, placementId, deviceEntryId)
+  if (typeof target === 'string') return failed(plan, target)
+  const ids = { placementId, deviceEntryId }
+  if (orientation === target.current) return { plan, conflicts: [], ...ids }
+  const frame = target.lookup.frame(plan.frame.frameId)
+  const before =
+    frame === undefined ? [] : spaceReasons(plan, target, frame, target.placement.devices)
+  const outcome = turnOutcome(plan, target, frame, before, orientation)
+  if (typeof outcome === 'string') return failed(plan, outcome)
+  return {
+    plan: { ...plan, placements: plan.placements.with(target.index, outcome) },
+    conflicts: [],
+    ...ids,
   }
 }

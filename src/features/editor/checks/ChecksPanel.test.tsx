@@ -9,6 +9,7 @@ import { usePlanStore } from '@/state/planStore'
 import { useUiStore } from '@/state/uiStore'
 import { useEditorState } from '../editorState'
 import { clearAnnouncement, useEditorAnnouncer } from '../layout/announcer'
+import { resetEditorShell, useEditorShell } from '../layout/shellStore'
 import { ChecksPanel } from './ChecksPanel'
 
 vi.mock(import('@/state/catalogStore'), async (importOriginal) => {
@@ -35,6 +36,7 @@ beforeEach(async () => {
   clearAnnouncement()
   useUiStore.getState().clearSelection()
   useEditorState.getState().reset()
+  resetEditorShell()
 })
 
 afterEach(async () => {
@@ -115,5 +117,17 @@ describe('ChecksPanel', () => {
     expect(screen.getByTestId('checks-power-draw')).toHaveTextContent(
       'about 38 W typical · up to 132 W',
     )
+  })
+
+  it('points a check on a tray device at its row in Equipment to fit', async () => {
+    await open(
+      kwsPlan({ sections: [6], equipment: [{ id: 'eq-gone', deviceId: 'no-such-device' }] }),
+    )
+    render(<ChecksPanel />)
+    const unknown = await screen.findByTestId('checks-item-unknown-part')
+    fireEvent.click(unknown)
+    expect(useUiStore.getState().selection).toEqual(['eq-gone'])
+    // The tray is not on screen here (below lg it is a sheet): its sheet opens.
+    expect(useEditorShell.getState()).toMatchObject({ sheet: 'equipment', sheetOpen: true })
   })
 })

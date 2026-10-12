@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { EquipmentUSummary } from '@/domain/devices'
-import { KWS_FRAME, kwsCatalog } from '@/domain/__fixtures__/kws'
-import { dimsText, estimateText, growPlan, summaryText, trayNeedText } from './equipmentView'
+import { KWS_FRAME, kwsCatalog, kwsPlan } from '@/domain/__fixtures__/kws'
+import {
+  dimsText,
+  equipmentName,
+  estimateText,
+  fitReport,
+  growPlan,
+  summaryText,
+  trayNeedText,
+} from './equipmentView'
 
 const CATALOG = kwsCatalog()
 
@@ -61,6 +69,85 @@ describe('growPlan', () => {
     expect(tall).toMatchObject({ targetU: 32, addText: '3U' })
     expect(tall?.blocked).toBe(
       'Adding 3U would make the rack 32U; KWS Rack v2 stacks go up to 30U.',
+    )
+  })
+})
+
+describe('fitReport', () => {
+  const plan = kwsPlan({
+    sections: [3, 6],
+    equipment: [
+      { id: 'eq-pc', deviceId: 'lenovo-m720q' },
+      { id: 'eq-nas', deviceId: 'nas-2bay' },
+      { id: 'eq-x', deviceId: 'mystery-box' },
+    ],
+  })
+  const placed = (...ids: string[]) =>
+    ids.map((equipmentId) => ({ equipmentId, placementId: `pl-${equipmentId}` }))
+
+  it('names tray entries by their device, or their id when unknown', () => {
+    expect(equipmentName(plan, CATALOG, 'eq-pc')).toBe('Lenovo ThinkCentre M720q Tiny')
+    expect(equipmentName(plan, CATALOG, 'eq-x')).toBe('mystery-box')
+    expect(equipmentName(plan, CATALOG, 'eq-gone')).toBe('eq-gone')
+  })
+
+  it('says what was placed and where the rack grew', () => {
+    const all = fitReport(
+      { placed: placed('eq-pc', 'eq-nas'), unplaced: [], addedU: 3 },
+      plan,
+      CATALOG,
+      'top',
+    )
+    expect(all).toEqual({
+      placed: 2,
+      headline: 'Placed all 2 devices and added 3U at the top.',
+      leftOver: [],
+      announcement: 'Placed all 2 devices and added 3U at the top.',
+    })
+    expect(
+      fitReport({ placed: placed('eq-pc'), unplaced: [], addedU: 6 }, plan, CATALOG, 'bottom', true)
+        .headline,
+    ).toBe('Placed the device and added 6U at the bottom, marked In my rack.')
+    expect(
+      fitReport({ placed: placed('eq-pc'), unplaced: [], addedU: 0 }, plan, CATALOG, 'top')
+        .headline,
+    ).toBe('Placed the device.')
+  })
+
+  it('lists what is still waiting, and why', () => {
+    const report = fitReport(
+      {
+        placed: placed('eq-pc'),
+        unplaced: [{ equipmentId: 'eq-nas', reason: 'No mount in the catalog takes it yet.' }],
+        addedU: 0,
+      },
+      plan,
+      CATALOG,
+      'top',
+    )
+    expect(report.headline).toBe('Placed 1 device of 2.')
+    expect(report.leftOver).toEqual([
+      {
+        equipmentId: 'eq-nas',
+        name: 'Fixture 2-bay NAS',
+        reason: 'No mount in the catalog takes it yet.',
+      },
+    ])
+    expect(report.announcement).toBe(
+      'Placed 1 device of 2. Fixture 2-bay NAS is still waiting: No mount in the catalog takes it yet.',
+    )
+  })
+
+  it('says when nothing could be placed, or nothing was waiting', () => {
+    const unplaced = [
+      { equipmentId: 'eq-nas', reason: 'a' },
+      { equipmentId: 'eq-x', reason: 'b' },
+    ]
+    expect(fitReport({ placed: [], unplaced, addedU: 0 }, plan, CATALOG, 'top').headline).toBe(
+      'None of the 2 devices could be placed.',
+    )
+    expect(fitReport({ placed: [], unplaced: [], addedU: 0 }, plan, CATALOG, 'top').headline).toBe(
+      'Nothing is waiting to be placed.',
     )
   })
 })
