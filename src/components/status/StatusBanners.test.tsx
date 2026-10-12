@@ -51,6 +51,8 @@ describe('StatusBanners', () => {
     act(() => reportDbStatus({ type: 'version-change' }))
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent('A newer version of the app is open in another tab')
+    // An update to take, not a failure: the info tone.
+    expect(alert).toHaveClass('bg-info-soft')
     expect(screen.getByRole('button', { name: 'Reload' })).toBeEnabled()
   })
 
@@ -62,6 +64,7 @@ describe('StatusBanners', () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent('This plan changed in another tab')
     expect(screen.getByRole('alert')).toHaveTextContent('Your latest changes here are not saved')
+    expect(screen.getByRole('alert')).toHaveClass('text-destructive')
     fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
     await waitFor(() => expect(reloadFromDb).toHaveBeenCalledTimes(1))
 
@@ -82,6 +85,7 @@ describe('StatusBanners', () => {
     openPlan({ readOnly: true })
     renderBanners()
     expect(screen.getByRole('status')).toHaveTextContent('opened read-only')
+    expect(screen.getByRole('status')).toHaveClass('bg-warning-soft')
     expect(screen.getByRole('button', { name: 'Save an editable copy' })).toBeEnabled()
   })
 
@@ -89,6 +93,7 @@ describe('StatusBanners', () => {
     renderBanners()
     act(() => reportDbStatus({ type: 'storage-full' }))
     expect(screen.getByRole('alert')).toHaveTextContent('Browser storage is full')
+    expect(screen.getByRole('alert')).toHaveClass('bg-warning-soft')
     expect(screen.getByRole('link', { name: /Settings > Storage/ })).toHaveAttribute(
       'href',
       '/settings#storage',
@@ -105,6 +110,7 @@ describe('StatusBanners', () => {
     renderBanners()
     act(() => reportDbStatus({ type: 'write-error', message: 'The disk said no.' }))
     expect(screen.getByRole('alert')).toHaveTextContent('The disk said no.')
+    expect(screen.getByRole('alert')).toHaveClass('text-destructive')
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     await waitFor(() => expect(getDbStatus().writeError).toBeNull())
     expect(flushSave).toHaveBeenCalledTimes(1)

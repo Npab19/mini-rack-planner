@@ -1,9 +1,10 @@
 /**
  * Facts about a catalog entry, shared by the palette and the inspector: designer and licence as
  * the source page shows them, the "Open page" link (a plain link: the app never fetches it), and
- * how the entry was verified. Unverified entries carry an icon + text badge.
+ * how the entry was verified. Unverified entries carry an icon + text badge in the warning tone
+ * (measure first); checked ones a check icon in the In my rack green.
  */
-import { ExternalLink, ShieldQuestion } from 'lucide-react'
+import { ExternalLink, ShieldCheck, ShieldQuestion } from 'lucide-react'
 import { Fragment, type ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import type { Source, Verified, VerifyMethod } from '@/domain/schema/common'
@@ -29,7 +30,7 @@ export function verifiedText(verified: Verified): string {
 export function UnverifiedBadge({ className }: { className?: string }) {
   return (
     <Badge
-      variant="outline"
+      variant="warning"
       className={cn('border-dashed', className)}
       title="Sizes, holes or prints are not checked yet: measure before you print."
     >
@@ -40,7 +41,7 @@ export function UnverifiedBadge({ className }: { className?: string }) {
 }
 
 const LINK_CLASS =
-  'inline-flex items-center gap-1 rounded-sm text-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
+  'inline-flex items-center gap-1 rounded-sm text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
 
 /**
  * "Open page" for an entry's source. The icon-only form (palette rows) names the entry in its
@@ -128,7 +129,10 @@ export function VerifiedFact({ verified }: { verified: Verified }) {
           <UnverifiedBadge />
         </span>
       ) : (
-        <span>{verifiedText(verified)}</span>
+        <span>
+          <ShieldCheck aria-hidden className="mr-1 mb-0.5 inline size-3.5 text-have" />
+          {verifiedText(verified)}
+        </span>
       )}
       {verified.note === undefined ? null : (
         <details className="text-xs text-muted-foreground">

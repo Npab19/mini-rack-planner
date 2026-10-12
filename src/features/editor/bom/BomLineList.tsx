@@ -1,11 +1,18 @@
 /**
  * The BOM drawer's lines: one list per group (prints, hardware, equipment) with columns adapted
  * to the group and the tab, a "Got it" checkbox on shopping lines and a "Why" popover with the sum
- * and where every unit comes from.
+ * and where every unit comes from. Colour repeats the words: what is still to get in the `need`
+ * tone, ticked lines and spares in `have`, leftovers in `info`, and a role dot next to devices.
  */
 import { CircleHelp, Cpu, Printer, Wrench, type LucideIcon } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
-import { HAVE_TEXT, HaveIcon, NEED_TEXT } from '@/components/common/HaveNeed'
+import {
+  HAVE_NEED_TEXT_CLASSES,
+  HAVE_TEXT,
+  HaveIcon,
+  NEED_TEXT,
+} from '@/components/common/HaveNeed'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -18,6 +25,7 @@ import {
 } from '@/components/ui/popover'
 import type { BomLine, BomLineKind } from '@/domain/api'
 import type { PackCount } from '@/domain/bom'
+import type { PartRole } from '@/domain/partRole'
 import { cn } from '@/lib/utils'
 import {
   buyText,
@@ -32,11 +40,16 @@ import {
   type LineGroup,
 } from './bomView'
 
-const KIND_ICONS: Record<BomLineKind, LucideIcon> = {
-  print: Printer,
-  hardware: Wrench,
-  device: Cpu,
+/** Group icons in fixed categorical colours, the same in every accent. */
+const KIND_ICONS: Record<BomLineKind, { icon: LucideIcon; className: string }> = {
+  print: { icon: Printer, className: 'text-chart-1' },
+  hardware: { icon: Wrench, className: 'text-chart-2' },
+  device: { icon: Cpu, className: 'text-info' },
 }
+
+/** Ticked "Got it" boxes in the In my rack colour; unticked ones keep a To get outline. */
+const GOT_IT_CHECKBOX =
+  'border-need-border data-checked:border-have-border data-checked:bg-have data-checked:text-have-foreground dark:data-checked:bg-have'
 
 export interface LineContext {
   /** Packs each hardware line's Buy is rounded to, by line key. */
@@ -47,6 +60,8 @@ export interface LineContext {
   includedBricks: ReadonlySet<string>
   /** Line keys with a Got it change in flight (clicks are ignored meanwhile). */
   busy: ReadonlySet<string>
+  /** What each device line is for (its role dot), by line key. */
+  roles: ReadonlyMap<string, PartRole>
   onGotIt: (line: BomLine, checked: boolean) => void
 }
 
@@ -63,9 +78,9 @@ function WhyDetails({ line }: { line: BomLine }) {
         <PopoverDescription className="text-foreground">{line.why}</PopoverDescription>
       </PopoverHeader>
       <ProvenanceSection title="In the plan" entries={view.planned} />
-      <ProvenanceSection title={HAVE_TEXT} entries={view.owned} />
+      <ProvenanceSection title={HAVE_TEXT} entries={view.owned} owned />
       {view.notes.length === 0 ? null : (
-        <div className="grid gap-1">
+        <div className="grid gap-1 border-t pt-2">
           <p className="text-xs font-medium">Notes</p>
           <ul className="grid gap-1 text-xs text-muted-foreground">
             {view.notes.map((note, index) => (
@@ -111,14 +126,20 @@ function WhyButton({ line }: { line: BomLine }) {
 function ProvenanceSection({
   title,
   entries,
+  owned = false,
 }: {
   title: string
   entries: ReadonlyArray<{ label: string; qty: number; detail?: string }>
+  /** The In my rack part: its title in the have tone with its icon. */
+  owned?: boolean
 }) {
   if (entries.length === 0) return null
   return (
-    <div className="grid gap-1">
-      <p className="text-xs font-medium">{title}</p>
+    <div className="grid gap-1 border-t pt-2">
+      <p className={cn('flex items-center gap-1 text-xs font-medium', owned && 'text-have')}>
+        {owned ? <HaveIcon aria-hidden className="size-3.5" /> : null}
+        {title}
+      </p>
       <ul className="grid gap-1 text-xs">
         {entries.map((entry, index) => (
           <li
@@ -142,12 +163,40 @@ function ProvenanceSection({
 // ---------------------------------------------------------------------------------------------
 // Rows
 
-function Fact({ term, children }: { term: string; children: ReactNode }) {
+function Fact({
+  term,
+  children,
+  className,
+}: {
+  term: string
+  children: ReactNode
+  /** A tone for the value (amounts still to get); foreground otherwise. */
+  className?: string | undefined
+}) {
   return (
     <div className="flex gap-1">
       <dt>{term}</dt>
-      <dd className="font-medium text-foreground tabular-nums">{children}</dd>
+      <dd className={cn('font-medium text-foreground tabular-nums', className)}>{children}</dd>
     </div>
+  )
+}
+
+/** The line's name, with a role dot for devices (the name always says what it is). */
+function LineLabel({
+  line,
+  context,
+  className,
+}: {
+  line: BomLine
+  context: LineContext
+  className?: string
+}) {
+  const role = context.roles.get(line.key)
+  return (
+    <p className={cn('font-medium break-words', className)}>
+      {role === undefined ? null : <RoleDot role={role} className="mr-1.5 mb-px align-middle" />}
+      {line.label}
+    </p>
   )
 }
 
@@ -199,14 +248,22 @@ function ShoppingRow({ line, context }: { line: BomLine; context: LineContext })
   const count = shoppingCount(line)
   const packs = context.packs.get(line.key) ?? []
   const covered = line.install - line.need
+  // Amounts still to get in the To get tone; plain once ticked.
+  const tone = gotIt ? undefined : HAVE_NEED_TEXT_CLASSES.need
   return (
     <li
       {...lineData(line)}
       data-got-it={gotIt}
       className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 py-2.5"
     >
-      <label className="flex w-12 cursor-pointer flex-col items-center gap-1 pt-0.5 text-[0.7rem] leading-none text-muted-foreground">
+      <label
+        className={cn(
+          'flex w-12 cursor-pointer flex-col items-center gap-1 pt-0.5 text-[0.7rem] leading-none',
+          gotIt ? 'font-medium text-have' : 'text-muted-foreground',
+        )}
+      >
         <Checkbox
+          className={GOT_IT_CHECKBOX}
           data-testid={`bom-got-it-${line.key}`}
           aria-label={`Got it: ${line.label}`}
           checked={gotIt}
@@ -216,22 +273,25 @@ function ShoppingRow({ line, context }: { line: BomLine; context: LineContext })
         Got it
       </label>
       <div className="min-w-0">
-        <p
-          className={cn(
-            'font-medium break-words',
-            gotIt && 'text-muted-foreground line-through decoration-2',
-          )}
-        >
-          {line.label}
-        </p>
+        <LineLabel
+          line={line}
+          context={context}
+          className={cn(gotIt && 'text-muted-foreground line-through decoration-2')}
+        />
         <Facts>
           {line.kind === 'hardware' ? (
             <>
-              <Fact term={NEED_TEXT}>{neededText(line)}</Fact>
-              {line.buy > 0 ? <Fact term="Buy">{buyText(line, packs)}</Fact> : null}
+              <Fact term={NEED_TEXT} className={tone}>
+                {neededText(line)}
+              </Fact>
+              {line.buy > 0 ? (
+                <Fact term="Buy" className={tone}>
+                  {buyText(line, packs)}
+                </Fact>
+              ) : null}
             </>
           ) : (
-            <Fact term={line.kind === 'print' ? 'Make' : 'Get'}>
+            <Fact term={line.kind === 'print' ? 'Make' : 'Get'} className={tone}>
               {line.kind === 'print' ? quantityText(count, line.unit) : count}
             </Fact>
           )}
@@ -246,7 +306,7 @@ function ShoppingRow({ line, context }: { line: BomLine; context: LineContext })
           ) : null}
         </Facts>
         {gotIt ? (
-          <p className="mt-0.5 flex items-center gap-1 text-xs">
+          <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-have">
             <HaveIcon aria-hidden className="size-3.5" />
             Covered by your spares
           </p>
@@ -267,19 +327,29 @@ function FullRow({ line, context }: { line: BomLine; context: LineContext }) {
       className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 py-2.5"
     >
       <div className="min-w-0">
-        <p className="font-medium break-words">{line.label}</p>
+        <LineLabel line={line} context={context} />
         <Facts>
           <Fact term="In plan">{line.target}</Fact>
-          <Fact term={HAVE_TEXT}>{line.asBuilt}</Fact>
+          <Fact
+            term={HAVE_TEXT}
+            className={line.asBuilt > 0 ? HAVE_NEED_TEXT_CLASSES.have : undefined}
+          >
+            {line.asBuilt}
+          </Fact>
           {line.included ? (
             <Fact term="Included">ships with the device</Fact>
           ) : (
             <>
-              <Fact term={NEED_TEXT}>
+              <Fact
+                term={NEED_TEXT}
+                className={line.need > 0 ? HAVE_NEED_TEXT_CLASSES.need : undefined}
+              >
                 {line.kind === 'hardware' ? neededText(line) : line.install}
               </Fact>
               {line.kind === 'hardware' && line.buy > 0 ? (
-                <Fact term="Buy">{buyText(line, packs)}</Fact>
+                <Fact term="Buy" className={HAVE_NEED_TEXT_CLASSES.need}>
+                  {buyText(line, packs)}
+                </Fact>
               ) : null}
             </>
           )}
@@ -306,16 +376,18 @@ function FullRow({ line, context }: { line: BomLine; context: LineContext }) {
   )
 }
 
-function LeftoverRow({ line }: { line: BomLine }) {
+function LeftoverRow({ line, context }: { line: BomLine; context: LineContext }) {
   return (
     <li
       {...lineData(line)}
       className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 py-2.5"
     >
       <div className="min-w-0">
-        <p className="font-medium break-words">{line.label}</p>
+        <LineLabel line={line} context={context} />
         <Facts>
-          <Fact term="Left over">{line.surplus}</Fact>
+          <Fact term="Left over" className="text-info">
+            {line.surplus}
+          </Fact>
           <Fact term="In plan">{line.target}</Fact>
           <Fact term={HAVE_TEXT}>{line.asBuilt}</Fact>
         </Facts>
@@ -338,11 +410,11 @@ function LineGroupSection({
   context: LineContext
 }) {
   const headingId = useId()
-  const Icon = KIND_ICONS[group.kind]
+  const { icon: Icon, className } = KIND_ICONS[group.kind]
   return (
     <section aria-labelledby={headingId} className="grid">
       <h3 id={headingId} className="flex items-center gap-2 text-sm font-medium">
-        <Icon aria-hidden className="size-4 shrink-0" />
+        <Icon aria-hidden className={cn('size-4 shrink-0', className)} />
         {GROUP_TITLES[tab][group.kind]}
         <span className="font-normal text-muted-foreground">({group.lines.length})</span>
       </h3>
@@ -354,7 +426,7 @@ function LineGroupSection({
             case 'full':
               return <FullRow key={line.key} line={line} context={context} />
             case 'leftovers':
-              return <LeftoverRow key={line.key} line={line} />
+              return <LeftoverRow key={line.key} line={line} context={context} />
           }
         })}
       </ul>

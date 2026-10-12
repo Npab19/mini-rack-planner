@@ -5,7 +5,7 @@
 import { useId, useMemo } from 'react'
 
 export interface RackPatterns {
-  /** "To get": diagonal hatch (with a dashed outline and a text tag on the shape). */
+  /** "To get": amber diagonal hatch (with a dashed outline and a text tag on the shape). */
   need: string
   /** An invalid ghost: a denser cross-hatch. */
   invalid: string
@@ -40,7 +40,14 @@ export function RackDefs({ patterns }: { patterns: RackPatterns }) {
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(45)"
       >
-        <line x1={0} y1={0} x2={0} y2={4} strokeWidth={1.1} className="stroke-foreground/30" />
+        <line
+          x1={0}
+          y1={0}
+          x2={0}
+          y2={4}
+          strokeWidth={1.1}
+          className="stroke-need-border/50 dark:stroke-need-border/35"
+        />
       </pattern>
       <pattern
         id={patterns.invalid}
@@ -62,8 +69,49 @@ export function RackDefs({ patterns }: { patterns: RackPatterns }) {
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(45)"
       >
-        <line x1={0} y1={0} x2={0} y2={3} strokeWidth={0.8} className="stroke-foreground/35" />
+        <line
+          x1={0}
+          y1={0}
+          x2={0}
+          y2={3}
+          strokeWidth={0.8}
+          className="stroke-muted-foreground/60"
+        />
       </pattern>
     </defs>
+  )
+}
+
+/**
+ * The selection ring of a shape: a primary stroke over a wider background-coloured halo, so it
+ * stands out on every part colour (the dashed keyboard focus ring stays a foreground colour).
+ */
+export function SelectionRing({
+  strokeWidth,
+  ...box
+}: {
+  x: number
+  y: number
+  width: number
+  height: number
+  rx: number
+  strokeWidth: number
+}) {
+  return (
+    <>
+      <rect
+        {...box}
+        strokeWidth={strokeWidth * 2.2}
+        strokeLinejoin="round"
+        className="fill-none stroke-background"
+        aria-hidden="true"
+      />
+      <rect
+        {...box}
+        strokeWidth={strokeWidth}
+        className="fill-none stroke-primary"
+        data-selection-ring=""
+      />
+    </>
   )
 }

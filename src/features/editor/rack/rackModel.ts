@@ -7,6 +7,7 @@
  */
 import { placementHeightSixths, placementName, sectionSpans, stackJoints } from '@/domain/frame'
 import { formatU, uToSixths } from '@/domain/geometry'
+import { deviceRole, placementRole, type PartRole } from '@/domain/partRole'
 import {
   DEVICE_GAP_MM,
   fitDeviceInSlot,
@@ -38,6 +39,8 @@ export interface DeviceView {
   name: string
   have: boolean
   known: boolean
+  /** What it is for (colour hint); neutral when the catalog does not know it. */
+  role: PartRole
   /** Left edge from the placement's opening origin, in mm. */
   xMm: number
   /** Bottom edge from the placement's bottom, in mm. */
@@ -54,6 +57,8 @@ export interface PlacementView {
   /** The catalog knows its item (or ear-mounted device). */
   known: boolean
   style: DrawStyle
+  /** What it is for (colour hint): its devices' role, else its item's (`placementRole`). */
+  role: PartRole
   /** Catalog tint (hex), drawn subtly. */
   color?: string
   y: number
@@ -90,6 +95,7 @@ export function placementView(placement: Placement, catalog: CatalogLookup): Pla
     name: placementName(placement, catalog),
     known: placeable !== undefined,
     style: styleOf(placeable, catalog),
+    role: placementRole(placement, catalog),
     ...(color === undefined ? {} : { color }),
     y: placement.y,
     heightSixths,
@@ -160,6 +166,7 @@ function deviceView(
       name: device.deviceId,
       have: device.have,
       known: false,
+      role: 'neutral',
       xMm: slot.layout.xMm + (device.xMm ?? 0),
       yMm: slot.layout.yMm,
       wMm: Math.min(slot.maxW, UNKNOWN_DEVICE_MM.w),
@@ -175,6 +182,7 @@ function deviceView(
     name: deviceName(entry),
     have: device.have,
     known: true,
+    role: deviceRole(entry.category),
     xMm: slot.layout.xMm + (device.xMm ?? packed?.xMm ?? 0),
     yMm: slot.layout.yMm,
     wMm: size.w,

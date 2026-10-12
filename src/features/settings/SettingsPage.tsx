@@ -61,7 +61,7 @@ export function SettingsPage() {
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
-                className="inline-flex rounded-md px-2 py-1 text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="inline-flex rounded-md px-2 py-1 text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 {section.label}
               </a>

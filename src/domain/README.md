@@ -116,3 +116,4 @@ plan and share link in `fixtures/compat/v<n>/` and fails when `PlanSchema` no lo
 | `customParts.ts`                  | custom device/item/frame inputs and editors, `embedUsedCustomEntries`       |
 | `extras.ts`                       | accessories (non-U extras): add, quantities, remove                         |
 | `retired.ts`                      | removed-but-owned parts: reuse, keep as spare, discard                      |
+| `partRole.ts`                     | part roles (compute, storage, network, power, neutral) for colour hints     |

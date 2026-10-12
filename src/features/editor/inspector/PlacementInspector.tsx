@@ -1,5 +1,5 @@
 /**
- * The inspector for one placement: name and position, In my rack / To get, its own label,
+ * The inspector for one placement: name (with a chip for its role) and position, In my rack / To get, its own label,
  * Move to U…, the devices in its slots, its options, facts about the part, Duplicate, Add another
  * at U… (the rack's dialog) and Delete (owned parts ask first: they are kept as retired). Each
  * change is one undo step.
@@ -8,6 +8,7 @@ import { Copy, Plus, Trash2 } from 'lucide-react'
 import { useId, useState, type KeyboardEvent } from 'react'
 import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
+import { RoleChip } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { markPlacement } from '@/domain/build'
+import { placementRole } from '@/domain/partRole'
 import { placementHeightSixths, placementName } from '@/domain/frame'
 import { formatU } from '@/domain/geometry'
 import { deletePlacement, resolvePlaceable } from '@/domain/placement'
@@ -274,14 +276,17 @@ export function PlacementInspector({
   return (
     <article aria-labelledby={headingId} className="grid gap-4" data-testid="inspector-placement">
       <header className="grid gap-1">
-        <h2
-          id={headingId}
-          tabIndex={-1}
-          data-panel-focus=""
-          className="text-base font-medium break-words outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          {name}
-        </h2>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <h2
+            id={headingId}
+            tabIndex={-1}
+            data-panel-focus=""
+            className="min-w-0 text-base font-medium break-words outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            {name}
+          </h2>
+          <RoleChip role={placementRole(placement, lookup)} />
+        </div>
         <p className="text-sm text-muted-foreground">
           {placementWhere(placement, heightSixths)}
           {placement.label === undefined ? null : ` · ${catalogName}`}

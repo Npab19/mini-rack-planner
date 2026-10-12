@@ -22,21 +22,14 @@ interface BannerProps {
   title: string
   /** alert: needs attention now (announced assertively); status: informational. */
   role: 'alert' | 'status'
-  tone?: 'default' | 'destructive'
+  /** info: an update or reload; warning: work or storage at risk; destructive: something failed. */
+  tone: 'info' | 'warning' | 'destructive'
   children?: ReactNode
   actions?: ReactNode
   onDismiss?: () => void
 }
 
-function Banner({
-  icon: Icon,
-  title,
-  role,
-  tone = 'default',
-  children,
-  actions,
-  onDismiss,
-}: BannerProps) {
+function Banner({ icon: Icon, title, role, tone, children, actions, onDismiss }: BannerProps) {
   return (
     <Alert variant={tone} role={role}>
       <Icon aria-hidden />
@@ -144,6 +137,7 @@ export function StatusBanners() {
         key="version-change"
         icon={RefreshCw}
         role="alert"
+        tone="info"
         title="A newer version of the app is open in another tab"
         actions={
           <Button size="sm" onClick={() => void reloadApp()}>
@@ -161,6 +155,7 @@ export function StatusBanners() {
         key="blocked"
         icon={RefreshCw}
         role="alert"
+        tone="info"
         title="Another tab is still running an older version"
         actions={
           <Button size="sm" onClick={() => void reloadApp()}>
@@ -225,6 +220,7 @@ export function StatusBanners() {
         key="read-only"
         icon={Lock}
         role="status"
+        tone="warning"
         title="Made with a newer version of Mini Rack Planner, so it opened read-only"
         actions={
           <Button
@@ -252,7 +248,7 @@ export function StatusBanners() {
         key="storage-full"
         icon={HardDrive}
         role="alert"
-        tone="destructive"
+        tone="warning"
         title="Browser storage is full"
         onDismiss={() => dismiss('storage-full')}
         actions={

@@ -288,6 +288,28 @@ async function settleAnimations(page: Page): Promise<void> {
   })
 }
 
+/**
+ * The looks every axe check runs in: both colour schemes, and a non-default accent. The accent
+ * run is dark so the dark accent blocks of src/index.css (which must out-rank .dark) are covered.
+ */
+export const AXE_LOOKS = [
+  { name: 'light', colorScheme: 'light', accent: null },
+  { name: 'dark', colorScheme: 'dark', accent: null },
+  { name: 'dark, teal accent', colorScheme: 'dark', accent: 'teal' },
+] as const
+
+export type AxeLook = (typeof AXE_LOOKS)[number]
+
+/** Shows the app in `look` from the next navigation on: the OS colour scheme and a stored accent. */
+export async function showLook(page: Page, look: AxeLook): Promise<void> {
+  await page.emulateMedia({ colorScheme: look.colorScheme })
+  if (look.accent === null) return
+  await page.addInitScript((accent) => {
+    const scope = globalThis as unknown as { localStorage: { setItem(k: string, v: string): void } }
+    scope.localStorage.setItem('mrp-accent', accent)
+  }, look.accent)
+}
+
 export async function expectNoSeriousAxeViolations(page: Page, what: string): Promise<void> {
   await settleAnimations(page)
   const { violations } = await new AxeBuilder({ page }).analyze()

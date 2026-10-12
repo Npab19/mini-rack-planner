@@ -6,16 +6,26 @@
  */
 import { Archive, ArrowDown, ArrowUp, CircleCheck, Merge, Scissors, X } from 'lucide-react'
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { HAVE_TEXT, NEED_TEXT } from '@/components/common/HaveNeed'
+import {
+  HAVE_NEED_TEXT_CLASSES,
+  HAVE_TEXT,
+  HaveIcon,
+  haveNeedKey,
+  NEED_TEXT,
+  NeedIcon,
+} from '@/components/common/HaveNeed'
 import { HaveNeedToggle } from '@/components/common/HaveNeedToggle'
+import { RoleDot } from '@/components/common/PartRole'
 import { Button } from '@/components/ui/button'
 import { markSectionContents, placementsAnchoredIn } from '@/domain/build'
 import { markSection, placementHeightSixths, placementName } from '@/domain/frame'
+import { placementRole } from '@/domain/partRole'
 import { resolveOptionValues } from '@/domain/recipe'
 import type { Frame, Option } from '@/domain/schema/catalog'
 import type { OptionValue } from '@/domain/schema/common'
 import type { PlanSection } from '@/domain/schema/plan'
 import { usePlanStore } from '@/state/planStore'
+import { cn } from '@/lib/utils'
 import { useUiStore } from '@/state/uiStore'
 import { optionChangeText } from './FrameOptionsPanel'
 import { OptionField } from './OptionField'
@@ -179,7 +189,7 @@ export function SectionInspector({
           disabled={readOnly || allOwned}
           onClick={markEverything}
         >
-          <CircleCheck aria-hidden />
+          <CircleCheck aria-hidden className="text-have" />
           Mark everything in this section as {HAVE_TEXT}
         </Button>
       </div>
@@ -192,21 +202,37 @@ export function SectionInspector({
           <p className="text-sm text-muted-foreground">Nothing is mounted here yet.</p>
         ) : (
           <ul className="grid gap-1">
-            {anchored.map((placement) => (
-              <li key={placement.id}>
-                <button
-                  type="button"
-                  className="w-full rounded-md px-2 py-1 text-left text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
-                  onClick={() => onPick([placement.id])}
-                >
-                  <span className="font-medium">{placementName(placement, lookup)}</span>{' '}
-                  <span className="text-muted-foreground">
-                    {placementWhere(placement, placementHeightSixths(placement, lookup))} ·{' '}
-                    {placement.have === undefined ? NEED_TEXT : HAVE_TEXT}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {anchored.map((placement) => {
+              const key = haveNeedKey(placement.have !== undefined)
+              const Icon = key === 'have' ? HaveIcon : NeedIcon
+              return (
+                <li key={placement.id}>
+                  <button
+                    type="button"
+                    className="w-full rounded-md px-2 py-1 text-left text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+                    onClick={() => onPick([placement.id])}
+                  >
+                    <RoleDot
+                      role={placementRole(placement, lookup)}
+                      className="mr-1.5 mb-px align-middle"
+                    />
+                    <span className="font-medium">{placementName(placement, lookup)}</span>{' '}
+                    <span className="text-muted-foreground">
+                      {placementWhere(placement, placementHeightSixths(placement, lookup))} ·{' '}
+                    </span>
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-0.5 font-medium whitespace-nowrap',
+                        HAVE_NEED_TEXT_CLASSES[key],
+                      )}
+                    >
+                      <Icon aria-hidden className="size-3.5" />
+                      {key === 'have' ? HAVE_TEXT : NEED_TEXT}
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>

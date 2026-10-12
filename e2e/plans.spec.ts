@@ -7,6 +7,7 @@
  */
 import { AxeBuilder } from '@axe-core/playwright'
 import type { Locator, Page } from '@playwright/test'
+import { AXE_LOOKS, showLook } from './editorHelpers.ts'
 import { expect, test } from './fixtures.ts'
 
 const SAMPLE_NAME = 'Sample: KWS 9U → 12U'
@@ -410,12 +411,12 @@ test.describe('Settings', () => {
 })
 
 test.describe('Accessibility', () => {
-  for (const colorScheme of ['light', 'dark'] as const) {
-    test(`Plans, wizard, editor, Import and Settings have no serious or critical axe violations (${colorScheme})`, async ({
+  for (const look of AXE_LOOKS) {
+    test(`Plans, wizard, editor, Import and Settings have no serious or critical axe violations (${look.name})`, async ({
       page,
     }) => {
       await useLinkDownloads(page)
-      await page.emulateMedia({ colorScheme })
+      await showLook(page, look)
       await openPlans(page)
       await expectNoSeriousAxeViolations(page, 'the empty Plans page')
 

@@ -33,6 +33,16 @@ export const START_OPTIONS: readonly StartOption[] = [
   },
 ]
 
+/**
+ * Each choice's icon tile: recording what you have is "In my rack" green, a new plan the accent,
+ * the sample the info blue. The titles say the same; the colour only helps tell them apart.
+ */
+const ICON_TILE: Record<StartChoice, string> = {
+  record: 'bg-have-soft text-have ring-have-border/40',
+  new: 'bg-accent text-primary ring-primary/30',
+  sample: 'bg-info-soft text-info ring-info-border/40',
+}
+
 function StartButton({
   option,
   busy,
@@ -56,17 +66,19 @@ function StartButton({
       disabled={disabled}
       onClick={() => onChoose(option.choice)}
       className={cn(
-        'flex h-full w-full flex-col items-start gap-2 rounded-xl bg-card p-4 text-left text-sm ring-1 ring-foreground/10 transition-colors outline-none',
-        'hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60',
+        'flex h-full w-full flex-col items-start gap-2 rounded-xl bg-card p-4 text-left text-sm ring-1 ring-foreground/10 transition-[color,background-color,box-shadow] outline-none',
+        'hover:bg-accent/40 hover:ring-primary/50 focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-card disabled:hover:ring-foreground/10',
       )}
     >
-      <Icon
+      <span
         aria-hidden
         className={cn(
-          'size-5 text-muted-foreground',
-          busy && 'animate-spin motion-reduce:animate-none',
+          'flex size-9 items-center justify-center rounded-lg ring-1',
+          ICON_TILE[option.choice],
         )}
-      />
+      >
+        <Icon className={cn('size-5', busy && 'animate-spin motion-reduce:animate-none')} />
+      </span>
       <span id={titleId} className="text-base leading-snug font-medium">
         {busy ? `${option.title}…` : option.title}
       </span>

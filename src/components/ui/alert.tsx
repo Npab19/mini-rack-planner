@@ -10,6 +10,11 @@ const alertVariants = cva(
         default: 'bg-card text-card-foreground',
         destructive:
           'bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
+        // Soft tones: coloured border, title and icon; the body keeps the readable muted text.
+        info: 'border-info-border bg-info-soft text-foreground *:data-[slot=alert-title]:text-info *:[svg]:text-info',
+        warning:
+          'border-warning-border bg-warning-soft text-foreground *:data-[slot=alert-title]:text-warning *:[svg]:text-warning',
+        have: 'border-have-border bg-have-soft text-foreground *:data-[slot=alert-title]:text-have *:[svg]:text-have',
       },
     },
     defaultVariants: {

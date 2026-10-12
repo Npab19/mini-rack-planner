@@ -35,8 +35,8 @@ export function PanelSheet() {
           data-editor-sheet=""
           className={cn('gap-0', SIDE_CLASSES[info.side])}
         >
-          <SheetHeader className="shrink-0 border-b py-3 pr-12">
-            <SheetTitle>{info.title}</SheetTitle>
+          <SheetHeader className="shrink-0 border-b bg-accent py-3 pr-12">
+            <SheetTitle className="text-accent-foreground">{info.title}</SheetTitle>
           </SheetHeader>
           <div
             id={panelDomId(sheet)}

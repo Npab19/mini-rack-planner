@@ -26,7 +26,7 @@ function RackArea() {
       id={RACK_VIEWPORT_ID}
       data-testid="panel-rack"
       tabIndex={-1}
-      className="relative min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain bg-muted/30 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
+      className="relative min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rack-canvas outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
     >
       <RackViewportContext.Provider value={viewport}>
         <RackSlot />

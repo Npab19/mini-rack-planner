@@ -48,14 +48,18 @@ function ThemeToggle() {
   )
 }
 
-/** The current page is marked by weight and background as well as colour (and aria-current). */
+/**
+ * The current page is marked by weight and an accent-tinted background as well as colour (and
+ * aria-current).
+ */
 function navLinkClass(base: string) {
   return ({ isActive }: { isActive: boolean }) =>
     cn(
       base,
       FOCUS_RING,
-      'rounded-md text-muted-foreground transition-colors hover:text-foreground',
-      isActive && 'bg-muted font-medium text-foreground',
+      'rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+      isActive &&
+        'bg-accent font-semibold text-accent-foreground hover:bg-accent hover:text-accent-foreground',
     )
 }
 
@@ -96,7 +100,8 @@ export function AppLayout() {
   return (
     <TooltipProvider>
       <div className="flex min-h-dvh flex-col bg-background text-foreground">
-        <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
+        {/* The slim accent line on top is the app's brand mark; it follows the chosen accent. */}
+        <header className="sticky top-0 z-40 border-t-2 border-b border-t-primary bg-background/90 backdrop-blur">
           <div className="mx-auto flex h-12 max-w-screen-2xl items-center gap-2 px-3 sm:gap-4 sm:px-4">
             <NavLink
               to="/"
@@ -105,7 +110,10 @@ export function AppLayout() {
                 FOCUS_RING,
               )}
             >
-              <img src="/favicon.svg" alt="" className="size-6 shrink-0" />
+              {/* The tile keeps the dark logo visible on the dark theme. */}
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent ring-1 ring-primary/20">
+                <img src="/favicon.svg" alt="" className="size-5" />
+              </span>
               <span className="truncate">Mini Rack Planner</span>
             </NavLink>
             <nav aria-label="Main" className="hidden items-center gap-1 text-sm sm:flex">

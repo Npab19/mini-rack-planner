@@ -5,6 +5,7 @@
  * where they are. One tab stop: the arrow keys (and Home/End) move between its buttons.
  */
 import { memo, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { RoleDot } from '@/components/common/PartRole'
 import { cn } from '@/lib/utils'
 import {
   haveWords,
@@ -127,6 +128,7 @@ export const RackContentsList = memo(function RackContentsList({
                         className={ITEM}
                         onClick={() => onSelectPlacement(view)}
                       >
+                        <RoleDot role={view.role} className="mr-1.5 align-middle" />
                         {placementAriaLabel({ ...view, devices: [] })}
                       </button>
                       {view.devices.length === 0 ? null : (
@@ -140,8 +142,10 @@ export const RackContentsList = memo(function RackContentsList({
                                 className={ITEM}
                                 onClick={() => onSelectDevice(view, device)}
                               >
-                                {device.known ? device.name : `Unknown device: ${device.name}`},{' '}
-                                {haveWords(device.have)}
+                                <RoleDot role={device.role} className="mr-1.5 align-middle" />
+                                {device.known
+                                  ? device.name
+                                  : `Unknown device: ${device.name}`}, {haveWords(device.have)}
                               </button>
                             </li>
                           ))}

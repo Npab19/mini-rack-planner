@@ -1,4 +1,4 @@
-import { RefreshCw } from 'lucide-react'
+import { Info, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useEffect } from 'react'
 import { isRouteErrorResponse, useRouteError } from 'react-router'
 import { CopyDiagnosticsButton } from '@/components/common/ErrorBoundary'
@@ -34,7 +34,14 @@ export function RouteError() {
   return (
     <main className="mx-auto flex w-full max-w-lg flex-col gap-4 p-6 sm:p-8">
       <div role="alert" className="flex flex-col gap-2">
-        <h1 className="text-xl font-semibold">{title}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          {stale ? (
+            <Info aria-hidden="true" className="size-5 shrink-0 text-info" />
+          ) : (
+            <TriangleAlert aria-hidden="true" className="size-5 shrink-0 text-destructive" />
+          )}
+          {title}
+        </h1>
         <p className="text-sm text-muted-foreground">
           {stale
             ? 'The app was updated while this tab was open. Reload to continue — your plans are stored in this browser and are not lost.'
@@ -42,7 +49,7 @@ export function RouteError() {
         </p>
       </div>
       {!stale && error instanceof Error ? (
-        <pre className="overflow-auto rounded-md bg-muted p-3 text-xs break-words whitespace-pre-wrap">
+        <pre className="overflow-auto rounded-md border border-destructive/30 bg-destructive-soft p-3 text-xs break-words whitespace-pre-wrap">
           {error.message}
         </pre>
       ) : null}

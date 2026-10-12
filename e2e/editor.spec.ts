@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import {
   arrowUntilChecked,
+  AXE_LOOKS,
   expectGoldenShoppingList,
   expectNoSeriousAxeViolations,
   goldenShoppingLines,
@@ -22,6 +23,7 @@ import {
   rackPart,
   recordMyRack,
   setSparesToZero,
+  showLook,
   SIGNED_OFF,
   useLinkDownloads,
 } from './editorHelpers.ts'
@@ -303,11 +305,11 @@ test.describe('Editor (v0.1)', () => {
     await expectGoldenShoppingList(page.getByTestId('bom-panel'), GOLDEN)
   })
 
-  for (const colorScheme of ['light', 'dark'] as const) {
-    test(`the sample plan with a selection and the BOM open has no serious axe violations (${colorScheme})`, async ({
+  for (const look of AXE_LOOKS) {
+    test(`the sample plan with a selection and the BOM open has no serious axe violations (${look.name})`, async ({
       page,
     }) => {
-      await page.emulateMedia({ colorScheme })
+      await showLook(page, look)
       await page.goto('/')
       await page.getByRole('button', { name: 'Open the sample' }).click()
       await expect(page.getByTestId('rack-svg')).toBeVisible()
@@ -319,7 +321,7 @@ test.describe('Editor (v0.1)', () => {
       ).toBeVisible()
       await page.getByTestId('toolbar-bom').click()
       await expect(page.getByTestId('bom-panel')).toBeVisible()
-      await expectNoSeriousAxeViolations(page, `the editor (${colorScheme})`)
+      await expectNoSeriousAxeViolations(page, `the editor (${look.name})`)
     })
   }
 })

@@ -49,7 +49,7 @@ function Choice({ value, label, hint }: { value: string; label: string; hint: st
   const labelId = useId()
   const hintId = useId()
   return (
-    <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 has-data-checked:border-primary has-data-checked:bg-muted/50">
+    <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 hover:bg-muted/50 has-data-checked:border-primary has-data-checked:bg-accent">
       <RadioGroupItem
         value={value}
         aria-labelledby={labelId}
@@ -112,7 +112,7 @@ function ConflictBody({
       <ul className="grid gap-1.5">
         {pending.conflicts.map((conflict, index) => (
           <li key={`${conflict.kind}-${index}`} className="flex items-start gap-2 text-sm">
-            <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+            <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
             <span>{conflict.message}</span>
           </li>
         ))}

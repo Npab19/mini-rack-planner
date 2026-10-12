@@ -63,6 +63,7 @@ describe('placementView', () => {
       name: 'Blank 1U',
       known: true,
       style: 'blank',
+      role: 'neutral',
       y: 0,
       heightSixths: 6,
       have: true,
@@ -82,6 +83,15 @@ describe('placementView', () => {
       expect.objectContaining({ id: 'dv-sbc-2', xMm: 101, yMm: 4, wMm: 90, hMm: 25, have: false }),
     ])
     expect(view.devices[0]?.name).toBe('Test SBC')
+  })
+
+  it('colours a part by what it is for: its devices, else what it accepts', () => {
+    // The shelf accepts anything; the SBCs on it make it compute.
+    expect(viewOf('pl-shelf').role).toBe('compute')
+    expect(viewOf('pl-shelf').devices.map((device) => device.role)).toEqual(['compute', 'compute'])
+    expect(viewOf('pl-pc').role).toBe('compute')
+    expect(viewOf('pl-switch').role).toBe('network')
+    expect(viewOf('pl-fan').role).toBe('neutral')
   })
 
   it('puts a device in a fixed slot at the slot origin', () => {
@@ -113,6 +123,7 @@ describe('placementView', () => {
     expect(view).toMatchObject({
       known: false,
       style: 'unknown',
+      role: 'neutral',
       name: 'Old mount',
       heightSixths: 12,
       position: 'U2–U3',

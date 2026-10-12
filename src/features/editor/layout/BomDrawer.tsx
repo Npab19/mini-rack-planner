@@ -32,12 +32,12 @@ export function BomDrawer() {
           aria-expanded={open}
           aria-controls={open ? bodyId : undefined}
           onClick={() => useUiStore.getState().togglePanel('bom')}
-          className="flex h-9 w-full items-center gap-2 px-3 text-left text-sm font-medium outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
+          className="flex h-9 w-full items-center gap-2 px-3 text-left text-sm font-medium outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           <ChevronUp
             aria-hidden
             className={cn(
-              'size-4 shrink-0 transition-transform motion-reduce:transition-none',
+              'size-4 shrink-0 text-primary transition-transform motion-reduce:transition-none',
               open && 'rotate-180',
             )}
           />
@@ -47,7 +47,7 @@ export function BomDrawer() {
             className="ml-auto flex items-center gap-1.5 text-xs font-normal text-muted-foreground"
           >
             {open ? 'Hide' : 'Show'}
-            <Kbd className="text-foreground">B</Kbd>
+            <Kbd>B</Kbd>
           </span>
         </button>
       </h2>

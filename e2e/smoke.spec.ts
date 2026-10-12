@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { AxeBuilder } from '@axe-core/playwright'
 import type { APIResponse } from '@playwright/test'
 import { CSP } from '../scripts/headers.ts'
+import { AXE_LOOKS, showLook } from './editorHelpers.ts'
 import { BASE_URL, SERVED_BY_VITE_PREVIEW, isSecureOrigin } from './env.ts'
 import { expect, test } from './fixtures.ts'
 
@@ -61,11 +62,9 @@ test.describe('app shell', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Your racks' })).toBeVisible()
   })
 
-  for (const colorScheme of ['light', 'dark'] as const) {
-    test(`home page has no serious or critical axe violations (${colorScheme})`, async ({
-      page,
-    }) => {
-      await page.emulateMedia({ colorScheme })
+  for (const look of AXE_LOOKS) {
+    test(`home page has no serious or critical axe violations (${look.name})`, async ({ page }) => {
+      await showLook(page, look)
       await page.goto('/')
       await expect(page.getByRole('heading', { level: 1, name: 'Your racks' })).toBeVisible()
       const { violations } = await new AxeBuilder({ page }).analyze()
