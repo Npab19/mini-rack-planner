@@ -41,7 +41,9 @@ function PanelBox({ panel, className }: { panel: PanelId; className?: string }) 
     <div
       id={panelDomId(panel)}
       data-testid={`panel-${panel}`}
-      className={cn('overflow-y-auto overscroll-contain', className)}
+      // relative: screen-reader-only text inside (absolutely positioned) stays in this scroll area
+      // instead of stretching the page, which showed a second scroll bar.
+      className={cn('relative overflow-y-auto overscroll-contain', className)}
     >
       <Slot />
     </div>

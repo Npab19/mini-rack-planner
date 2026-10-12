@@ -41,7 +41,7 @@ export function PanelSheet() {
           <div
             id={panelDomId(sheet)}
             data-testid={`panel-${sheet}`}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
           >
             <Slot />
           </div>

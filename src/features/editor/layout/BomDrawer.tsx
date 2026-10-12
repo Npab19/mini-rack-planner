@@ -52,7 +52,10 @@ export function BomDrawer() {
         </button>
       </h2>
       {open ? (
-        <div id={bodyId} className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t">
+        <div
+          id={bodyId}
+          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain border-t"
+        >
           <BomSlot />
         </div>
       ) : null}
