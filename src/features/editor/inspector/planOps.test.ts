@@ -44,7 +44,7 @@ describe('sparesUsedBy', () => {
 describe('sparesText', () => {
   it('mentions spares only when some were used', () => {
     expect(sparesText(0)).toBe('')
-    expect(sparesText(1)).toBe(' Used 1 loose spare from your inventory.')
-    expect(sparesText(16)).toBe(' Used 16 loose spares from your inventory.')
+    expect(sparesText(1)).toBe(' Used 1 part you had on hand.')
+    expect(sparesText(16)).toBe(' Used 16 parts you had on hand.')
   })
 })

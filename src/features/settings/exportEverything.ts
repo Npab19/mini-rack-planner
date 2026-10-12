@@ -1,6 +1,6 @@
 /**
  * "Export everything", shared by the Backup section and the backup nudge: every plan, the custom
- * parts, the settings and the spare-parts inventory in one JSON file. Model files are never in it
+ * parts, the settings and what is on hand (the inventory) in one JSON file. Model files are never in it
  * (import-only); dropping the same files again after a restore relinks them by SHA-256.
  */
 import { backupFileName, exportBackup } from '@/db/backup'
@@ -35,6 +35,6 @@ export async function exportEverything(): Promise<ExportEverythingResult> {
 export function describeExport(result: ExportEverythingResult): string {
   if (result.outcome === 'cancelled') return 'Export cancelled. Nothing was saved.'
   const verb = result.outcome === 'saved' ? 'saved' : 'downloaded'
-  const contents = `${plural(result.plans, 'plan')}, ${plural(result.parts, 'custom part')}, settings and spares`
+  const contents = `${plural(result.plans, 'plan')}, ${plural(result.parts, 'custom part')}, settings and parts on hand`
   return `Backup ${verb} as ${result.fileName} (${contents}).`
 }

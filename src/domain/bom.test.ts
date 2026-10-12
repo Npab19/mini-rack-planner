@@ -174,8 +174,8 @@ describe("extending the user's rack (3U + 6U built)", () => {
 
   it('explains the sum in plain language', () => {
     const result = bom(kwsPlan({ sections: [BUILT_3U, BUILT_6U, 3] }))
-    expect(lineOf(result, KEYS.inserts).why).toBe('36 = 144 in plan − 108 in your rack − 0 spares')
-    expect(lineOf(result, KEYS.plate3).why).toBe('1 = 2 in plan − 1 in your rack − 0 spares')
+    expect(lineOf(result, KEYS.inserts).why).toBe('36 = 144 in plan − 108 in your rack − 0 on hand')
+    expect(lineOf(result, KEYS.plate3).why).toBe('1 = 2 in plan − 1 in your rack − 0 on hand')
   })
 
   it('adds one 6U: 72/16/24/40/56, 4 legs and 1 connectors', () => {
@@ -292,7 +292,7 @@ describe('inventory, spares and packs', () => {
       KEYS.inserts,
     )
     expect(inserts).toMatchObject({ install: 36, spare: 4, need: 0, buy: 0 })
-    expect(inserts.why).toBe('0 = 144 in plan − 108 in your rack + 4 extra (10%) − 40 spares')
+    expect(inserts.why).toBe('0 = 144 in plan − 108 in your rack + 4 extra (10%) − 40 on hand')
   })
 
   it('rounds up to packs', () => {
@@ -302,7 +302,7 @@ describe('inventory, spares and packs', () => {
     )
     expect(inserts).toMatchObject({ install: 36, spare: 4, need: 40, buy: 50 })
     expect(inserts.why).toBe(
-      '40 = 144 in plan − 108 in your rack + 4 extra (10%) − 0 spares; buy 50 (1 × 50)',
+      '40 = 144 in plan − 108 in your rack + 4 extra (10%) − 0 on hand; buy 50 (1 × 50)',
     )
   })
 
@@ -581,7 +581,7 @@ describe('devices', () => {
       deviceKey('nas-2bay'),
     )
     expect(nas).toMatchObject({ target: 3, asBuilt: 1, install: 2, need: 1 })
-    expect(nas.why).toBe('1 = 3 in plan − 1 in your rack − 1 spares')
+    expect(nas.why).toBe('1 = 3 in plan − 1 in your rack − 1 on hand')
   })
 
   it('keeps unknown devices as id-only lines with a warning', () => {
@@ -823,12 +823,12 @@ describe('explainQuantities', () => {
     )
     expect(
       explainQuantities({ ...base, target: 95, asBuilt: 23, install: 16, need: 16, buy: 16 }),
-    ).toBe('16 = 16 for what you still build (95 in plan, 23 in your rack) − 0 spares')
+    ).toBe('16 = 16 for what you still build (95 in plan, 23 in your rack) − 0 on hand')
   })
 
   it('shows how much of a larger inventory is used', () => {
     expect(explainQuantities({ ...base, target: 10, asBuilt: 4, install: 6, inventory: 9 })).toBe(
-      '0 = 10 in plan − 4 in your rack − 6 of your 9 spares',
+      '0 = 10 in plan − 4 in your rack − 6 of the 9 on hand',
     )
   })
 })

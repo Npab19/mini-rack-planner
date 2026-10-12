@@ -965,7 +965,7 @@ function percent(fraction: number): string {
   return `${Math.round(fraction * 1000) / 10}%`
 }
 
-/** Plain-language sum, e.g. "36 = 144 in plan − 108 in your rack − 0 spares". */
+/** Plain-language sum, e.g. "36 = 144 in plan − 108 in your rack − 0 on hand". */
 export function explainQuantities(q: ExplainInput): string {
   const owned = `${q.target} in plan, ${q.asBuilt} in your rack`
   if (q.install === 0) {
@@ -980,7 +980,7 @@ export function explainQuantities(q: ExplainInput): string {
       ? `${q.need} = ${q.target} in plan − ${q.asBuilt} in your rack`
       : `${q.need} = ${q.install} for what you still build (${owned})`
   if (q.spare > 0) text += ` + ${q.spare} extra (${percent(q.sparePct)})`
-  text += q.inventory > used ? ` − ${used} of your ${q.inventory} spares` : ` − ${used} spares`
+  text += q.inventory > used ? ` − ${used} of the ${q.inventory} on hand` : ` − ${used} on hand`
   if (q.buy > q.need) text += `; buy ${q.buy} (${describePacks(q.packs)})`
   if (q.surplus > 0) text += `; ${q.surplus} surplus`
   return text
@@ -1300,7 +1300,7 @@ export function surplusLines(result: BomResult): BomLine[] {
 }
 
 /**
- * Inventory after a build step (Need -> Have, Finish build): loose spares drop by what is newly
+ * Inventory after a build step (Need -> Have, Finish build): what is on hand drops by what is newly
  * installed per line (as-built after − as-built before), never below zero. Entries that reach
  * zero are removed.
  */

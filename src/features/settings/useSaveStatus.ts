@@ -18,9 +18,10 @@ export interface SaveStatus {
 
 /**
  * The per-section "Saved" indicator. Only the latest save's outcome is shown, so a slow earlier
- * save cannot overwrite the status of a later one.
+ * save cannot overwrite the status of a later one. A failure is also shown as a toast that starts
+ * with `failureText`.
  */
-export function useSaveStatus(): SaveStatus {
+export function useSaveStatus(failureText = 'Could not save the setting'): SaveStatus {
   const [state, setState] = useState<SaveState>({ kind: 'idle' })
   const latest = useRef(0)
 
@@ -30,21 +31,24 @@ export function useSaveStatus(): SaveStatus {
     return () => clearTimeout(timer)
   }, [state])
 
-  const track = useCallback(async (save: () => Promise<unknown>): Promise<boolean> => {
-    latest.current += 1
-    const id = latest.current
-    setState({ kind: 'saving' })
-    try {
-      await save()
-      if (id === latest.current) setState({ kind: 'saved' })
-      return true
-    } catch (error) {
-      const message = errorMessage(error)
-      if (id === latest.current) setState({ kind: 'error', message })
-      toast.error(`Could not save the setting: ${message}`)
-      return false
-    }
-  }, [])
+  const track = useCallback(
+    async (save: () => Promise<unknown>): Promise<boolean> => {
+      latest.current += 1
+      const id = latest.current
+      setState({ kind: 'saving' })
+      try {
+        await save()
+        if (id === latest.current) setState({ kind: 'saved' })
+        return true
+      } catch (error) {
+        const message = errorMessage(error)
+        if (id === latest.current) setState({ kind: 'error', message })
+        toast.error(`${failureText}: ${message}`)
+        return false
+      }
+    },
+    [failureText],
+  )
 
   const markSaved = useCallback(() => {
     latest.current += 1

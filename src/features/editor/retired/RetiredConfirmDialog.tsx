@@ -1,6 +1,6 @@
 /**
  * Asks before a removed part leaves the plan for good:
- * - Keep as spare lists the parts that go into the spares (the inventory every plan shares);
+ * - Keep as spare lists the parts that go on hand (the inventory every plan shares);
  * - Discard says it stops counting as yours (sold, given away, broken).
  * The host runs the action; after it, focus goes to `focusAfter` (the part's row is gone).
  */
@@ -22,7 +22,7 @@ import { spareText } from './retiredText'
 export interface RetiredConfirmRequest {
   action: 'keep' | 'discard'
   view: RetiredView
-  /** Keep as spare: what goes into the spares. */
+  /** Keep as spare: what goes on hand. */
   spares: readonly RetiredSpare[]
 }
 
@@ -62,7 +62,7 @@ export function RetiredConfirmDialog({
             </DialogTitle>
             <DialogDescription>
               {request.action === 'keep'
-                ? 'It leaves this plan, and its parts go into your spares, which every plan can use before anything is bought.'
+                ? 'It leaves this plan, and its parts go on hand, which every plan uses before anything is bought.'
                 : 'Use this when you no longer have it: sold, given away or broken. It leaves this plan, and the bill of materials stops counting it as yours. Undo brings it back.'}
             </DialogDescription>
           </DialogHeader>
@@ -74,7 +74,7 @@ export function RetiredConfirmDialog({
           ) : (
             <div className="grid gap-1">
               <p id={listId} className="text-xs font-medium">
-                Goes into your spares
+                Goes on hand
               </p>
               <ul
                 aria-labelledby={listId}

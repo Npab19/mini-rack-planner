@@ -1,8 +1,9 @@
 /**
  * The BOM drawer (M3a): Shopping list (default) / Full BOM / Leftovers, grouped into prints,
- * hardware and equipment. "Got it" ticks a shopping line off by adding it to the spares
- * (inventory), "Finish build" turns everything To get into In my rack and uses up those spares,
- * and "Export CSV" saves the current list for a spreadsheet.
+ * hardware and equipment. "Got it" ticks a shopping line off by adding it to what is on hand
+ * (the inventory), "Finish build" turns everything To get into In my rack and uses up what it
+ * installs from what is on hand, and "Export CSV" saves the current list for a spreadsheet.
+ * Hardware lines show what is on hand and change it in place (`OnHandFact`).
  *
  * Reads the open plan, its BOM (`useBom`), settings and inventory from the stores. The editor shell
  * titles it (the drawer header, or the sheet title on small screens), so it has no heading of its
@@ -69,7 +70,7 @@ const TAB_LABELS: Record<BomTab, string> = {
 }
 
 const EMPTY_TEXT: Record<BomTab, string> = {
-  shopping: 'Nothing to get: everything this plan uses is in your rack or in your spares.',
+  shopping: 'Nothing to get: everything this plan uses is in your rack or on hand.',
   full: 'This plan has no parts yet. Add sections and mounts to see what it takes.',
   leftovers: 'No leftovers: everything you own is still used by this plan.',
 }
@@ -81,13 +82,13 @@ const EMPTY_CLASSES: Record<BomTab, { box: string; icon: string }> = {
   leftovers: { box: 'border-have-border bg-have-soft text-foreground', icon: 'text-have' },
 }
 
-/** What the last Finish build did, so it can be undone together with the spares it used. */
+/** What the last Finish build did, so it can be undone together with what on hand it used. */
 interface FinishedBuild {
   planId: string
   /** The plan right after finishing; Undo is offered while it is still the open plan. */
   plan: Plan
   changed: number
-  /** Spares used up per line key. */
+  /** What it used up from what is on hand, per line key. */
   consumed: Inventory
 }
 
@@ -95,8 +96,8 @@ function plural(count: number, singular: string, pluralForm = `${singular}s`): s
   return `${count} ${count === 1 ? singular : pluralForm}`
 }
 
-/** Spares used up: before minus after, per key. */
-function consumedSpares(before: Inventory, after: Inventory): Inventory {
+/** What on hand was used up: before minus after, per key. */
+function consumedOnHand(before: Inventory, after: Inventory): Inventory {
   const used: Inventory = {}
   for (const [key, qty] of Object.entries(before)) {
     const diff = qty - (after[key] ?? 0)
@@ -105,7 +106,7 @@ function consumedSpares(before: Inventory, after: Inventory): Inventory {
   return used
 }
 
-function addSpares(inventory: Inventory, extra: Inventory): Inventory {
+function addOnHand(inventory: Inventory, extra: Inventory): Inventory {
   const merged: Inventory = { ...inventory }
   for (const [key, qty] of Object.entries(extra)) merged[key] = (merged[key] ?? 0) + qty
   return merged
@@ -237,16 +238,14 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
     try {
       const left = await adjustInventory(line.key, checked ? amount : -amount)
       if (checked) {
-        announce(`Got it: ${line.label}. ${amount} added to your spares.`)
+        announce(`Got it: ${line.label}. ${amount} more on hand.`)
       } else if (left >= line.install + line.spare) {
-        announce(
-          `${line.label}: ${amount} taken out of your spares; the ${left} left still cover it.`,
-        )
+        announce(`${line.label}: ${amount} fewer on hand; the ${left} left still cover it.`)
       } else {
-        announce(`${line.label} is back on the shopping list: ${amount} taken out of your spares.`)
+        announce(`${line.label} is back on the shopping list: ${amount} fewer on hand.`)
       }
     } catch (error) {
-      const text = `Could not update your spares: ${errorMessage(error)}`
+      const text = `Could not update what you have on hand: ${errorMessage(error)}`
       announce(text)
       toast.error(text)
     } finally {
@@ -312,14 +311,14 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
         await replaceInventory(remaining)
       } catch (error) {
         toast.error(
-          `The build is finished, but your spares were not updated: ${errorMessage(error)}`,
+          `The build is finished, but what you have on hand was not updated: ${errorMessage(error)}`,
         )
       }
       setFinished({
         planId: after.id,
         plan: after,
         changed,
-        consumed: consumedSpares(inventory, remaining),
+        consumed: consumedOnHand(inventory, remaining),
       })
       const text = `Build finished: ${plural(changed, 'item')} marked ${HAVE_TEXT}.`
       announce(`${text} You can now start the next idea from here.`)
@@ -341,10 +340,10 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
     store.undo()
     setFinished(null)
     try {
-      await replaceInventory(addSpares(inventory, done.consumed))
-      announce('Finish build undone: those parts are To get again and your spares are back.')
+      await replaceInventory(addOnHand(inventory, done.consumed))
+      announce('Finish build undone: those parts are To get again and back on hand.')
     } catch (error) {
-      const text = `The plan is back, but your spares were not restored: ${errorMessage(error)}`
+      const text = `The plan is back, but what you had on hand was not restored: ${errorMessage(error)}`
       announce(text)
       toast.error(text)
     }
@@ -375,6 +374,7 @@ function BomContent({ plan, bom }: { plan: Plan; bom: BomResult }) {
     includedBricks,
     busy: busyKeys,
     roles,
+    onHand: inventory,
     onGotIt: (line, checked) => void toggleGotIt(line, checked),
   }
   const showFinished = finished !== null && finished.planId === planId

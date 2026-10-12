@@ -254,7 +254,7 @@ describe('SettingsPage', () => {
     const status = within(backup).getByRole('status')
     await waitFor(() =>
       expect(status).toHaveTextContent(
-        /Backup downloaded as mini-rack-planner-backup-\d{4}-\d{2}-\d{2}\.json \(1 plan, 0 custom parts, settings and spares\)/,
+        /Backup downloaded as mini-rack-planner-backup-\d{4}-\d{2}-\d{2}\.json \(1 plan, 0 custom parts, settings and parts on hand\)/,
       ),
     )
     expect(downloadName).toMatch(/^mini-rack-planner-backup-\d{4}-\d{2}-\d{2}\.json$/)

@@ -11,6 +11,7 @@ import {
   deletePlan,
   duplicatePlan,
   getPlan,
+  listPlans,
   listPlanSummaries,
   renamePlan,
   savePlan,
@@ -148,6 +149,31 @@ describe('listPlanSummaries', () => {
     const [summary] = await listPlanSummaries()
     // The planned top 3U has no snapshot, so only the built 3U + 6U count.
     expect(summary?.heightU).toBe(9)
+  })
+})
+
+describe('listPlans', () => {
+  it('reads every plan newest first and leaves out the ones it cannot read', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-01T10:00:00.000Z'))
+    const sample = await createPlan(samplePlan())
+    vi.setSystemTime(new Date('2026-10-02T10:00:00.000Z'))
+    const user = await createPlan(makePlan({ sections: USER_SECTIONS }))
+    const broken = { ...user, id: 'plan-broken', updatedAt: '2026-10-03T10:00:00.000Z' }
+    await getDb().plans.put({
+      id: broken.id,
+      rackId: broken.rackId,
+      name: 'Broken',
+      updatedAt: broken.updatedAt,
+      rev: 1,
+      schema: broken.schema,
+      plan: { ...broken, frame: 'not a frame' } as unknown as Plan,
+    })
+
+    const plans = await listPlans()
+    expect(plans.map((loaded) => loaded.plan.id)).toEqual([user.id, sample.id])
+    expect(plans[1]?.plan.name).toBe('KWS 9U → 12U')
+    expect(plans.every((loaded) => !loaded.readOnly)).toBe(true)
   })
 })
 

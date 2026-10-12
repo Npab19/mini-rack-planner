@@ -60,7 +60,7 @@ describe('ImportPage', () => {
     const heading = await screen.findByRole('heading', { name: 'In backup.json' })
     await waitFor(() => expect(heading).toHaveFocus())
     expect(
-      screen.getByText(/1 plan, 0 custom parts, no settings, no inventory/),
+      screen.getByText(/1 plan, 0 custom parts, no settings, no parts on hand/),
     ).toBeInTheDocument()
     const plans = screen.getByRole('list', { name: 'Plans in the file' })
     expect(within(plans).getByText('KWS 9U → 12U')).toBeInTheDocument()

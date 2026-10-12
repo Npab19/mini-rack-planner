@@ -4,9 +4,9 @@
  * counts them as yours (they show under Leftovers) until you decide, per part:
  * - Reuse: back into the plan, In my rack. A part or a section asks where (`ReuseDialog`), then
  *   is selected; accessories go straight back on their line.
- * - Keep as spare: it leaves the plan and its parts go into the spares (the inventory every plan
+ * - Keep as spare: it leaves the plan and its parts go on hand (the inventory every plan
  *   shares). The inventory is not part of the plan, so this section offers its own Undo, which
- *   also takes those spares out again; the toolbar's Undo only brings the part back here.
+ *   also takes those parts off hand again; the toolbar's Undo only brings the part back here.
  * - Discard: it leaves the plan (sold, given away, broken); Undo brings it back.
  * Every plan change is one undo step and is announced.
  * Rows are owned parts: a solid green outline with the In my rack icon and a role dot before the
@@ -46,13 +46,13 @@ export interface RemovedButOwnedSectionProps {
   onPick: (ids: readonly string[]) => void
 }
 
-/** The last Keep as spare, so it can be undone together with the spares it added. */
+/** The last Keep as spare, so it can be undone together with what it put on hand. */
 interface KeptSpare {
   planId: string
   name: string
   /** The plan right after; Undo is offered while it is still the open plan. */
   plan: Plan
-  /** Spares added per inventory key. */
+  /** Added on hand, per inventory key. */
   added: Inventory
 }
 
@@ -135,7 +135,7 @@ export function RemovedButOwnedSection({
 
   async function keep(view: RetiredView): Promise<void> {
     const current = usePlanStore.getState().plan
-    // What goes into the spares, from the plan as it is right now.
+    // What goes on hand, from the plan as it is right now.
     const parts = current === null ? [] : retiredSpares(current, lookup, view.id, spares.settings)
     const outcome = applyPlanOp((latest) => keepAsSpare(latest, view.id), spares)
     if (!outcome.applied) {
@@ -154,7 +154,7 @@ export function RemovedButOwnedSection({
       }
     } catch (error) {
       announce(
-        `${view.name} left the plan, but your spares were not all updated: ${errorMessage(error)}`,
+        `${view.name} left the plan, but what you have on hand was not all updated: ${errorMessage(error)}`,
       )
       return
     } finally {
@@ -163,7 +163,7 @@ export function RemovedButOwnedSection({
     announce(
       parts.length === 0
         ? `Kept ${retiredTitle(view)} as spare: it left this plan.`
-        : `Kept ${retiredTitle(view)} as spare: ${parts.length === 1 ? 'its part is' : 'its parts are'} in your spares now.`,
+        : `Kept ${retiredTitle(view)} as spare: ${parts.length === 1 ? 'its part is' : 'its parts are'} on hand now.`,
     )
   }
 
@@ -175,9 +175,11 @@ export function RemovedButOwnedSection({
     focusHeading.current = true
     try {
       for (const [key, qty] of Object.entries(done.added)) await adjustInventory(key, -qty)
-      announce(`Undone: ${done.name} is back under Removed but owned, and out of your spares.`)
+      announce(`Undone: ${done.name} is back under Removed but owned, and no longer on hand.`)
     } catch (error) {
-      announce(`${done.name} is back, but your spares were not all updated: ${errorMessage(error)}`)
+      announce(
+        `${done.name} is back, but what you have on hand was not all updated: ${errorMessage(error)}`,
+      )
     }
   }
 

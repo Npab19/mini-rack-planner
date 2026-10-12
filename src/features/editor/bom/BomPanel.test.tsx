@@ -193,7 +193,7 @@ describe('BomPanel shopping list', () => {
     expect(within(inserts).getByText('36 + 4 spare')).toBeInTheDocument()
   })
 
-  it('ticks a line off with Got it (spares added) and back on when unticked', async () => {
+  it('ticks a line off with Got it (added to on hand) and back on when unticked', async () => {
     const plan = await openUserPlan()
     renderPanel(plan.id)
     await waitForLine(KEYS.inserts, { 'data-need': '40' })
@@ -205,28 +205,99 @@ describe('BomPanel shopping list', () => {
     await waitForLine(KEYS.inserts, { 'data-need': '0', 'data-buy': '0', 'data-got-it': 'true' })
     expect(await getInventory()).toEqual({ [KEYS.inserts]: 40 })
     expect(screen.getByTestId(`bom-got-it-${KEYS.inserts}`)).toHaveAttribute('aria-checked', 'true')
-    expect(within(row(KEYS.inserts)).getByText('Covered by your spares')).toBeInTheDocument()
+    expect(
+      within(row(KEYS.inserts)).getByText('Covered by what you have on hand'),
+    ).toBeInTheDocument()
     expect(screen.getByTestId('bom-summary')).toHaveTextContent(/^To get: 6 lines/)
-    expect(said()).toBe('Got it: M5 heat-set insert (M5x8x7). 40 added to your spares.')
+    expect(said()).toBe('Got it: M5 heat-set insert (M5x8x7). 40 more on hand.')
 
     fireEvent.click(screen.getByTestId(`bom-got-it-${KEYS.inserts}`))
     await waitForLine(KEYS.inserts, { 'data-need': '40', 'data-got-it': 'false' })
     expect(await getInventory()).toEqual({})
   })
 
-  it('only takes back what Got it added when spares were there before', async () => {
+  it('only takes back what Got it added when some were on hand before', async () => {
     await setQty(KEYS.m6x8, 100)
     const plan = await openUserPlan()
     renderPanel(plan.id)
-    // 100 spares cover 16 + 2: already ticked.
+    // 100 on hand cover 16 + 2: already ticked.
     await waitForLine(KEYS.m6x8, { 'data-need': '0', 'data-got-it': 'true' })
     fireEvent.click(screen.getByTestId(`bom-got-it-${KEYS.m6x8}`))
     await waitFor(async () => expect(await getInventory()).toEqual({ [KEYS.m6x8]: 82 }), SLOW)
     await waitFor(() =>
       expect(said()).toBe(
-        'M6×8 socket head cap screw: 18 taken out of your spares; the 82 left still cover it.',
+        'M6×8 socket head cap screw: 18 fewer on hand; the 82 left still cover it.',
       ),
     )
+  })
+})
+
+describe('BomPanel on hand', () => {
+  it('shows what is on hand on every hardware line, and the sum subtracts it', async () => {
+    await updateSettings({ sparePct: { default: 0 } })
+    await setQty(KEYS.inserts, 20)
+    const plan = await openUserPlan()
+    renderPanel(plan.id)
+    const inserts = await waitForLine(KEYS.inserts, { 'data-need': '16', 'data-buy': '16' })
+    expect(screen.getByTestId(`bom-on-hand-${KEYS.inserts}`)).toHaveTextContent('20')
+    expect(screen.getByTestId(`bom-on-hand-${KEYS.inserts}`)).toHaveAccessibleName(
+      'On hand: 20. Change it for M5 heat-set insert (M5x8x7)',
+    )
+    expect(within(inserts).getByText('On hand')).toBeInTheDocument()
+    expect(screen.getByTestId(`bom-on-hand-${KEYS.nyloc}`)).toHaveTextContent('0')
+    // Prints have no on-hand field of their own.
+    expect(screen.queryByTestId(`bom-on-hand-${KEYS.plate3}`)).toBeNull()
+    expect(screen.getByTestId('bom-on-hand-link')).toHaveAttribute('href', '/inventory')
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Why: M5 heat-set insert (M5x8x7)' }))
+    })
+    const popover = await screen.findByRole('dialog')
+    expect(
+      within(popover).getByText('16 = 144 in plan − 108 in your rack − 20 on hand'),
+    ).toBeInTheDocument()
+    fireEvent.keyDown(popover, { key: 'Escape' })
+
+    fireEvent.click(screen.getByTestId('bom-tab-full'))
+    await waitFor(() =>
+      expect(
+        within(row(KEYS.inserts)).getByTestId(`bom-on-hand-${KEYS.inserts}`),
+      ).toHaveTextContent('20'),
+    )
+  })
+
+  it('changes what is on hand in place, and the line follows live', async () => {
+    await updateSettings({ sparePct: { default: 0 } })
+    const plan = await openUserPlan()
+    renderPanel(plan.id)
+    await waitForLine(KEYS.inserts, { 'data-need': '36' })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId(`bom-on-hand-${KEYS.inserts}`))
+    })
+    const popover = await screen.findByRole('dialog')
+    expect(within(popover).getByRole('link', { name: 'All hardware on hand' })).toHaveAttribute(
+      'href',
+      '/inventory',
+    )
+    const field = within(popover).getByRole('textbox', {
+      name: 'On hand: M5 heat-set insert (M5x8x7)',
+    })
+    await waitFor(() => expect(field).toHaveFocus())
+    fireEvent.change(field, { target: { value: '30' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    await waitForLine(KEYS.inserts, { 'data-need': '6', 'data-buy': '6', 'data-got-it': 'false' })
+    expect(await getInventory()).toEqual({ [KEYS.inserts]: 30 })
+    await waitFor(() => expect(said()).toBe('M5 heat-set insert (M5x8x7): 30 pcs on hand.'))
+
+    // Enough on hand: the line is ticked off as Got it.
+    fireEvent.click(
+      within(popover).getByRole('button', { name: 'Add 1: M5 heat-set insert (M5x8x7)' }),
+    )
+    await waitFor(async () => expect(await getInventory()).toEqual({ [KEYS.inserts]: 31 }), SLOW)
+    fireEvent.change(field, { target: { value: '36' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    await waitForLine(KEYS.inserts, { 'data-need': '0', 'data-buy': '0', 'data-got-it': 'true' })
+    expect(screen.getByTestId(`bom-got-it-${KEYS.inserts}`)).toHaveAttribute('aria-checked', 'true')
   })
 })
 
@@ -264,7 +335,7 @@ describe('BomPanel tabs and details', () => {
     })
     const popover = await screen.findByRole('dialog')
     expect(
-      within(popover).getByText('36 = 144 in plan − 108 in your rack − 0 spares'),
+      within(popover).getByText('36 = 144 in plan − 108 in your rack − 0 on hand'),
     ).toBeInTheDocument()
     expect(within(popover).getByText('In the plan')).toBeInTheDocument()
     expect(within(popover).getByText('In my rack')).toBeInTheDocument()
@@ -314,7 +385,7 @@ describe('BomPanel tabs and details', () => {
 })
 
 describe('BomPanel Finish build', () => {
-  it('lists what is still to get, finishes the build and uses up the ticked spares', async () => {
+  it('lists what is still to get, finishes the build and uses up what was ticked', async () => {
     const plan = await openUserPlan()
     const router = renderPanel(plan.id)
     await waitForLine(KEYS.inserts, { 'data-need': '40' })
@@ -331,7 +402,9 @@ describe('BomPanel Finish build', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Finish build?' })
     expect(within(dialog).getByText('Section 3 (3U)')).toBeInTheDocument()
     expect(
-      within(dialog).getByText(/marks these as In my rack and uses up spares you ticked as Got it/),
+      within(dialog).getByText(
+        /marks these as In my rack and uses up the parts on hand they need, such as those you ticked as Got it/,
+      ),
     ).toBeInTheDocument()
     expect(
       within(dialog).getByText(/5 lines on the shopping list are not ticked/),
@@ -348,7 +421,7 @@ describe('BomPanel Finish build', () => {
     expect(at).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     expect(catalog?.item('lenovo-tiny-mount')).toBeDefined()
 
-    // Everything is in the rack now; the spares that went in are used up, the extra 4 stay.
+    // Everything is in the rack now; what went in is used up from on hand, the extra 4 stay.
     expect(usePlanStore.getState().plan?.frame.sections.every((s) => s.have !== undefined)).toBe(
       true,
     )
@@ -374,7 +447,7 @@ describe('BomPanel Finish build', () => {
     expect((await listPlanSummaries()).length).toBe(2)
   })
 
-  it('undoes a finished build together with the spares it used', async () => {
+  it('undoes a finished build together with what on hand it used', async () => {
     await setQty(KEYS.inserts, 40)
     const plan = await openUserPlan()
     renderPanel(plan.id)

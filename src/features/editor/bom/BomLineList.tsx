@@ -1,11 +1,14 @@
 /**
  * The BOM drawer's lines: one list per group (prints, hardware, equipment) with columns adapted
  * to the group and the tab, a "Got it" checkbox on shopping lines and a "Why" popover with the sum
- * and where every unit comes from. Colour repeats the words: what is still to get in the `need`
- * tone, ticked lines and spares in `have`, leftovers in `info`, and a role dot next to devices.
+ * and where every unit comes from. Hardware lines show what is on hand for them, with a popover
+ * to change it (`OnHandFact`), and the hardware group links to the On hand page. Colour repeats
+ * the words: what is still to get in the `need` tone, ticked lines and what is on hand in `have`,
+ * leftovers in `info`, and a role dot next to devices.
  */
-import { CircleHelp, Cpu, Printer, Wrench, type LucideIcon } from 'lucide-react'
+import { CircleHelp, Cpu, PackageOpen, Printer, Wrench, type LucideIcon } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
+import { Link } from 'react-router'
 import {
   HAVE_NEED_TEXT_CLASSES,
   HAVE_TEXT,
@@ -26,6 +29,7 @@ import {
 import type { BomLine, BomLineKind } from '@/domain/api'
 import type { PackCount } from '@/domain/bom'
 import type { PartRole } from '@/domain/partRole'
+import type { Inventory } from '@/domain/schema/settings'
 import { cn } from '@/lib/utils'
 import {
   buyText,
@@ -39,6 +43,7 @@ import {
   type BomTab,
   type LineGroup,
 } from './bomView'
+import { OnHandFact } from './OnHandFact'
 
 /** Group icons in fixed categorical colours, the same in every accent. */
 const KIND_ICONS: Record<BomLineKind, { icon: LucideIcon; className: string }> = {
@@ -62,6 +67,8 @@ export interface LineContext {
   busy: ReadonlySet<string>
   /** What each device line is for (its role dot), by line key. */
   roles: ReadonlyMap<string, PartRole>
+  /** What is on hand (loose, not in a rack), by line key. */
+  onHand: Inventory
   onGotIt: (line: BomLine, checked: boolean) => void
 }
 
@@ -284,6 +291,7 @@ function ShoppingRow({ line, context }: { line: BomLine; context: LineContext })
               <Fact term={NEED_TEXT} className={tone}>
                 {neededText(line)}
               </Fact>
+              <OnHandFact line={line} qty={context.onHand[line.key] ?? 0} />
               {line.buy > 0 ? (
                 <Fact term="Buy" className={tone}>
                   {buyText(line, packs)}
@@ -308,10 +316,10 @@ function ShoppingRow({ line, context }: { line: BomLine; context: LineContext })
         {gotIt ? (
           <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-have">
             <HaveIcon aria-hidden className="size-3.5" />
-            Covered by your spares
+            Covered by what you have on hand
           </p>
         ) : covered > 0 && line.kind !== 'hardware' ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">{covered} already in your spares</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{covered} already on hand</p>
         ) : null}
       </div>
       <WhyButton line={line} />
@@ -346,6 +354,9 @@ function FullRow({ line, context }: { line: BomLine; context: LineContext }) {
               >
                 {line.kind === 'hardware' ? neededText(line) : line.install}
               </Fact>
+              {line.kind === 'hardware' ? (
+                <OnHandFact line={line} qty={context.onHand[line.key] ?? 0} />
+              ) : null}
               {line.kind === 'hardware' && line.buy > 0 ? (
                 <Fact term="Buy" className={HAVE_NEED_TEXT_CLASSES.need}>
                   {buyText(line, packs)}
@@ -411,13 +422,26 @@ function LineGroupSection({
 }) {
   const headingId = useId()
   const { icon: Icon, className } = KIND_ICONS[group.kind]
+  const onHandLink = group.kind === 'hardware' && tab !== 'leftovers'
   return (
     <section aria-labelledby={headingId} className="grid">
-      <h3 id={headingId} className="flex items-center gap-2 text-sm font-medium">
-        <Icon aria-hidden className={cn('size-4 shrink-0', className)} />
-        {GROUP_TITLES[tab][group.kind]}
-        <span className="font-normal text-muted-foreground">({group.lines.length})</span>
-      </h3>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h3 id={headingId} className="flex items-center gap-2 text-sm font-medium">
+          <Icon aria-hidden className={cn('size-4 shrink-0', className)} />
+          {GROUP_TITLES[tab][group.kind]}
+          <span className="font-normal text-muted-foreground">({group.lines.length})</span>
+        </h3>
+        {onHandLink ? (
+          <Link
+            to="/inventory"
+            data-testid="bom-on-hand-link"
+            className="ml-auto inline-flex items-center gap-1 rounded-sm text-xs font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <PackageOpen aria-hidden className="size-3.5" />
+            Hardware on hand
+          </Link>
+        ) : null}
+      </div>
       <ul className="divide-y">
         {group.lines.map((line) => {
           switch (tab) {

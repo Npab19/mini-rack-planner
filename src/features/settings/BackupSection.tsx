@@ -105,8 +105,7 @@ export function BackupSection() {
       </p>
       <ul className="list-disc space-y-1 pl-4 text-xs text-muted-foreground">
         <li>
-          The file holds every plan, your custom parts, these settings and your spare-parts
-          inventory.
+          The file holds every plan, your custom parts, these settings and what you have on hand.
         </li>
         <li>
           Model files (STL, 3MF) are never included: they are import-only. After restoring, drop the

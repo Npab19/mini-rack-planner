@@ -44,7 +44,7 @@ export function FinishBuildDialog({
           <DialogDescription>
             {count === 0
               ? 'Everything in this plan is already in your rack.'
-              : 'Finish build marks these as In my rack and uses up spares you ticked as Got it. You can undo it right after.'}
+              : 'Finish build marks these as In my rack and uses up the parts on hand they need, such as those you ticked as Got it. You can undo it right after.'}
           </DialogDescription>
         </DialogHeader>
         {count === 0 ? null : (

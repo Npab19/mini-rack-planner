@@ -17,6 +17,7 @@ function renderApp(path = '/') {
         children: [
           { index: true, Component: () => <h1>Your racks</h1> },
           { path: 'library', Component: () => <h1>My parts</h1> },
+          { path: 'inventory', Component: () => <h1>Hardware on hand</h1> },
           { path: 'settings', Component: () => <h1>Settings</h1> },
           { path: 'about', Component: () => <h1>About</h1> },
           { path: 'broken', Component: Crash },
@@ -66,7 +67,7 @@ describe('AppLayout', () => {
       within(nav)
         .getAllByRole('link')
         .map((link) => link.textContent),
-    ).toEqual(['Plans', 'My parts', 'Settings', 'About'])
+    ).toEqual(['Plans', 'My parts', 'On hand', 'Settings', 'About'])
     expect(within(nav).getByRole('link', { name: 'Plans' })).toHaveAttribute('aria-current', 'page')
     expect(within(header).getByRole('button', { name: /^Theme: / })).toBeInTheDocument()
     expect(within(header).getByRole('button', { name: 'Menu' })).toHaveClass('sm:hidden')
@@ -112,6 +113,7 @@ describe('AppLayout', () => {
     expect(links.map((link) => link.textContent)).toEqual([
       'Plans',
       'My parts',
+      'On hand',
       'Settings',
       'About',
     ])
